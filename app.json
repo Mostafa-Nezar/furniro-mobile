@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Furniro Mobile",
+    "slug": "furniro-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/Meubel House_Logos-05.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/Meubel House_Logos-05.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#B88E2F"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.furniro.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/Meubel House_Logos-05.png",
+        "backgroundColor": "#B88E2F"
+      },
+      "package": "com.furniro.mobile"
+    },
+    "web": {
+      "favicon": "./assets/images/Meubel House_Logos-05.png"
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
+
