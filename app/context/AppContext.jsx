@@ -111,7 +111,6 @@ export const AppProvider = ({ children }) => {
     saveDataToStorage();
   }, [state.isDarkMode, state.cart, state.favorites, state.user, state.isAuthenticated]);
 
-  // ✅ تحميل البيانات من AsyncStorage
   const loadStoredData = async () => {
     try {
       const appDataRaw = await AsyncStorage.getItem('appData');
@@ -132,7 +131,6 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // ✅ حفظ البيانات في AsyncStorage
   const saveDataToStorage = async () => {
     try {
       const appData = {
@@ -150,17 +148,19 @@ export const AppProvider = ({ children }) => {
   };
 
 const addToCart = (product) => {
+  const existingItem = state.cart.find(item => item.id === product.id);
+
   const filteredProduct = {
     id: product.id,
     name: product.name,
     price: product.price,
-    image: product.image, // لو هتستخدمه في الكارت
+    image: product.image,
+    quantity: existingItem ? existingItem.quantity + 1 : 1,
   };
 
   dispatch({ type: 'ADD_TO_CART', payload: filteredProduct });
   addProductToBackendCart(filteredProduct);
 };
-
 
 const addProductToBackendCart = async (filteredProduct) => {
   try {
@@ -178,10 +178,10 @@ const addProductToBackendCart = async (filteredProduct) => {
       if (res.ok) {
         const updatedUser = {
           ...state.user,
-          cart: data.cart, // ✅ الكارت المحدث من السيرفر
+          cart: data.cart, // ✅ كارت محدث من السيرفر
         };
-        dispatch({ type: 'LOGIN', payload: updatedUser }); // ✅ تحديث اليوزر في الحالة
-        await AsyncStorage.setItem('user', JSON.stringify(updatedUser)); // ✅ تحديثه في AsyncStorage
+        dispatch({ type: 'LOGIN', payload: updatedUser });
+        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
       }
     }
   } catch (error) {
@@ -190,6 +190,38 @@ const addProductToBackendCart = async (filteredProduct) => {
 };
 
 
+  const removeFromCart = async (productId) => {
+    dispatch({ type: 'REMOVE_FROM_CART', payload: productId });
+    await removeProductFromBackendCart(productId);
+  };
+
+  const removeProductFromBackendCart = async (productId) => {
+    try {
+      if (state.user?.id) {
+        const res = await fetch(`http://localhost:3001/api/users/${state.user.id}/remove-from-cart`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          const updatedUser = {
+            ...state.user,
+            cart: data.cart,
+          };
+          dispatch({ type: 'LOGIN', payload: updatedUser });
+          await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing cart removal with backend:', error);
+    }
+  };
+
   const value = {
     ...state,
     dispatch,
@@ -197,7 +229,7 @@ const addProductToBackendCart = async (filteredProduct) => {
     login: (user) => dispatch({ type: 'LOGIN', payload: user }),
     logout: () => dispatch({ type: 'LOGOUT' }),
     addToCart,
-    removeFromCart: (productId) => dispatch({ type: 'REMOVE_FROM_CART', payload: productId }),
+    removeFromCart,
     updateCartQuantity: (productId, quantity) =>
       dispatch({ type: 'UPDATE_CART_QUANTITY', payload: { id: productId, quantity } }),
     toggleFavorite: (productId) => dispatch({ type: 'TOGGLE_FAVORITE', payload: productId }),
