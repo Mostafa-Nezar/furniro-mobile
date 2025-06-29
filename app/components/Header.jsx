@@ -82,7 +82,7 @@ const Header = ({ title, showBack = false, showCart = true, showSearch = true })
                   tw`text-xs font-bold`,
                   { color: theme.white }
                 ]}>
-                  {cartItemsCount > 9 ? '9+' : cartItemsCount}
+                  {cartItemsCount > 100 ? '100+' : cartItemsCount}
                 </Text>
               </View>
             )}
