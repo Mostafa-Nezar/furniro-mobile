@@ -8,16 +8,17 @@ import {
   Alert,
   Dimensions,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext";
 import Header from "../components/Header";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
+
 const { width } = Dimensions.get("window");
 
 const ProductDetailScreen = () => {
-  const navigation = useNavigation();
+const { user } = useAppContext();
   const route = useRoute();
   const { product } = route.params;
   const { theme, addToCart, toggleFavorite, favorites } = useAppContext();
@@ -48,55 +49,60 @@ const ProductDetailScreen = () => {
     for (let i = 0; i < quantity; i++) addToCart(product);
     Alert.alert("Added", `${quantity} of ${product.name} added to cart.`);
   };
-  const handleRatingSubmit = async (selectedRate) => {
-    try {
-      const userId = 1; // عدل حسب اليوزر الحقيقي
-      const rateId = `${userId}-${product.id}`;
-
-      // أرسل التقييم
-      await fetch("http://localhost:3001/api/ratings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userid: userId,
-          productid: product.id,
-          rateid: rateId,
-          rate: selectedRate,
-        }),
-      });
-
-      // هات كل التقييمات
-      const res = await fetch("http://localhost:3001/api/ratings");
-      const allRatings = await res.json();
-
-      // فلتر التقييمات الخاصة بالمنتج
-      const productRatings = allRatings.filter(
-        (r) => r.productid === product.id
-      );
-      const total = productRatings.reduce((acc, cur) => acc + cur.rate, 0);
-      const avg = total / productRatings.length;
-
-      // حدث المنتج نفسه
-await fetch(`http://localhost:3001/api/products/db/${product.id}`, {
-  method: "PATCH",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    averagerate: parseFloat(avg.toFixed(1)),
-    ratecount: productRatings.length,
-  }),
-});
-
-
-      // عدل في الواجهة مباشرة
-      Alert.alert("Thanks!", `You rated this product ${selectedRate} stars.`);
-      setRating(selectedRate);
-      product.averagerate = parseFloat(avg.toFixed(1));
-      product.ratecount = productRatings.length;
-    } catch (error) {
-      console.error("Error rating product:", error);
-      Alert.alert("Error", "Failed to submit rating.");
+const handleRatingSubmit = async (selectedRate) => {
+  try {
+    if (!user?.id) {
+      Alert.alert("Error", "You must be logged in to rate.");
+      return;
     }
-  };
+
+    const userId = user.id;
+    const rateId = `${userId}-${product.id}`;
+
+    // أرسل التقييم
+    await fetch("http://localhost:3001/api/ratings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userid: userId,
+        productid: product.id,
+        rateid: rateId,
+        rate: selectedRate,
+      }),
+    });
+
+    // هات كل التقييمات
+    const res = await fetch("http://localhost:3001/api/ratings");
+    const allRatings = await res.json();
+
+    // فلتر التقييمات الخاصة بالمنتج
+    const productRatings = allRatings.filter(
+      (r) => r.productid === product.id
+    );
+    const total = productRatings.reduce((acc, cur) => acc + cur.rate, 0);
+    const avg = total / productRatings.length;
+
+    // حدث المنتج نفسه
+    await fetch(`http://localhost:3001/api/products/db/${product.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        averagerate: parseFloat(avg.toFixed(1)),
+        ratecount: productRatings.length,
+      }),
+    });
+
+    // عدل في الواجهة مباشرة
+    Alert.alert("Thanks!", `You rated this product ${selectedRate} stars.`);
+    setRating(selectedRate);
+    product.averagerate = parseFloat(avg.toFixed(1));
+    product.ratecount = productRatings.length;
+  } catch (error) {
+    console.error("Error rating product:", error);
+    Alert.alert("Error", "Failed to submit rating.");
+  }
+};
+
 
   const handleToggleFavorite = () => {
     toggleFavorite(product.id);

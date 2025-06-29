@@ -123,27 +123,33 @@ static async register(userData) {
     }
   }
 
-  static async addRating(productId, rating, comment) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/ratings`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ productId, rating, comment }),
-      });
+static async addRating(productId, rating, comment, userId) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/ratings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userid: userId, // ✅ أضفنا الـ userId
+        productid: productId,
+        rate: rating,
+        comment,
+      }),
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error adding rating:", error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error adding rating:", error);
+    throw error;
   }
+}
+
 
   static getImageUrl(imagePath) {
     if (!imagePath) return null;

@@ -44,7 +44,7 @@ const RegisterScreen = () => {
       if (result.success) {
         login(result.user);
         Alert.alert('Success', 'Account created successfully', [
-          { text: 'OK', onPress: () => navigation.navigate('Main') },
+           navigation.replace('Main') 
         ]);
       } else {
         Alert.alert('Registration Error', result.message || 'An error occurred');
