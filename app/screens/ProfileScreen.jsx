@@ -619,26 +619,30 @@ const ProfileScreen = () => {
         </View>
 
         {/* Logout Button */}
-        <TouchableOpacity
-          onPress={() => {
-            AsyncStorage.clear();
-            navigation.reset("Login")
-          }}
-          style={[
-            tw`flex-row items-center justify-center p-4 mx-4 mt-6 mb-8 rounded-lg`,
-            { backgroundColor: theme.red },
-          ]}
-        >
-          <Icon name="logout" size={20} color={theme.white} />
-          <Text
-            style={[
-              tw`ml-2 text-base font-semibold`,
-              { color: theme.white, fontFamily: "Poppins-SemiBold" },
-            ]}
-          >
-            Log Out
-          </Text>
-        </TouchableOpacity>
+<TouchableOpacity
+  onPress={async () => {
+    await AsyncStorage.clear();
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
+  }}
+  style={[
+    tw`flex-row items-center justify-center p-4 mx-4 mt-6 mb-8 rounded-lg`,
+    { backgroundColor: theme.red },
+  ]}
+>
+  <Icon name="logout" size={20} color={theme.white} />
+  <Text
+    style={[
+      tw`ml-2 text-base font-semibold`,
+      { color: theme.white, fontFamily: "Poppins-SemiBold" },
+    ]}
+  >
+    Log Out
+  </Text>
+</TouchableOpacity>
+
       </ScrollView>
 
       {/* Animated Sidebar */}
