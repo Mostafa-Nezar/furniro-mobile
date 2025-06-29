@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const ProductCard = ({ product, onPress }) => {
   const { theme, addToCart, toggleFavorite, favorites } = useAppContext();
-  
+
   const isFavorite = favorites.includes(product.id);
   const hasDiscount = product.oldprice && product.oldprice > product.price;
   const discountPercentage = hasDiscount 
@@ -16,15 +16,14 @@ const ProductCard = ({ product, onPress }) => {
 
   const handleAddToCart = () => {
     addToCart(product);
-    Alert.alert('تم الإضافة', 'تم إضافة المنتج إلى السلة بنجاح');
+    Alert.alert('Added to Cart', 'The product was successfully added to your cart');
   };
 
   const handleToggleFavorite = () => {
     toggleFavorite(product.id);
   };
 
-  // Get the correct image URL
-  const imageUrl = DataService.getImageUrl(product.image) || `file:///home/ubuntu/FurniroMobile/assets/images/${product.image}`;
+  const imageUrl = DataService.getImageUrl(product.image);
 
   return (
     <TouchableOpacity
@@ -41,7 +40,7 @@ const ProductCard = ({ product, onPress }) => {
           style={tw`w-full h-48`}
           resizeMode="cover"
         />
-        
+
         {/* Discount Badge */}
         {hasDiscount && (
           <View style={[
@@ -67,7 +66,7 @@ const ProductCard = ({ product, onPress }) => {
               tw`text-xs font-bold`,
               { color: theme.white }
             ]}>
-              جديد
+              New
             </Text>
           </View>
         )}
@@ -96,7 +95,7 @@ const ProductCard = ({ product, onPress }) => {
         ]}>
           {product.name}
         </Text>
-        
+
         <Text style={[
           tw`text-sm mb-3`,
           { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
@@ -137,7 +136,7 @@ const ProductCard = ({ product, onPress }) => {
             tw`ml-2 font-semibold`,
             { color: theme.white, fontFamily: 'Poppins-SemiBold' }
           ]}>
-            إضافة للسلة
+            Add to Cart
           </Text>
         </TouchableOpacity>
       </View>
@@ -146,4 +145,3 @@ const ProductCard = ({ product, onPress }) => {
 };
 
 export default ProductCard;
-

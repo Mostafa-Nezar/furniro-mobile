@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,23 +6,30 @@ import {
   FlatList,
   TouchableOpacity,
   ScrollView,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useAppContext } from '../context/AppContext';
-import { DataService } from '../services/DataService';
-import Header from '../components/Header';
-import ProductCard from '../components/ProductCard';
-import tw from 'twrnc';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useAppContext } from "../context/AppContext";
+import { DataService } from "../services/DataService";
+import Header from "../components/Header";
+import ProductCard from "../components/ProductCard";
+import tw from "twrnc";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 const SearchScreen = () => {
   const navigation = useNavigation();
   const { theme } = useAppContext();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
   const [popularSearches] = useState([
-    'كرسي', 'طاولة', 'سرير', 'خزانة', 'مصباح', 'أريكة', 'مكتب', 'رف'
+    "Chair",
+    "Table",
+    "Bed",
+    "Wardrobe",
+    "Lamp",
+    "Sofa",
+    "Desk",
+    "Shelf",
   ]);
   const [loading, setLoading] = useState(false);
 
@@ -39,13 +46,12 @@ const SearchScreen = () => {
       setLoading(true);
       const results = await DataService.searchProducts(searchQuery);
       setSearchResults(results);
-      
-      // Add to recent searches if not already there
+
       if (!recentSearches.includes(searchQuery)) {
-        setRecentSearches(prev => [searchQuery, ...prev.slice(0, 4)]);
+        setRecentSearches((prev) => [searchQuery, ...prev.slice(0, 4)]);
       }
     } catch (error) {
-      console.error('Search error:', error);
+      console.error("Search error:", error);
     } finally {
       setLoading(false);
     }
@@ -63,7 +69,7 @@ const SearchScreen = () => {
     <View style={tw`w-1/2 px-1`}>
       <ProductCard
         product={item}
-        onPress={() => navigation.navigate('ProductDetail', { product: item })}
+        onPress={() => navigation.navigate("ProductDetail", { product: item })}
       />
     </View>
   );
@@ -73,23 +79,27 @@ const SearchScreen = () => {
       onPress={onPress}
       style={[
         tw`flex-row items-center justify-between p-3 border-b`,
-        { borderBottomColor: theme.lightGray }
+        { borderBottomColor: theme.lightGray },
       ]}
     >
       <View style={tw`flex-row items-center flex-1`}>
         <Icon name="search" size={20} color={theme.darkGray} />
-        <Text style={[
-          tw`ml-3 text-base`,
-          { color: theme.black, fontFamily: 'Poppins-Regular' }
-        ]}>
+        <Text
+          style={[
+            tw`ml-3 text-base`,
+            { color: theme.black, fontFamily: "Poppins-Regular" },
+          ]}
+        >
           {title}
         </Text>
       </View>
       {showClear && (
-        <TouchableOpacity onPress={(e) => {
-          e.stopPropagation();
-          clearRecentSearches();
-        }}>
+        <TouchableOpacity
+          onPress={(e) => {
+            e.stopPropagation();
+            clearRecentSearches();
+          }}
+        >
           <Icon name="clear" size={20} color={theme.darkGray} />
         </TouchableOpacity>
       )}
@@ -98,28 +108,30 @@ const SearchScreen = () => {
 
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
-      <Header title="البحث" showBack={true} showSearch={false} />
-      
+      <Header title="Search" showBack={true} showSearch={false} />
+
       {/* Search Input */}
       <View style={tw`px-4 py-3`}>
-        <View style={[
-          tw`flex-row items-center border rounded-lg px-4 py-3`,
-          { borderColor: theme.lightGray, backgroundColor: theme.semiWhite }
-        ]}>
+        <View
+          style={[
+            tw`flex-row items-center border rounded-lg px-4 py-3`,
+            { borderColor: theme.lightGray, backgroundColor: theme.semiWhite },
+          ]}
+        >
           <Icon name="search" size={20} color={theme.darkGray} />
           <TextInput
             style={[
               tw`flex-1 ml-3 text-base`,
-              { color: theme.black, fontFamily: 'Poppins-Regular' }
+              { color: theme.black, fontFamily: "Poppins-Regular" },
             ]}
-            placeholder="ابحث عن المنتجات..."
+            placeholder="Search for products..."
             placeholderTextColor={theme.darkGray}
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoFocus={true}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
               <Icon name="clear" size={20} color={theme.darkGray} />
             </TouchableOpacity>
           )}
@@ -131,21 +143,25 @@ const SearchScreen = () => {
         <View style={tw`flex-1`}>
           {loading ? (
             <View style={tw`flex-1 justify-center items-center`}>
-              <Text style={[
-                tw`text-base`,
-                { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
-              ]}>
-                جاري البحث...
+              <Text
+                style={[
+                  tw`text-base`,
+                  { color: theme.darkGray, fontFamily: "Poppins-Regular" },
+                ]}
+              >
+                Searching...
               </Text>
             </View>
           ) : searchResults.length > 0 ? (
             <>
               <View style={tw`px-4 py-2`}>
-                <Text style={[
-                  tw`text-sm`,
-                  { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
-                ]}>
-                  {searchResults.length} نتيجة للبحث عن "{searchQuery}"
+                <Text
+                  style={[
+                    tw`text-sm`,
+                    { color: theme.darkGray, fontFamily: "Poppins-Regular" },
+                  ]}
+                >
+                  {searchResults.length} results found for "{searchQuery}"
                 </Text>
               </View>
               <FlatList
@@ -160,17 +176,21 @@ const SearchScreen = () => {
           ) : (
             <View style={tw`flex-1 justify-center items-center px-6`}>
               <Icon name="search-off" size={64} color={theme.darkGray} />
-              <Text style={[
-                tw`text-lg font-semibold mt-4 text-center`,
-                { color: theme.darkGray, fontFamily: 'Poppins-SemiBold' }
-              ]}>
-                لم يتم العثور على نتائج
+              <Text
+                style={[
+                  tw`text-lg font-semibold mt-4 text-center`,
+                  { color: theme.darkGray, fontFamily: "Poppins-SemiBold" },
+                ]}
+              >
+                No results found
               </Text>
-              <Text style={[
-                tw`text-base mt-2 text-center`,
-                { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
-              ]}>
-                جرب البحث بكلمات مختلفة
+              <Text
+                style={[
+                  tw`text-base mt-2 text-center`,
+                  { color: theme.darkGray, fontFamily: "Poppins-Regular" },
+                ]}
+              >
+                Try searching with different keywords
               </Text>
             </View>
           )}
@@ -181,18 +201,22 @@ const SearchScreen = () => {
           {recentSearches.length > 0 && (
             <View style={tw`mb-6`}>
               <View style={tw`flex-row items-center justify-between px-4 py-3`}>
-                <Text style={[
-                  tw`text-lg font-semibold`,
-                  { color: theme.black, fontFamily: 'Poppins-SemiBold' }
-                ]}>
-                  عمليات البحث الأخيرة
+                <Text
+                  style={[
+                    tw`text-lg font-semibold`,
+                    { color: theme.black, fontFamily: "Poppins-SemiBold" },
+                  ]}
+                >
+                  Recent Searches
                 </Text>
                 <TouchableOpacity onPress={clearRecentSearches}>
-                  <Text style={[
-                    tw`text-sm`,
-                    { color: theme.primary, fontFamily: 'Poppins-Regular' }
-                  ]}>
-                    مسح الكل
+                  <Text
+                    style={[
+                      tw`text-sm`,
+                      { color: theme.primary, fontFamily: "Poppins-Regular" },
+                    ]}
+                  >
+                    Clear All
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -210,13 +234,15 @@ const SearchScreen = () => {
 
           {/* Popular Searches */}
           <View>
-            <Text style={[
-              tw`text-lg font-semibold px-4 py-3`,
-              { color: theme.black, fontFamily: 'Poppins-SemiBold' }
-            ]}>
-              عمليات البحث الشائعة
+            <Text
+              style={[
+                tw`text-lg font-semibold px-4 py-3`,
+                { color: theme.black, fontFamily: "Poppins-SemiBold" },
+              ]}
+            >
+              Popular Searches
             </Text>
-            
+
             <View style={tw`px-4 pb-4`}>
               <View style={tw`flex-row flex-wrap`}>
                 {popularSearches.map((search, index) => (
@@ -225,13 +251,15 @@ const SearchScreen = () => {
                     onPress={() => handleSearchPress(search)}
                     style={[
                       tw`px-4 py-2 rounded-full mr-2 mb-2`,
-                      { backgroundColor: theme.lightGray }
+                      { backgroundColor: theme.lightGray },
                     ]}
                   >
-                    <Text style={[
-                      tw`text-sm`,
-                      { color: theme.black, fontFamily: 'Poppins-Regular' }
-                    ]}>
+                    <Text
+                      style={[
+                        tw`text-sm`,
+                        { color: theme.black, fontFamily: "Poppins-Regular" },
+                      ]}
+                    >
                       {search}
                     </Text>
                   </TouchableOpacity>
@@ -241,23 +269,28 @@ const SearchScreen = () => {
           </View>
 
           {/* Search Tips */}
-          <View style={[
-            tw`mx-4 p-4 rounded-lg`,
-            { backgroundColor: theme.lightBeige }
-          ]}>
-            <Text style={[
-              tw`text-base font-semibold mb-2`,
-              { color: theme.black, fontFamily: 'Poppins-SemiBold' }
-            ]}>
-              نصائح للبحث
+          <View
+            style={[
+              tw`mx-4 p-4 rounded-lg`,
+              { backgroundColor: theme.lightBeige },
+            ]}
+          >
+            <Text
+              style={[
+                tw`text-base font-semibold mb-2`,
+                { color: theme.black, fontFamily: "Poppins-SemiBold" },
+              ]}
+            >
+              Search Tips
             </Text>
-            <Text style={[
-              tw`text-sm`,
-              { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
-            ]}>
-              • استخدم كلمات مفتاحية بسيطة{'\n'}
-              • جرب البحث باسم المنتج أو الفئة{'\n'}
-              • تأكد من الإملاء الصحيح
+            <Text
+              style={[
+                tw`text-sm`,
+                { color: theme.darkGray, fontFamily: "Poppins-Regular" },
+              ]}
+            >
+              • Use simple keywords{""}• Try product name or category{""}• Check
+              your spelling
             </Text>
           </View>
         </ScrollView>
@@ -267,4 +300,3 @@ const SearchScreen = () => {
 };
 
 export default SearchScreen;
-

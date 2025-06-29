@@ -29,14 +29,14 @@ const ShopScreen = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('name');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 2000 });
-  const [selectedCategory, setSelectedCategory] = useState(route.params?.category || 'الكل');
+  const [selectedCategory, setSelectedCategory] = useState(route.params?.category || 'All');
 
-  const categories = ['الكل', 'غرف المعيشة', 'غرف النوم', 'المطبخ', 'الإضاءة'];
+  const categories = ['All', 'Living Room', 'Bedroom', 'Kitchen', 'Lighting'];
   const sortOptions = [
-    { key: 'name', label: 'الاسم' },
-    { key: 'price_low', label: 'السعر: من الأقل للأعلى' },
-    { key: 'price_high', label: 'السعر: من الأعلى للأقل' },
-    { key: 'newest', label: 'الأحدث' },
+    { key: 'name', label: 'Name' },
+    { key: 'price_low', label: 'Price: Low to High' },
+    { key: 'price_high', label: 'Price: High to Low' },
+    { key: 'newest', label: 'Newest' },
   ];
 
   useEffect(() => {
@@ -68,7 +68,6 @@ const ShopScreen = () => {
   const filterAndSortProducts = () => {
     let filtered = [...products];
 
-    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -76,19 +75,16 @@ const ShopScreen = () => {
       );
     }
 
-    // Filter by category
-    if (selectedCategory !== 'الكل') {
+    if (selectedCategory !== 'All') {
       filtered = filtered.filter(product =>
         product.des.toLowerCase().includes(selectedCategory.toLowerCase())
       );
     }
 
-    // Filter by price range
     filtered = filtered.filter(product =>
       product.price >= priceRange.min && product.price <= priceRange.max
     );
 
-    // Sort products
     switch (sortBy) {
       case 'price_low':
         filtered.sort((a, b) => a.price - b.price);
@@ -99,8 +95,6 @@ const ShopScreen = () => {
       case 'newest':
         filtered.sort((a, b) => b.id - a.id);
         break;
-      default:
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
     }
 
     setFilteredProducts(filtered);
@@ -132,7 +126,7 @@ const ShopScreen = () => {
               tw`text-xl font-bold`,
               { color: theme.black, fontFamily: 'Poppins-Bold' }
             ]}>
-              الفلاتر والترتيب
+              Filters & Sorting
             </Text>
             <TouchableOpacity onPress={() => setShowFilters(false)}>
               <Icon name="close" size={24} color={theme.black} />
@@ -140,12 +134,11 @@ const ShopScreen = () => {
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Categories */}
             <Text style={[
               tw`text-lg font-semibold mb-3`,
               { color: theme.black, fontFamily: 'Poppins-SemiBold' }
             ]}>
-              الفئات
+              Categories
             </Text>
             <View style={tw`flex-row flex-wrap mb-6`}>
               {categories.map((category) => (
@@ -176,12 +169,11 @@ const ShopScreen = () => {
               ))}
             </View>
 
-            {/* Sort Options */}
             <Text style={[
               tw`text-lg font-semibold mb-3`,
               { color: theme.black, fontFamily: 'Poppins-SemiBold' }
             ]}>
-              ترتيب حسب
+              Sort By
             </Text>
             {sortOptions.map((option) => (
               <TouchableOpacity
@@ -203,12 +195,11 @@ const ShopScreen = () => {
               </TouchableOpacity>
             ))}
 
-            {/* Price Range */}
             <Text style={[
               tw`text-lg font-semibold mb-3 mt-6`,
               { color: theme.black, fontFamily: 'Poppins-SemiBold' }
             ]}>
-              نطاق السعر: ${priceRange.min} - ${priceRange.max}
+              Price Range: ${priceRange.min} - ${priceRange.max}
             </Text>
             <View style={tw`flex-row items-center mb-4`}>
               <TextInput
@@ -216,7 +207,7 @@ const ShopScreen = () => {
                   tw`flex-1 border rounded-lg px-3 py-2 mr-2`,
                   { borderColor: theme.lightGray, color: theme.black }
                 ]}
-                placeholder="الحد الأدنى"
+                placeholder="Min"
                 value={priceRange.min.toString()}
                 onChangeText={(text) => setPriceRange(prev => ({ ...prev, min: parseInt(text) || 0 }))}
                 keyboardType="numeric"
@@ -226,7 +217,7 @@ const ShopScreen = () => {
                   tw`flex-1 border rounded-lg px-3 py-2`,
                   { borderColor: theme.lightGray, color: theme.black }
                 ]}
-                placeholder="الحد الأقصى"
+                placeholder="Max"
                 value={priceRange.max.toString()}
                 onChangeText={(text) => setPriceRange(prev => ({ ...prev, max: parseInt(text) || 2000 }))}
                 keyboardType="numeric"
@@ -245,7 +236,7 @@ const ShopScreen = () => {
               tw`text-center text-lg font-semibold`,
               { color: theme.white, fontFamily: 'Poppins-SemiBold' }
             ]}>
-              تطبيق الفلاتر
+              Apply Filters
             </Text>
           </TouchableOpacity>
         </View>
@@ -255,9 +246,8 @@ const ShopScreen = () => {
 
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
-      <Header title="المتجر" showBack={false} />
+      <Header title="Shop" showBack={false} />
 
-      {/* Search Bar */}
       <View style={tw`px-4 py-3`}>
         <View style={[
           tw`flex-row items-center border rounded-lg px-4 py-3`,
@@ -269,7 +259,7 @@ const ShopScreen = () => {
               tw`flex-1 ml-3 text-base`,
               { color: theme.black, fontFamily: 'Poppins-Regular' }
             ]}
-            placeholder="البحث عن المنتجات..."
+            placeholder="Search products..."
             placeholderTextColor={theme.darkGray}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -280,25 +270,23 @@ const ShopScreen = () => {
         </View>
       </View>
 
-      {/* Results Count */}
       <View style={tw`px-4 pb-2`}>
         <Text style={[
           tw`text-sm`,
           { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
         ]}>
-          {filteredProducts.length} منتج
-          {selectedCategory !== 'الكل' && ` في ${selectedCategory}`}
+          {filteredProducts.length} products
+          {selectedCategory !== 'All' && ` in ${selectedCategory}`}
         </Text>
       </View>
 
-      {/* Products Grid */}
       {loading ? (
         <View style={tw`flex-1 justify-center items-center`}>
           <Text style={[
             tw`text-base`,
             { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
           ]}>
-            جاري التحميل...
+            Loading...
           </Text>
         </View>
       ) : (
@@ -319,13 +307,13 @@ const ShopScreen = () => {
                 tw`text-lg font-semibold mt-4 text-center`,
                 { color: theme.darkGray, fontFamily: 'Poppins-SemiBold' }
               ]}>
-                لم يتم العثور على منتجات
+                No products found
               </Text>
               <Text style={[
                 tw`text-base mt-2 text-center`,
                 { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
               ]}>
-                جرب تغيير معايير البحث أو الفلاتر
+                Try changing the search or filters
               </Text>
             </View>
           }
@@ -338,4 +326,3 @@ const ShopScreen = () => {
 };
 
 export default ShopScreen;
-

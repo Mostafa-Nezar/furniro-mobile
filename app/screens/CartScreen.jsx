@@ -6,13 +6,16 @@ import {
   TouchableOpacity,
   Image,
   Alert,
-  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext.jsx';
 import Header from '../components/Header.jsx';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
+// Image helper
+const getimage = (image) =>
+  image?.startsWith('http') ? image : `http://localhost:3001/uploads/${image}`;
 
 const CartScreen = () => {
   const navigation = useNavigation();
@@ -31,30 +34,32 @@ const CartScreen = () => {
 
   const handleRemoveItem = (productId) => {
     Alert.alert(
-      'حذف المنتج',
-      'هل أنت متأكد من حذف هذا المنتج من السلة؟',
+      'Remove Product',
+      'Are you sure you want to remove this product from your cart?',
       [
-        { text: 'إلغاء', style: 'cancel' },
-        { text: 'حذف', style: 'destructive', onPress: () => removeFromCart(productId) }
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Remove', style: 'destructive', onPress: () => removeFromCart(productId) }
       ]
     );
   };
 
   const handleCheckout = () => {
     if (cart.length === 0) {
-      Alert.alert('السلة فارغة', 'يرجى إضافة منتجات إلى السلة أولاً');
+      Alert.alert('Cart is Empty', 'Please add some products first.');
       return;
     }
-    
+
     Alert.alert(
-      'إتمام الطلب',
-      `إجمالي الطلب: $${totalPrice.toFixed(2)}\nعدد المنتجات: ${totalItems}`,
+      'Confirm Checkout',
+      `Total: $${totalPrice.toFixed(2)}\nItems: ${totalItems}`,
       [
-        { text: 'إلغاء', style: 'cancel' },
-        { text: 'تأكيد الطلب', onPress: () => {
-          // Here you would typically navigate to a checkout screen
-          Alert.alert('تم الطلب', 'تم إرسال طلبك بنجاح!');
-        }}
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Confirm',
+          onPress: () => {
+            Alert.alert('Order Placed', 'Your order has been submitted!');
+          }
+        }
       ]
     );
   };
@@ -65,11 +70,11 @@ const CartScreen = () => {
       { backgroundColor: theme.semiWhite }
     ]}>
       <Image
-        source={{ uri: `file:///home/ubuntu/FurniroMobile/assets/images/${item.image}` }}
+        source={{ uri: getimage(item.image) }}
         style={tw`w-20 h-20 rounded-lg`}
         resizeMode="cover"
       />
-      
+
       <View style={tw`flex-1 ml-4`}>
         <Text style={[
           tw`text-lg font-semibold mb-1`,
@@ -77,14 +82,14 @@ const CartScreen = () => {
         ]}>
           {item.name}
         </Text>
-        
+
         <Text style={[
           tw`text-sm mb-2`,
           { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
         ]}>
           {item.des}
         </Text>
-        
+
         <View style={tw`flex-row items-center justify-between`}>
           <Text style={[
             tw`text-lg font-bold`,
@@ -92,7 +97,7 @@ const CartScreen = () => {
           ]}>
             ${(item.price * item.quantity).toFixed(2)}
           </Text>
-          
+
           <View style={tw`flex-row items-center`}>
             <TouchableOpacity
               onPress={() => handleQuantityChange(item.id, item.quantity - 1)}
@@ -103,14 +108,14 @@ const CartScreen = () => {
             >
               <Icon name="remove" size={16} color={theme.black} />
             </TouchableOpacity>
-            
+
             <Text style={[
               tw`mx-3 text-base font-semibold`,
               { color: theme.black, fontFamily: 'Poppins-SemiBold' }
             ]}>
               {item.quantity}
             </Text>
-            
+
             <TouchableOpacity
               onPress={() => handleQuantityChange(item.id, item.quantity + 1)}
               style={[
@@ -123,7 +128,7 @@ const CartScreen = () => {
           </View>
         </View>
       </View>
-      
+
       <TouchableOpacity
         onPress={() => handleRemoveItem(item.id)}
         style={tw`ml-2 p-2`}
@@ -136,23 +141,23 @@ const CartScreen = () => {
   if (cart.length === 0) {
     return (
       <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
-        <Header title="السلة" showBack={false} showCart={false} />
-        
+        <Header title="Cart" showBack={false} showCart={false} />
+
         <View style={tw`flex-1 justify-center items-center px-6`}>
           <Icon name="shopping-cart" size={80} color={theme.darkGray} />
           <Text style={[
             tw`text-xl font-bold mt-4 text-center`,
             { color: theme.black, fontFamily: 'Poppins-Bold' }
           ]}>
-            السلة فارغة
+            Your cart is empty
           </Text>
           <Text style={[
             tw`text-base mt-2 text-center`,
             { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
           ]}>
-            ابدأ بإضافة منتجات إلى سلة التسوق
+            Start adding products to your cart
           </Text>
-          
+
           <TouchableOpacity
             onPress={() => navigation.navigate('Shop')}
             style={[
@@ -164,7 +169,7 @@ const CartScreen = () => {
               tw`text-lg font-semibold`,
               { color: theme.white, fontFamily: 'Poppins-SemiBold' }
             ]}>
-              تسوق الآن
+              Shop Now
             </Text>
           </TouchableOpacity>
         </View>
@@ -174,10 +179,9 @@ const CartScreen = () => {
 
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
-      <Header title="السلة" showBack={false} showCart={false} />
-      
+      <Header title="Cart" showBack={false} showCart={false} />
+
       <View style={tw`flex-1`}>
-        {/* Cart Items */}
         <FlatList
           data={cart}
           renderItem={renderCartItem}
@@ -185,8 +189,7 @@ const CartScreen = () => {
           contentContainerStyle={tw`px-4 py-4`}
           showsVerticalScrollIndicator={false}
         />
-        
-        {/* Cart Summary */}
+
         <View style={[
           tw`p-4 border-t`,
           { backgroundColor: theme.white, borderTopColor: theme.lightGray }
@@ -196,7 +199,7 @@ const CartScreen = () => {
               tw`text-base`,
               { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
             ]}>
-              عدد المنتجات:
+              Total Items:
             </Text>
             <Text style={[
               tw`text-base font-semibold`,
@@ -205,13 +208,13 @@ const CartScreen = () => {
               {totalItems}
             </Text>
           </View>
-          
+
           <View style={tw`flex-row justify-between items-center mb-2`}>
             <Text style={[
               tw`text-base`,
               { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
             ]}>
-              المجموع الفرعي:
+              Subtotal:
             </Text>
             <Text style={[
               tw`text-base font-semibold`,
@@ -220,22 +223,22 @@ const CartScreen = () => {
               ${totalPrice.toFixed(2)}
             </Text>
           </View>
-          
+
           <View style={tw`flex-row justify-between items-center mb-2`}>
             <Text style={[
               tw`text-base`,
               { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
             ]}>
-              الشحن:
+              Shipping:
             </Text>
             <Text style={[
               tw`text-base font-semibold`,
               { color: theme.green, fontFamily: 'Poppins-SemiBold' }
             ]}>
-              {totalPrice >= 100 ? 'مجاني' : '$10.00'}
+              {totalPrice >= 100 ? 'Free' : '$10.00'}
             </Text>
           </View>
-          
+
           <View style={[
             tw`flex-row justify-between items-center py-3 border-t`,
             { borderTopColor: theme.lightGray }
@@ -244,7 +247,7 @@ const CartScreen = () => {
               tw`text-lg font-bold`,
               { color: theme.black, fontFamily: 'Poppins-Bold' }
             ]}>
-              الإجمالي:
+              Total:
             </Text>
             <Text style={[
               tw`text-lg font-bold`,
@@ -253,16 +256,16 @@ const CartScreen = () => {
               ${(totalPrice + (totalPrice >= 100 ? 0 : 10)).toFixed(2)}
             </Text>
           </View>
-          
+
           {totalPrice < 100 && (
             <Text style={[
               tw`text-sm text-center mb-4`,
               { color: theme.darkGray, fontFamily: 'Poppins-Regular' }
             ]}>
-              أضف ${(100 - totalPrice).toFixed(2)} للحصول على شحن مجاني
+              Add ${(100 - totalPrice).toFixed(2)} more to get free shipping.
             </Text>
           )}
-          
+
           <TouchableOpacity
             onPress={handleCheckout}
             style={[
@@ -274,10 +277,10 @@ const CartScreen = () => {
               tw`text-center text-lg font-semibold`,
               { color: theme.white, fontFamily: 'Poppins-SemiBold' }
             ]}>
-              إتمام الطلب
+              Checkout
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             onPress={() => navigation.navigate('Shop')}
             style={[
@@ -289,7 +292,7 @@ const CartScreen = () => {
               tw`text-center text-base font-semibold`,
               { color: theme.primary, fontFamily: 'Poppins-SemiBold' }
             ]}>
-              متابعة التسوق
+              Continue Shopping
             </Text>
           </TouchableOpacity>
         </View>
@@ -299,4 +302,3 @@ const CartScreen = () => {
 };
 
 export default CartScreen;
-
