@@ -63,27 +63,29 @@ export class ApiService {
     }
   }
 
-  static async login(email, password) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+static async login(email, password) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+    const data = await response.json();
 
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error logging in:", error);
-      throw error;
+    if (!response.ok) {
+      return { success: false, message: data.msg || "Login failed" };
     }
+
+    return { success: true, user: data.user }; // ✅ الحل هنا
+  } catch (error) {
+    console.error("Error logging in:", error);
+    return { success: false, message: "Network error" };
   }
+}
+
 
 static async register(userData) {
   try {

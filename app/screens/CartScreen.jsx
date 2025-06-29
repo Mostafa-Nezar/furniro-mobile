@@ -185,7 +185,7 @@ const CartScreen = () => {
         <FlatList
           data={cart}
           renderItem={renderCartItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
           contentContainerStyle={tw`px-4 py-4`}
           showsVerticalScrollIndicator={false}
         />

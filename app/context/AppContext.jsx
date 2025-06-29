@@ -103,42 +103,92 @@ const appReducer = (state, action) => {
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  // Load stored data on app start
   useEffect(() => {
     loadStoredData();
   }, []);
 
-  // Save data to AsyncStorage whenever state changes
   useEffect(() => {
     saveDataToStorage();
-  }, [state.isDarkMode, state.cart, state.favorites, state.user]);
+  }, [state.isDarkMode, state.cart, state.favorites, state.user, state.isAuthenticated]);
 
+  // ✅ تحميل البيانات من AsyncStorage
   const loadStoredData = async () => {
     try {
-      const storedData = await AsyncStorage.getItem('appData');
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        dispatch({ type: 'LOAD_STORED_DATA', payload: parsedData });
-      }
+      const appDataRaw = await AsyncStorage.getItem('appData');
+      const userRaw = await AsyncStorage.getItem('user');
+
+      const appData = appDataRaw ? JSON.parse(appDataRaw) : {};
+      const user = userRaw ? JSON.parse(userRaw) : null;
+
+      dispatch({
+        type: 'LOAD_STORED_DATA',
+        payload: {
+          ...appData,
+          user,
+        },
+      });
     } catch (error) {
       console.error('Error loading stored data:', error);
     }
   };
 
+  // ✅ حفظ البيانات في AsyncStorage
   const saveDataToStorage = async () => {
     try {
-      const dataToStore = {
+      const appData = {
         isDarkMode: state.isDarkMode,
         cart: state.cart,
         favorites: state.favorites,
-        user: state.user,
         isAuthenticated: state.isAuthenticated,
       };
-      await AsyncStorage.setItem('appData', JSON.stringify(dataToStore));
+
+      await AsyncStorage.setItem('appData', JSON.stringify(appData));
+      await AsyncStorage.setItem('user', JSON.stringify(state.user));
     } catch (error) {
       console.error('Error saving data:', error);
     }
   };
+
+const addToCart = (product) => {
+  const filteredProduct = {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    image: product.image, // لو هتستخدمه في الكارت
+  };
+
+  dispatch({ type: 'ADD_TO_CART', payload: filteredProduct });
+  addProductToBackendCart(filteredProduct);
+};
+
+
+const addProductToBackendCart = async (filteredProduct) => {
+  try {
+    if (state.user?.id) {
+      const res = await fetch(`http://localhost:3001/api/users/${state.user.id}/add-to-cart`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ product: filteredProduct }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        const updatedUser = {
+          ...state.user,
+          cart: data.cart, // ✅ الكارت المحدث من السيرفر
+        };
+        dispatch({ type: 'LOGIN', payload: updatedUser }); // ✅ تحديث اليوزر في الحالة
+        await AsyncStorage.setItem('user', JSON.stringify(updatedUser)); // ✅ تحديثه في AsyncStorage
+      }
+    }
+  } catch (error) {
+    console.error('Error syncing cart with backend:', error);
+  }
+};
+
 
   const value = {
     ...state,
@@ -146,9 +196,9 @@ export const AppProvider = ({ children }) => {
     toggleTheme: () => dispatch({ type: 'TOGGLE_THEME' }),
     login: (user) => dispatch({ type: 'LOGIN', payload: user }),
     logout: () => dispatch({ type: 'LOGOUT' }),
-    addToCart: (product) => dispatch({ type: 'ADD_TO_CART', payload: product }),
+    addToCart,
     removeFromCart: (productId) => dispatch({ type: 'REMOVE_FROM_CART', payload: productId }),
-    updateCartQuantity: (productId, quantity) => 
+    updateCartQuantity: (productId, quantity) =>
       dispatch({ type: 'UPDATE_CART_QUANTITY', payload: { id: productId, quantity } }),
     toggleFavorite: (productId) => dispatch({ type: 'TOGGLE_FAVORITE', payload: productId }),
     setProducts: (products) => dispatch({ type: 'SET_PRODUCTS', payload: products }),
@@ -165,4 +215,3 @@ export const useAppContext = () => {
   }
   return context;
 };
-

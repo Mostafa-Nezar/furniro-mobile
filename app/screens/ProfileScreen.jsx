@@ -18,6 +18,7 @@ import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as ImagePicker from "expo-image-picker";
 import { useState, useRef } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 
@@ -123,6 +124,7 @@ const ProfileScreen = () => {
         onPress: async () => {
           await AuthService.signOut();
           logout();
+          AsyncStorage.clear();
           navigation.navigate("Login");
         },
       },
@@ -618,7 +620,10 @@ const ProfileScreen = () => {
 
         {/* Logout Button */}
         <TouchableOpacity
-          onPress={handleLogout}
+          onPress={() => {
+            AsyncStorage.clear();
+            navigation.reset("Login")
+          }}
           style={[
             tw`flex-row items-center justify-center p-4 mx-4 mt-6 mb-8 rounded-lg`,
             { backgroundColor: theme.red },
