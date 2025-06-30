@@ -6,9 +6,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const Header = ({ title, showBack = false, showCart = true, showSearch = true }) => {
   const navigation = useNavigation();
-  const { theme, cart, toggleTheme, isDarkMode } = useAppContext();
+  const { theme, user, toggleTheme, isDarkMode } = useAppContext();
 
-  const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const cartItemsCount = user?.cart?.reduce((total, item) => total + item.quantity, 0) || 0;  
 
   return (
     <View style={[

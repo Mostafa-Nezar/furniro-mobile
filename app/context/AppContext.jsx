@@ -41,7 +41,7 @@ const appReducer = (state, action) => {
         isAuthenticated: false,
         user: null,
         cart: [],
-        favorites: [], 
+        favorites: [],
       };
 
     case "ADD_TO_CART":
@@ -146,7 +146,6 @@ export const AppProvider = ({ children }) => {
     try {
       const appData = {
         isDarkMode: state.isDarkMode,
-        cart: state.cart,
         favorites: state.favorites,
         isAuthenticated: state.isAuthenticated,
       };
@@ -242,7 +241,13 @@ export const AppProvider = ({ children }) => {
     ...state,
     dispatch,
     toggleTheme: () => dispatch({ type: "TOGGLE_THEME" }),
-    login: (user) => dispatch({ type: "LOGIN", payload: user }),
+    login: (user) => {
+      dispatch({ type: "LOGIN", payload: user });
+      user?.cart?.forEach((item) => {
+        dispatch({ type: "ADD_TO_CART", payload: item });
+      });
+    },
+
     logout: () => dispatch({ type: "LOGOUT" }),
     addToCart,
     removeFromCart,

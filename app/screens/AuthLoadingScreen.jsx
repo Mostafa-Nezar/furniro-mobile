@@ -11,9 +11,10 @@ const AuthLoadingScreen = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const userData = await AsyncStorage.getItem("user");
-      userData
-        ? (login(JSON.parse(userData)), navigation.reset({ index: 0, routes: [{ name: "Main" }] }))
+      const user = JSON.parse(await AsyncStorage.getItem("user"));
+      user && user.id
+        ? (login(user),
+          navigation.reset({ index: 0, routes: [{ name: "Main" }] }))
         : navigation.reset({ index: 0, routes: [{ name: "Login" }] });
     };
 

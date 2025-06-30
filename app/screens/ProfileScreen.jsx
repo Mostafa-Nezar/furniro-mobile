@@ -621,6 +621,7 @@ const ProfileScreen = () => {
         {/* Logout Button */}
         <TouchableOpacity
           onPress={async () => {
+            await AsyncStorage.removeItem("user");
             await logout();
             navigation.reset({
               index: 0,

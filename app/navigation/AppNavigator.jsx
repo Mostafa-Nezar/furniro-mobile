@@ -20,9 +20,8 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
-  const { theme, cart } = useAppContext();
-  const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
-
+  const { theme, user } = useAppContext();
+  const cartItemsCount = user?.cart?.reduce((total, item) => total + item.quantity, 0) || 0;  
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({

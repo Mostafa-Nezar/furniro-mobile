@@ -35,13 +35,10 @@ const RegisterScreen = () => {
 
       if (result.success) {
         login(result.user);
-        Alert.alert('Success', 'Account created successfully', [{ text: 'OK', onPress: () => navigation.replace('Main') }]);
-      } else {
-        Alert.alert('Registration Error', result.message || 'An error occurred');
-      }
-    } catch (error) {
-      Alert.alert('Error', error.message || 'An error occurred');
-    } finally {
+        Alert.alert('Success', 'Account created successfully');
+        navigation.replace('Main')
+      } 
+    }finally {
       setSubmitting(false);
     }
   };
