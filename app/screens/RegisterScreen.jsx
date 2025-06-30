@@ -1,14 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
+  View, Text, TextInput, TouchableOpacity, Alert,
+  ScrollView, Image, KeyboardAvoidingView, Platform
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
@@ -17,6 +10,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import FAIcon from 'react-native-vector-icons/FontAwesome';
 
 const RegisterScreen = () => {
   const navigation = useNavigation();
@@ -27,7 +21,7 @@ const RegisterScreen = () => {
   const validationSchema = Yup.object().shape({
     name: Yup.string().required('Full name is required'),
     email: Yup.string().email('Invalid email').required('Email is required'),
-    password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+    password: Yup.string().min(6).required('Password is required'),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref('password'), null], 'Passwords must match')
       .required('Please confirm your password'),
@@ -36,16 +30,12 @@ const RegisterScreen = () => {
   const handleRegister = async (values, { setSubmitting }) => {
     try {
       const result = await ApiService.register({
-        name: values.name,
-        email: values.email,
-        password: values.password,
+        name: values.name, email: values.email, password: values.password,
       });
 
       if (result.success) {
         login(result.user);
-        Alert.alert('Success', 'Account created successfully', [
-           navigation.replace('Main') 
-        ]);
+        Alert.alert('Success', 'Account created successfully', [{ text: 'OK', onPress: () => navigation.replace('Main') }]);
       } else {
         Alert.alert('Registration Error', result.message || 'An error occurred');
       }
@@ -56,133 +46,100 @@ const RegisterScreen = () => {
     }
   };
 
+  const InputField = ({ icon, placeholder, secure, value, onChange, onBlur, toggleSecure, show, error, touched }) => (
+    <View style={tw`mb-4`}>
+      <View style={[
+        tw`flex-row items-center border rounded-lg px-4 py-3`,
+        { borderColor: theme.lightGray, backgroundColor: theme.semiWhite }
+      ]}>
+        <Icon name={icon} size={20} color={theme.darkGray} />
+        <TextInput
+          style={tw`flex-1 ml-3 text-base`}
+          placeholder={placeholder}
+          placeholderTextColor={theme.darkGray}
+          secureTextEntry={secure && !show}
+          value={value}
+          onChangeText={onChange}
+          onBlur={onBlur}
+        />
+        {secure && (
+          <TouchableOpacity onPress={toggleSecure}>
+            <Icon name={show ? 'visibility' : 'visibility-off'} size={20} color={theme.darkGray} />
+          </TouchableOpacity>
+        )}
+      </View>
+      {touched && error && <Text style={tw`text-red-500 text-sm mt-1`}>{error}</Text>}
+    </View>
+  );
+
   return (
     <KeyboardAvoidingView
       style={[tw`flex-1`, { backgroundColor: theme.white }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={tw`flex-grow justify-center px-6`}>
-        <View style={tw`items-center mb-8`}>
+        {/* Logo and Title */}
+        <View style={tw`items-center flex-row justify-center mb-8`}>
           <Image
             source={require('../../assets/images/Meubel House_Logos-05.png')}
-            style={tw`w-20 h-20 mb-4`}
+            style={tw`w-12 h-12 mr-3`}
             resizeMode="contain"
           />
-          <Text style={[tw`text-3xl font-bold`, { color: theme.primary }]}>Furniro</Text>
-          <Text style={[tw`text-lg mt-2`, { color: theme.darkGray }]}>Create New Account</Text>
+          <Text style={[tw`text-3xl font-bold`, { color: theme.black }]}>Furniro</Text>
         </View>
 
+        <Text style={[tw`text-lg text-center mb-6`, { color: theme.darkGray }]}>Create New Account</Text>
+
         <Formik
-          initialValues={{
-            name: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
-          }}
+          initialValues={{ name: '', email: '', password: '', confirmPassword: '' }}
           validationSchema={validationSchema}
           onSubmit={handleRegister}
         >
-          {({
-            handleChange,
-            handleBlur,
-            handleSubmit,
-            values,
-            errors,
-            touched,
-            isSubmitting,
-          }) => (
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting }) => (
             <>
-              {/* Name */}
-              <View style={tw`mb-4`}>
-                <Text style={[tw`mb-2 text-base font-medium`, { color: theme.black }]}>Full Name</Text>
-                <View style={[
-                  tw`flex-row items-center border rounded-lg px-4 py-3`,
-                  { borderColor: theme.lightGray, backgroundColor: theme.semiWhite }
-                ]}>
-                  <Icon name="person" size={20} color={theme.darkGray} />
-                  <TextInput
-                    style={tw`flex-1 ml-3 text-base`}
-                    placeholder="Enter your full name"
-                    placeholderTextColor={theme.darkGray}
-                    value={values.name}
-                    onChangeText={handleChange('name')}
-                    onBlur={handleBlur('name')}
-                  />
-                </View>
-                {touched.name && errors.name && <Text style={tw`text-red-500 text-sm mt-1`}>{errors.name}</Text>}
-              </View>
+              <InputField
+                icon="person"
+                placeholder="Full Name"
+                value={values.name}
+                onChange={handleChange('name')}
+                onBlur={handleBlur('name')}
+                error={errors.name}
+                touched={touched.name}
+              />
+              <InputField
+                icon="email"
+                placeholder="Email Address"
+                value={values.email}
+                onChange={handleChange('email')}
+                onBlur={handleBlur('email')}
+                error={errors.email}
+                touched={touched.email}
+              />
+              <InputField
+                icon="lock"
+                placeholder="Password"
+                secure
+                value={values.password}
+                onChange={handleChange('password')}
+                onBlur={handleBlur('password')}
+                toggleSecure={() => setShowPassword(!showPassword)}
+                show={showPassword}
+                error={errors.password}
+                touched={touched.password}
+              />
+              <InputField
+                icon="lock"
+                placeholder="Confirm Password"
+                secure
+                value={values.confirmPassword}
+                onChange={handleChange('confirmPassword')}
+                onBlur={handleBlur('confirmPassword')}
+                toggleSecure={() => setShowConfirmPassword(!showConfirmPassword)}
+                show={showConfirmPassword}
+                error={errors.confirmPassword}
+                touched={touched.confirmPassword}
+              />
 
-              {/* Email */}
-              <View style={tw`mb-4`}>
-                <Text style={[tw`mb-2 text-base font-medium`, { color: theme.black }]}>Email Address</Text>
-                <View style={[
-                  tw`flex-row items-center border rounded-lg px-4 py-3`,
-                  { borderColor: theme.lightGray, backgroundColor: theme.semiWhite }
-                ]}>
-                  <Icon name="email" size={20} color={theme.darkGray} />
-                  <TextInput
-                    style={tw`flex-1 ml-3 text-base`}
-                    placeholder="Enter your email address"
-                    placeholderTextColor={theme.darkGray}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    value={values.email}
-                    onChangeText={handleChange('email')}
-                    onBlur={handleBlur('email')}
-                  />
-                </View>
-                {touched.email && errors.email && <Text style={tw`text-red-500 text-sm mt-1`}>{errors.email}</Text>}
-              </View>
-
-              {/* Password */}
-              <View style={tw`mb-4`}>
-                <Text style={[tw`mb-2 text-base font-medium`, { color: theme.black }]}>Password</Text>
-                <View style={[
-                  tw`flex-row items-center border rounded-lg px-4 py-3`,
-                  { borderColor: theme.lightGray, backgroundColor: theme.semiWhite }
-                ]}>
-                  <Icon name="lock" size={20} color={theme.darkGray} />
-                  <TextInput
-                    style={tw`flex-1 ml-3 text-base`}
-                    placeholder="Enter password"
-                    placeholderTextColor={theme.darkGray}
-                    secureTextEntry={!showPassword}
-                    value={values.password}
-                    onChangeText={handleChange('password')}
-                    onBlur={handleBlur('password')}
-                  />
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    <Icon name={showPassword ? 'visibility' : 'visibility-off'} size={20} color={theme.darkGray} />
-                  </TouchableOpacity>
-                </View>
-                {touched.password && errors.password && <Text style={tw`text-red-500 text-sm mt-1`}>{errors.password}</Text>}
-              </View>
-
-              {/* Confirm Password */}
-              <View style={tw`mb-6`}>
-                <Text style={[tw`mb-2 text-base font-medium`, { color: theme.black }]}>Confirm Password</Text>
-                <View style={[
-                  tw`flex-row items-center border rounded-lg px-4 py-3`,
-                  { borderColor: theme.lightGray, backgroundColor: theme.semiWhite }
-                ]}>
-                  <Icon name="lock" size={20} color={theme.darkGray} />
-                  <TextInput
-                    style={tw`flex-1 ml-3 text-base`}
-                    placeholder="Re-enter password"
-                    placeholderTextColor={theme.darkGray}
-                    secureTextEntry={!showConfirmPassword}
-                    value={values.confirmPassword}
-                    onChangeText={handleChange('confirmPassword')}
-                    onBlur={handleBlur('confirmPassword')}
-                  />
-                  <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                    <Icon name={showConfirmPassword ? 'visibility' : 'visibility-off'} size={20} color={theme.darkGray} />
-                  </TouchableOpacity>
-                </View>
-                {touched.confirmPassword && errors.confirmPassword && <Text style={tw`text-red-500 text-sm mt-1`}>{errors.confirmPassword}</Text>}
-              </View>
-
-              {/* Register Button */}
               <TouchableOpacity
                 onPress={handleSubmit}
                 disabled={isSubmitting}
@@ -206,36 +163,31 @@ const RegisterScreen = () => {
           <View style={[tw`flex-1 h-px`, { backgroundColor: theme.lightGray }]} />
         </View>
 
-        {/* Google */}
-        <TouchableOpacity
-          onPress={() => Alert.alert('Google sign-up not implemented')}
-          style={[
-            tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,
-            { borderColor: theme.lightGray, backgroundColor: theme.white }
-          ]}
-        >
-          <Icon name="google" size={20} color="#DB4437" />
-          <Text style={[tw`ml-3 text-base font-medium`, { color: theme.black }]}>
-            Sign up with Google
-          </Text>
-        </TouchableOpacity>
-
-        {/* Facebook */}
-        <TouchableOpacity
-          onPress={() => Alert.alert('Facebook sign-up not implemented')}
-          style={[
-            tw`flex-row items-center justify-center py-3 rounded-lg mb-6 border`,
-            { borderColor: theme.lightGray, backgroundColor: theme.white }
-          ]}
-        >
-          <Icon name="facebook" size={20} color="#4267B2" />
-          <Text style={[tw`ml-3 text-base font-medium`, { color: theme.black }]}>
-            Sign up with Facebook
-          </Text>
-        </TouchableOpacity>
+        {/* Social Buttons */}
+        {[{
+          name: 'google',
+          color: '#DB4437',
+          text: 'Sign up with Google',
+        }, {
+          name: 'facebook',
+          color: '#4267B2',
+          text: 'Sign up with Facebook',
+        }].map(({ name, color, text }, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={() => Alert.alert(`${text} not implemented`)}
+            style={[
+              tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,
+              { borderColor: theme.lightGray, backgroundColor: theme.white }
+            ]}
+          >
+            <FAIcon name={name} size={20} color={color} />
+            <Text style={[tw`ml-3 text-base font-medium`, { color: theme.black }]}>{text}</Text>
+          </TouchableOpacity>
+        ))}
 
         {/* Already have account */}
-        <View style={tw`flex-row justify-center`}>
+        <View style={tw`flex-row justify-center mt-2`}>
           <Text style={[tw`text-base`, { color: theme.darkGray }]}>Already have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
             <Text style={[tw`text-base font-semibold`, { color: theme.primary }]}>Sign In</Text>

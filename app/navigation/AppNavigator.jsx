@@ -1,22 +1,21 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useAppContext } from '../context/AppContext.jsx';
-import { View, Text } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useAppContext } from "../context/AppContext.jsx";
+import { View, Text } from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 // Import screens
-import HomeScreen from '../screens/HomeScreen.jsx';
-import ShopScreen from '../screens/ShopScreen.jsx';
-import CartScreen from '../screens/CartScreen.jsx';
-import LoginScreen from '../screens/LoginScreen.jsx';
-import RegisterScreen from '../screens/RegisterScreen.jsx';
-import ProductDetailScreen from '../screens/ProductDetailScreen.jsx';
-import ProfileScreen from '../screens/ProfileScreen.jsx';
-import SearchScreen from '../screens/SearchScreen.jsx';
-import SplashScreen from '../screens/SplashScreen.jsx';
-
+import HomeScreen from "../screens/HomeScreen.jsx";
+import ShopScreen from "../screens/ShopScreen.jsx";
+import CartScreen from "../screens/CartScreen.jsx";
+import LoginScreen from "../screens/LoginScreen.jsx";
+import RegisterScreen from "../screens/RegisterScreen.jsx";
+import ProductDetailScreen from "../screens/ProductDetailScreen.jsx";
+import ProfileScreen from "../screens/ProfileScreen.jsx";
+import SearchScreen from "../screens/SearchScreen.jsx";
+import SplashScreen from "../screens/SplashScreen.jsx";
+import AuthLoadingScreen from "../screens/AuthLoadingScreen.jsx";
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -39,46 +38,46 @@ const TabNavigator = () => {
         tabBarInactiveTintColor: theme.darkGray,
         tabBarLabelStyle: {
           fontSize: 12,
-          fontFamily: 'Poppins-Medium',
+          fontFamily: "Poppins-Medium",
         },
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route.name === 'Home') {
-            iconName = 'home';
-          } else if (route.name === 'Shop') {
-            iconName = 'store';
-          } else if (route.name === 'Cart') {
-            iconName = 'shopping-cart';
-          } else if (route.name === 'Profile') {
-            iconName = 'person';
+          if (route.name === "Home") {
+            iconName = "home";
+          } else if (route.name === "Shop") {
+            iconName = "store";
+          } else if (route.name === "Cart") {
+            iconName = "shopping-cart";
+          } else if (route.name === "Profile") {
+            iconName = "person";
           }
 
           return (
-            <View style={{ position: 'relative' }}>
+            <View style={{ position: "relative" }}>
               <Icon name={iconName} size={size} color={color} />
-              {route.name === 'Cart' && cartItemsCount > 0 && (
+              {route.name === "Cart" && cartItemsCount > 0 && (
                 <View
                   style={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: -5,
                     right: -10,
                     backgroundColor: theme.red,
                     borderRadius: 10,
                     width: 20,
                     height: 20,
-                    justifyContent: 'center',
-                    alignItems: 'center',
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
                   <Text
                     style={{
                       color: theme.white,
                       fontSize: 10,
-                      fontWeight: 'bold',
+                      fontWeight: "bold",
                     }}
                   >
-                    {cartItemsCount > 9 ? '9+' : cartItemsCount}
+                    {cartItemsCount > 9 ? "9+" : cartItemsCount}
                   </Text>
                 </View>
               )}
@@ -87,25 +86,25 @@ const TabNavigator = () => {
         },
       })}
     >
-      <Tab.Screen 
-        name="Home" 
-        component={HomeScreen} 
-        options={{ tabBarLabel: 'Home' }}
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{ tabBarLabel: "Home" }}
       />
-      <Tab.Screen 
-        name="Shop" 
-        component={ShopScreen} 
-        options={{ tabBarLabel: 'Shop' }}
+      <Tab.Screen
+        name="Shop"
+        component={ShopScreen}
+        options={{ tabBarLabel: "Shop" }}
       />
-      <Tab.Screen 
-        name="Cart" 
-        component={CartScreen} 
-        options={{ tabBarLabel: 'Cart' }}
+      <Tab.Screen
+        name="Cart"
+        component={CartScreen}
+        options={{ tabBarLabel: "Cart" }}
       />
-      <Tab.Screen 
-        name="Profile" 
-        component={ProfileScreen} 
-        options={{ tabBarLabel: 'Profile' }}
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ tabBarLabel: "Profile" }}
       />
     </Tab.Navigator>
   );
@@ -122,6 +121,7 @@ const AppNavigator = () => {
           cardStyle: { backgroundColor: theme.white },
         }}
       >
+        <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} />
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
@@ -134,4 +134,3 @@ const AppNavigator = () => {
 };
 
 export default AppNavigator;
-
