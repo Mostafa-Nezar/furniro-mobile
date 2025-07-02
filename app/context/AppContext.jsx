@@ -176,7 +176,7 @@ export const AppProvider = ({ children }) => {
     try {
       if (state.user?.id) {
         const res = await fetch(
-          `http://localhost:3001/api/users/${state.user.id}/add-to-cart`,
+          `http://localhost:3001/api/cart/${state.user.id}/add-to-cart`,
           {
             method: "PATCH",
             headers: {
