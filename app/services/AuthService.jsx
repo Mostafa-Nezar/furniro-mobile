@@ -4,64 +4,57 @@ import { ApiService } from './ApiService.jsx';
 export class AuthService {
   static async login(email, password) {
     try {
-      // Try API first
       const response = await ApiService.login(email, password);
-      
-      // Store token if login successful
+
       if (response.token) {
         await AsyncStorage.setItem('userToken', response.token);
         await AsyncStorage.setItem('userData', JSON.stringify(response.user));
       }
-      
+
       return response;
     } catch (error) {
       console.error('Login error:', error);
-      
-      // Fallback to mock authentication for development
       if (email === 'admin@furniro.com' && password === 'admin123') {
         const userData = {
           id: 1,
           email: email,
           name: 'Admin User',
-          avatar: null
+          avatar: null,
         };
-        
         await AsyncStorage.setItem('userToken', 'mock_token_123');
         await AsyncStorage.setItem('userData', JSON.stringify(userData));
-        
+
         return { success: true, user: userData, token: 'mock_token_123' };
       }
-      
       throw error;
     }
   }
-
   static async register(userData) {
     try {
-      // Try API first
       const response = await ApiService.register(userData);
-      
-      // Store token if registration successful
       if (response.token) {
         await AsyncStorage.setItem('userToken', response.token);
         await AsyncStorage.setItem('userData', JSON.stringify(response.user));
+        return response;
       }
-      
+      if (response.success && response.user) {
+        const loginRes = await this.login(response.user.email, userData.password);
+        return loginRes;
+      }
+
       return response;
     } catch (error) {
       console.error('Registration error:', error);
-      
-      // Fallback to mock registration for development
       const newUser = {
         id: Date.now(),
         email: userData.email,
         name: userData.name,
-        avatar: null
+        avatar: null,
       };
-      
+
       await AsyncStorage.setItem('userToken', 'mock_token_123');
       await AsyncStorage.setItem('userData', JSON.stringify(newUser));
-      
+
       return { success: true, user: newUser, token: 'mock_token_123' };
     }
   }
@@ -106,7 +99,6 @@ export class AuthService {
     }
   }
 
-  // Legacy methods for backward compatibility
   static async signInWithEmail(email, password) {
     return this.login(email, password);
   }
@@ -119,4 +111,3 @@ export class AuthService {
     return this.logout();
   }
 }
-
