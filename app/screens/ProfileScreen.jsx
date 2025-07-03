@@ -1,6 +1,14 @@
 import {
-  View, Text, TouchableOpacity, ScrollView, Image, Alert,
-  Switch, Animated, Dimensions, Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  Alert,
+  Switch,
+  Animated,
+  Dimensions,
+  Modal,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext";
@@ -17,8 +25,15 @@ const { width } = Dimensions.get("window");
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const {
-    theme, user, isAuthenticated, logout,
-    isDarkMode, toggleTheme, cart, favorites, updateUser,
+    theme,
+    user,
+    isAuthenticated,
+    logout,
+    isDarkMode,
+    toggleTheme,
+    cart,
+    favorites,
+    updateUser,
   } = useAppContext();
   const [isUploading, setIsUploading] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -27,7 +42,8 @@ const ProfileScreen = () => {
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) return Alert.alert("Permission required", "Access your gallery");
+    if (!permission.granted)
+      return Alert.alert("Permission required", "Access your gallery");
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -53,14 +69,17 @@ const ProfileScreen = () => {
     });
 
     try {
-      const res = await fetch(`http://localhost:3001/api/upload/${user?.id}/update-image`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${user?.token}`,
-        },
-        body: formData,
-      });
+      const res = await fetch(
+        `http://localhost:3001/api/upload/${user?.id}/update-image`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${user?.token}`,
+          },
+          body: formData,
+        }
+      );
 
       const data = await res.json();
       if (data.success && data.imageUrl) {
@@ -83,7 +102,8 @@ const ProfileScreen = () => {
     Alert.alert("Logout", "Are you sure?", [
       { text: "Cancel", style: "cancel" },
       {
-        text: "Log Out", style: "destructive",
+        text: "Log Out",
+        style: "destructive",
         onPress: async () => {
           await AuthService.signOut();
           logout();
@@ -130,22 +150,48 @@ const ProfileScreen = () => {
   const renderFavoritesContent = () => (
     <View style={tw`flex-1 p-4`}>
       <View style={tw`flex-row justify-between items-center mb-6`}>
-        <Text style={[tw`text-xl font-bold`, { color: theme.black }]}>My Favorites</Text>
+        <Text style={[tw`text-xl font-bold`, { color: theme.black }]}>
+          My Favorites
+        </Text>
         <TouchableOpacity onPress={closeSidebar}>
           <Icon name="close" size={24} color={theme.darkGray} />
         </TouchableOpacity>
       </View>
       <ScrollView>
-        {favorites.length > 0 ? favorites.map((item, i) => (
-          <View key={i} style={[tw`flex-row p-4 mb-3 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
-            <Image source={{ uri: item.image }} style={tw`w-15 h-15 rounded-lg`} />
-            <View style={tw`ml-3 flex-1`}>
-              <Text style={[tw`text-base font-semibold`, { color: theme.black }]}>{item.name}</Text>
-              <Text style={[tw`text-sm`, { color: theme.darkGray }]}>${item.price}</Text>
-            </View>
-            <Icon name="favorite" size={20} color={theme.red} />
-          </View>
-        )) : renderEmptyContent("favorite-border", "No Favorites", "Add items to favorites")}
+        {favorites.length > 0
+          ? favorites.map((item, i) => (
+              <View
+                key={i}
+                style={[
+                  tw`flex-row p-4 mb-3 rounded-lg`,
+                  { backgroundColor: theme.semiWhite },
+                ]}
+              >
+                <Image
+                  source={{ uri: item.image }}
+                  style={tw`w-15 h-15 rounded-lg`}
+                />
+                <View style={tw`ml-3 flex-1`}>
+                  <Text
+                    style={[
+                      tw`text-base font-semibold`,
+                      { color: theme.black },
+                    ]}
+                  >
+                    {item.name}
+                  </Text>
+                  <Text style={[tw`text-sm`, { color: theme.darkGray }]}>
+                    ${item.price}
+                  </Text>
+                </View>
+                <Icon name="favorite" size={20} color={theme.red} />
+              </View>
+            ))
+          : renderEmptyContent(
+              "favorite-border",
+              "No Favorites",
+              "Add items to favorites"
+            )}
       </ScrollView>
     </View>
   );
@@ -153,23 +199,69 @@ const ProfileScreen = () => {
   const renderGenericContent = (title, icon) => (
     <View style={tw`flex-1 p-4`}>
       <View style={tw`flex-row justify-between items-center mb-6`}>
-        <Text style={[tw`text-xl font-bold`, { color: theme.black }]}>{title}</Text>
+        <Text style={[tw`text-xl font-bold`, { color: theme.black }]}>
+          {title}
+        </Text>
         <TouchableOpacity onPress={closeSidebar}>
           <Icon name="close" size={24} color={theme.darkGray} />
         </TouchableOpacity>
       </View>
-      {renderEmptyContent(icon, "Coming Soon", "This feature will be available soon")}
+      {renderEmptyContent(
+        icon,
+        "Coming Soon",
+        "This feature will be available soon"
+      )}
     </View>
   );
 
   const menuItems = [
-    { icon: "favorite", title: "Favorites", subtitle: `${favorites.length} items`, onPress: () => openSidebar(renderFavoritesContent()) },
-    { icon: "history", title: "Order History", subtitle: "Your previous orders", onPress: () => openSidebar(renderGenericContent("Order History", "history")) },
-    { icon: "location-on", title: "Addresses", subtitle: "Manage delivery", onPress: () => openSidebar(renderGenericContent("Addresses", "location-on")) },
-    { icon: "payment", title: "Payment", subtitle: "Manage cards", onPress: () => openSidebar(renderGenericContent("Payment Methods", "payment")) },
-    { icon: "notifications", title: "Notifications", subtitle: "Notification settings", onPress: () => openSidebar(renderGenericContent("Notifications", "notifications")) },
-    { icon: "help", title: "Help & Support", subtitle: "FAQs", onPress: () => openSidebar(renderGenericContent("Help & Support", "help")) },
-    { icon: "info", title: "About App", subtitle: "App info", onPress: () => Alert.alert("Furniro v1.0.0", "Modern furniture app") },
+    {
+      icon: "favorite",
+      title: "Favorites",
+      subtitle: `${favorites.length} items`,
+      onPress: () => openSidebar(renderFavoritesContent()),
+    },
+    {
+      icon: "history",
+      title: "Order History",
+      subtitle: "Your previous orders",
+      onPress: () =>
+        openSidebar(renderGenericContent("Order History", "history")),
+    },
+    {
+      icon: "location-on",
+      title: "Addresses",
+      subtitle: "Manage delivery",
+      onPress: () =>
+        openSidebar(renderGenericContent("Addresses", "location-on")),
+    },
+    {
+      icon: "payment",
+      title: "Payment",
+      subtitle: "Manage cards",
+      onPress: () =>
+        openSidebar(renderGenericContent("Payment Methods", "payment")),
+    },
+    {
+      icon: "notifications",
+      title: "Notifications",
+      subtitle: "Notification settings",
+      onPress: () =>
+        openSidebar(renderGenericContent("Notifications", "notifications")),
+    },
+    {
+      icon: "help",
+      title: "Help & Support",
+      subtitle: "FAQs",
+      onPress: () =>
+        openSidebar(renderGenericContent("Help & Support", "help")),
+    },
+    {
+      icon: "info",
+      title: "About App",
+      subtitle: "App info",
+      onPress: () => Alert.alert("Furniro v1.0.0", "Modern furniture app"),
+    },
   ];
 
   if (!isAuthenticated) {
@@ -178,13 +270,37 @@ const ProfileScreen = () => {
         <Header title="Profile" />
         <View style={tw`flex-1 justify-center items-center px-6`}>
           <Icon name="person" size={80} color={theme.darkGray} />
-          <Text style={[tw`text-xl font-bold mt-4`, { color: theme.black }]}>Welcome</Text>
-          <Text style={[tw`text-base mt-2 text-center`, { color: theme.darkGray }]}>Sign in to access profile</Text>
-          <TouchableOpacity style={[tw`py-4 px-8 mt-6 rounded-lg`, { backgroundColor: theme.primary }]} onPress={() => navigation.navigate("Login")}>
-            <Text style={[tw`text-lg font-semibold`, { color: theme.white }]}>Sign In</Text>
+          <Text style={[tw`text-xl font-bold mt-4`, { color: theme.black }]}>
+            Welcome
+          </Text>
+          <Text
+            style={[tw`text-base mt-2 text-center`, { color: theme.darkGray }]}
+          >
+            Sign in to access profile
+          </Text>
+          <TouchableOpacity
+            style={[
+              tw`py-4 px-8 mt-6 rounded-lg`,
+              { backgroundColor: theme.primary },
+            ]}
+            onPress={() => navigation.navigate("Login")}
+          >
+            <Text style={[tw`text-lg font-semibold`, { color: theme.white }]}>
+              Sign In
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[tw`py-3 px-8 mt-3 border rounded-lg`, { borderColor: theme.primary }]} onPress={() => navigation.navigate("Register")}>
-            <Text style={[tw`text-base font-semibold`, { color: theme.primary }]}>Create Account</Text>
+          <TouchableOpacity
+            style={[
+              tw`py-3 px-8 mt-3 border rounded-lg`,
+              { borderColor: theme.primary },
+            ]}
+            onPress={() => navigation.navigate("Register")}
+          >
+            <Text
+              style={[tw`text-base font-semibold`, { color: theme.primary }]}
+            >
+              Create Account
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -196,53 +312,121 @@ const ProfileScreen = () => {
       <Header title="Profile" />
       <ScrollView>
         {/* Avatar */}
-        <View style={[tw`p-6 items-center`, { backgroundColor: theme.lightBeige }]}>
+        <View
+          style={[tw`p-6 items-center`, { backgroundColor: theme.lightBeige }]}
+        >
           <TouchableOpacity onPress={pickImage} disabled={isUploading}>
-            <View style={[tw`w-24 h-24 rounded-full items-center justify-center mb-4`, { backgroundColor: theme.primary }]}>
-              {user?.image
-                ? <Image source={{ uri: user.image }} style={tw`w-24 h-24 rounded-full`} />
-                : <Icon name="person" size={40} color={theme.white} />}
-              {isUploading && <View style={[tw`absolute inset-0 items-center justify-center`, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
-                <Icon name="cloud-upload" size={24} color={theme.white} />
-              </View>}
-              <View style={[tw`absolute bottom-0 right-0 w-6 h-6 rounded-full items-center justify-center`, { backgroundColor: theme.primary }]}>
+            <View
+              style={[
+                tw`w-24 h-24 rounded-full items-center justify-center mb-4`,
+                { backgroundColor: theme.primary },
+              ]}
+            >
+              {user?.image ? (
+                <Image
+                  source={{ uri: user.image }}
+                  style={tw`w-24 h-24 rounded-full`}
+                />
+              ) : (
+                <Icon name="person" size={40} color={theme.white} />
+              )}
+              {isUploading && (
+                <View
+                  style={[
+                    tw`absolute inset-0 items-center justify-center`,
+                    { backgroundColor: "rgba(0,0,0,0.5)" },
+                  ]}
+                >
+                  <Icon name="cloud-upload" size={24} color={theme.white} />
+                </View>
+              )}
+              <View
+                style={[
+                  tw`absolute bottom-0 right-0 w-6 h-6 rounded-full items-center justify-center`,
+                  { backgroundColor: theme.primary },
+                ]}
+              >
                 <Icon name="camera-alt" size={12} color={theme.white} />
               </View>
             </View>
           </TouchableOpacity>
-          <Text style={[tw`text-xl font-bold mb-1`, { color: theme.black }]}>{user?.name}</Text>
-          <Text style={[tw`text-base`, { color: theme.darkGray }]}>{user?.email}</Text>
+          <Text style={[tw`text-xl font-bold mb-1`, { color: theme.black }]}>
+            {user?.name}
+          </Text>
+          <Text style={[tw`text-base`, { color: theme.darkGray }]}>
+            {user?.email}
+          </Text>
 
           <View style={tw`flex-row mt-4`}>
-            {[{ label: "In Cart", value: cart.length }, { label: "Favorites", value: favorites.length }].map((item, i) => (
+            {[
+              { label: "In Cart", value: cart.length },
+              { label: "Favorites", value: favorites.length },
+            ].map((item, i) => (
               <View key={i} style={tw`items-center mx-4`}>
-                <Text style={[tw`text-lg font-bold`, { color: theme.primary }]}>{item.value}</Text>
-                <Text style={[tw`text-sm`, { color: theme.darkGray }]}>{item.label}</Text>
+                <Text style={[tw`text-lg font-bold`, { color: theme.primary }]}>
+                  {item.value}
+                </Text>
+                <Text style={[tw`text-sm`, { color: theme.darkGray }]}>
+                  {item.label}
+                </Text>
               </View>
             ))}
           </View>
         </View>
 
         {/* Dark Mode */}
-        <View style={[tw`flex-row justify-between p-4 mx-4 mt-4 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
+        <View
+          style={[
+            tw`flex-row justify-between p-4 mx-4 mt-4 rounded-lg`,
+            { backgroundColor: theme.semiWhite },
+          ]}
+        >
           <View style={tw`flex-row items-center`}>
-            <Icon name={isDarkMode ? "dark-mode" : "light-mode"} size={24} color={theme.primary} />
+            <Icon
+              name={isDarkMode ? "dark-mode" : "light-mode"}
+              size={24}
+              color={theme.primary}
+            />
             <View style={tw`ml-3`}>
-              <Text style={[tw`text-base font-semibold`, { color: theme.black }]}>Dark Mode</Text>
-              <Text style={[tw`text-sm`, { color: theme.darkGray }]}>{isDarkMode ? "Enabled" : "Disabled"}</Text>
+              <Text
+                style={[tw`text-base font-semibold`, { color: theme.black }]}
+              >
+                Dark Mode
+              </Text>
+              <Text style={[tw`text-sm`, { color: theme.darkGray }]}>
+                {isDarkMode ? "Enabled" : "Disabled"}
+              </Text>
             </View>
           </View>
-          <Switch value={isDarkMode} onValueChange={toggleTheme} trackColor={{ false: theme.lightGray, true: theme.primary }} thumbColor={theme.white} />
+          <Switch
+            value={isDarkMode}
+            onValueChange={toggleTheme}
+            trackColor={{ false: theme.lightGray, true: theme.primary }}
+            thumbColor={theme.white}
+          />
         </View>
 
         {/* Menu Items */}
         <View style={tw`px-4 mt-4`}>
           {menuItems.map((item, i) => (
-            <TouchableOpacity key={i} onPress={item.onPress} style={[tw`flex-row items-center p-4 mb-2 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
+            <TouchableOpacity
+              key={i}
+              onPress={item.onPress}
+              style={[
+                tw`flex-row items-center p-4 mb-2 rounded-lg`,
+                { backgroundColor: theme.semiWhite },
+              ]}
+            >
               <Icon name={item.icon} size={24} color={theme.primary} />
               <View style={tw`flex-1 ml-3`}>
-                <Text style={[tw`text-base font-semibold`, { color: theme.black }]}>{item.title}</Text>
-                <Text style={[tw`text-sm`, { color: theme.darkGray }]}>{item.subtitle}</Text>
+                <Text
+                  style={[tw`text-base font-semibold`, { color: theme.black }]}
+                >
+                  {item.title}
+                </Text>
+                <Text style={[tw`text-sm`, { color: theme.darkGray }]}>
+                  {item.subtitle}
+                </Text>
               </View>
               <Icon name="chevron-right" size={20} color={theme.darkGray} />
             </TouchableOpacity>
@@ -250,21 +434,57 @@ const ProfileScreen = () => {
         </View>
 
         {/* Logout */}
-        <TouchableOpacity onPress={handleLogout} style={[tw`flex-row items-center justify-center p-4 mx-4 mt-6 mb-8 rounded-lg`, { backgroundColor: theme.red }]}>
+        <TouchableOpacity
+          onPress={async () => {
+            await AsyncStorage.removeItem("user");
+            await logout();
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Login" }],
+            });
+          }}
+          style={[
+            tw`flex-row items-center justify-center p-4 mx-4 mt-6 mb-8 rounded-lg`,
+            { backgroundColor: theme.red },
+          ]}
+        >
           <Icon name="logout" size={20} color={theme.white} />
-          <Text style={[tw`ml-2 text-base font-semibold`, { color: theme.white }]}>Log Out</Text>
+          <Text
+            style={[
+              tw`ml-2 text-base font-semibold`,
+              { color: theme.white, fontFamily: "Poppins-SemiBold" },
+            ]}
+          >
+            Log Out
+          </Text>
         </TouchableOpacity>
       </ScrollView>
 
       {/* Sidebar */}
-      <Modal visible={sidebarVisible} transparent animationType="none" onRequestClose={closeSidebar}>
-        <View style={[tw`flex-1 flex-row`, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
-          <TouchableOpacity style={tw`flex-1`} onPress={closeSidebar} activeOpacity={1} />
-          <Animated.View style={[tw`w-4/5 h-full`, {
-            backgroundColor: theme.white,
-            transform: [{ translateX: slideAnim }],
-            elevation: 5,
-          }]}>
+      <Modal
+        visible={sidebarVisible}
+        transparent
+        animationType="none"
+        onRequestClose={closeSidebar}
+      >
+        <View
+          style={[tw`flex-1 flex-row`, { backgroundColor: "rgba(0,0,0,0.5)" }]}
+        >
+          <TouchableOpacity
+            style={tw`flex-1`}
+            onPress={closeSidebar}
+            activeOpacity={1}
+          />
+          <Animated.View
+            style={[
+              tw`w-4/5 h-full`,
+              {
+                backgroundColor: theme.white,
+                transform: [{ translateX: slideAnim }],
+                elevation: 5,
+              },
+            ]}
+          >
             {sidebarContent}
           </Animated.View>
         </View>
