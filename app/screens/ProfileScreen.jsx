@@ -54,9 +54,9 @@ const ProfileScreen = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:3001/api/upload/upload-avatar",
+        `http://localhost:3001/api/upload/${user?.id}/update-image`,
         {
-          method: "POST",
+          method: "PATCH",
           headers: {
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${user?.token}`,
@@ -67,13 +67,15 @@ const ProfileScreen = () => {
 
       const data = await response.json();
 
-      if (data.success && data.avatarUrl) {
+      if (data.success && data.imageUrl) {
+        // تحديث بيانات المستخدم مع الصورة الجديدة
         const updatedUser = {
           ...user,
-          avatar: "http://localhost:3001" + data.avatarUrl,
+          image: data.imageUrl, // استخدام الرابط الكامل من السيرفر
         };
 
         updateUser(updatedUser);
+        await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
 
         Alert.alert("Success", "Image uploaded successfully");
       } else {
@@ -449,9 +451,9 @@ const ProfileScreen = () => {
                 { backgroundColor: theme.primary },
               ]}
             >
-              {user?.avatar ? (
+              {user?.image ? (
                 <Image
-                  source={{ uri: user.avatar }}
+                  source={{ uri: user.image }}
                   style={tw`w-24 h-24 rounded-full`}
                   resizeMode="cover"
                 />

@@ -43,6 +43,11 @@ const appReducer = (state, action) => {
         cart: [],
         favorites: [],
       };
+    case "UPDATE_USER":
+      return {
+        ...state,
+        user: action.payload,
+      };
 
     case "ADD_TO_CART":
       const existingItem = state.cart.find(
@@ -158,14 +163,12 @@ export const AppProvider = ({ children }) => {
   };
 
   const addToCart = (product) => {
-    const existingItem = state.cart.find((item) => item.id === product.id);
-
     const filteredProduct = {
       id: product.id,
       name: product.name,
       price: product.price,
       image: product.image,
-      quantity: existingItem ? existingItem.quantity + 1 : 1,
+      quantity: 1,
     };
 
     dispatch({ type: "ADD_TO_CART", payload: filteredProduct });
@@ -182,7 +185,13 @@ export const AppProvider = ({ children }) => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ product: filteredProduct }),
+            body: JSON.stringify({
+              productId: filteredProduct.id,
+              name: filteredProduct.name,
+              price: filteredProduct.price,
+              image: filteredProduct.image,
+              quantity: 1,
+            }),
           }
         );
 
@@ -191,7 +200,7 @@ export const AppProvider = ({ children }) => {
         if (res.ok) {
           const updatedUser = {
             ...state.user,
-            cart: data.cart, // ✅ كارت محدث من السيرفر
+            cart: data.cart,
           };
           dispatch({ type: "LOGIN", payload: updatedUser });
           await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
@@ -211,7 +220,7 @@ export const AppProvider = ({ children }) => {
     try {
       if (state.user?.id) {
         const res = await fetch(
-          `http://localhost:3001/api/users/${state.user.id}/remove-from-cart`,
+          `http://localhost:3001/api/cart/${state.user.id}/remove-from-cart`,
           {
             method: "PATCH",
             headers: {
@@ -235,6 +244,11 @@ export const AppProvider = ({ children }) => {
     } catch (error) {
       console.error("Error syncing cart removal with backend:", error);
     }
+  };
+
+  const updateUser = async (updatedUser) => {
+    dispatch({ type: "UPDATE_USER", payload: updatedUser });
+    await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
   const value = {
@@ -262,6 +276,7 @@ export const AppProvider = ({ children }) => {
       dispatch({ type: "SET_PRODUCTS", payload: products }),
     setOfflineStatus: (status) =>
       dispatch({ type: "SET_OFFLINE_STATUS", payload: status }),
+    updateUser,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
