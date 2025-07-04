@@ -95,6 +95,28 @@ const Payment = () => {
       setLoading(false);
     }
   };
+  const handlePayWithPayPal = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:3001/api/paypal/create-paypal-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ total: total.toFixed(2) }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.approveUrl) {
+        Linking.openURL(data.approveUrl);
+      } else {
+        Alert.alert("Payment Failed", data.error || "Something went wrong");
+      }
+    } catch (err) {
+      Alert.alert("Error", "Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const InputField = ({
     value,
@@ -129,7 +151,7 @@ const Payment = () => {
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title="Payment" showBack={true} showCart={false} />
       <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
-        <View style={[tw`p-4 rounded-lg mb-6 mt-4`, { backgroundColor: theme.semiWhite }]}>
+        {/* <View style={[tw`p-4 rounded-lg mb-6 mt-4`, { backgroundColor: theme.semiWhite }]}>
           <Text style={[tw`text-lg font-bold mb-3`, { color: theme.black }]}>Order Summary</Text>
           {cart.map((item, i) => (
             <View key={i} style={tw`flex-row justify-between mb-2`}>
@@ -153,7 +175,7 @@ const Payment = () => {
               <Text style={[tw`text-lg font-bold`, { color: theme.primary }]}>${total.toFixed(2)}</Text>
             </View>
           </View>
-        </View>
+        </View> */}
         <View style={tw`mb-6`}>
           <InputField value={formData.email} onChangeText={(v) => handleInputChange("email", v)} placeholder="Email Address" keyboardType="email-address" />
           <InputField value={formData.fullName} onChangeText={(v) => handleInputChange("fullName", v)} placeholder="Full Name" />
@@ -168,7 +190,6 @@ const Payment = () => {
           </View>
           <InputField value={formData.zipCode} onChangeText={(v) => handleInputChange("zipCode", v)} placeholder="ZIP Code" keyboardType="numeric" maxLength={10} />
         </View>
-
         <View style={tw`mb-6`}>
           <InputField value={formData.cardholderName} onChangeText={(v) => handleInputChange("cardholderName", v)} placeholder="Cardholder Name" />
           <InputField value={formData.cardNumber} onChangeText={(v) => handleInputChange("cardNumber", formatCardNumber(v))} placeholder="Card Number" keyboardType="numeric" maxLength={19} />
@@ -181,7 +202,6 @@ const Payment = () => {
             </View>
           </View>
         </View>
-
         <View style={[tw`p-4 rounded-lg mb-6 flex-row`, { backgroundColor: theme.lightBeige }]}>
           <Icon name="security" size={20} color={theme.primary} style={tw`mr-3 mt-1`} />
           <View style={tw`flex-1`}>
@@ -202,7 +222,10 @@ const Payment = () => {
             {loading ? "Processing..." : `Pay $${total.toFixed(2)}`}
           </Text>
         </TouchableOpacity>
-
+          <TouchableOpacity onPress={handlePayWithPayPal} disabled={loading} style={[tw`py-4 rounded-lg flex-row items-center justify-center mt-3`,{ backgroundColor: theme.black },]}>
+            <Icon  name="account-balance-wallet" size={20} color={theme.white} style={tw`mr-2`}/>
+            <Text style={[tw`text-lg font-semibold text-white`]}>Pay with PayPal</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.goBack()} style={[tw`py-3 mt-3 border rounded-lg`, { borderColor: theme.primary }]}>
           <Text style={[tw`text-center text-base font-semibold`, { color: theme.primary }]}>
             Back to Cart
