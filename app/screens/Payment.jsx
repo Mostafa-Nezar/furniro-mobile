@@ -8,23 +8,19 @@ import { useAppContext } from "../context/AppContext.jsx";
 import Header from "../components/Header.jsx";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { Formik } from "formik";
+import * as Yup from "yup";
 
 const Payment = () => {
   const navigation = useNavigation();
   const { theme, user } = useAppContext();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: user?.email || "", fullName: "", address: "", city: "",
-    state: "", zipCode: "", cardNumber: "", expiryDate: "",
-    cvv: "", cardholderName: "",
-  });
 
   const cart = user?.cart || [];
   const subtotal = cart.reduce((t, i) => t + i.price * i.quantity, 0);
   const shipping = subtotal >= 100 ? 0 : 10;
   const total = subtotal + shipping;
 
-  const handleInputChange = (f, v) => setFormData(p => ({ ...p, [f]: v }));
   const formatCardNumber = (v) => {
     v = v.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
     const m = v.match(/\d{4,16}/g), parts = [];
@@ -33,31 +29,26 @@ const Payment = () => {
       parts.push(match.substring(i, i + 4));
     return parts.length ? parts.join(" ") : v;
   };
+
   const formatExpiryDate = (v) => {
     v = v.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
     return v.length >= 2 ? v.substring(0, 2) + "/" + v.substring(2, 4) : v;
   };
-  const validateForm = () => {
-    const req = ["email", "fullName", "address", "city", "state", "zipCode", "cardNumber", "expiryDate", "cvv", "cardholderName"];
-    for (let f of req) {
-      if (!formData[f].trim()) {
-        Alert.alert("Error", `Please fill in ${f.replace(/([A-Z])/g, " $1").toLowerCase()}`);
-        return false;
-      }
-    }
-    if (formData.cardNumber.replace(/\s/g, "").length < 16) {
-      Alert.alert("Error", "Please enter a valid card number");
-      return false;
-    }
-    if (formData.cvv.length < 3) {
-      Alert.alert("Error", "Please enter a valid CVV");
-      return false;
-    }
-    return true;
-  };
 
-  const createCheckoutSession = async () => {
-    if (!validateForm()) return;
+  const validationSchema = Yup.object().shape({
+    email: Yup.string().email("Invalid email").required("Email is required"),
+    fullName: Yup.string().required("Full name is required"),
+    address: Yup.string().required("Address is required"),
+    city: Yup.string().required("City is required"),
+    state: Yup.string().required("State is required"),
+    zipCode: Yup.string().required("ZIP Code is required"),
+    cardNumber: Yup.string().min(19, "Card number is too short").required("Card number is required"),
+    expiryDate: Yup.string().matches(/^\d{2}\/\d{2}$/, "Expiry date must be MM/YY").required("Expiry date is required"),
+    cvv: Yup.string().min(3).max(4).required("CVV is required"),
+    cardholderName: Yup.string().required("Cardholder name is required"),
+  });
+
+  const createCheckoutSession = async (values) => {
     setLoading(true);
     try {
       const res = await fetch("http://localhost:3001/api/payment/create-checkout-session", {
@@ -65,23 +56,23 @@ const Payment = () => {
         body: JSON.stringify({
           items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
           customerInfo: {
-            email: formData.email,
-            name: formData.fullName,
+            email: values.email,
+            name: values.fullName,
             address: {
-              line1: formData.address,
-              city: formData.city,
-              state: formData.state,
-              postal_code: formData.zipCode,
+              line1: values.address,
+              city: values.city,
+              state: values.state,
+              postal_code: values.zipCode,
             },
           },
           paymentMethod: {
             card: {
-              number: formData.cardNumber.replace(/\s/g, ""),
-              exp_month: formData.expiryDate.split("/")[0],
-              exp_year: "20" + formData.expiryDate.split("/")[1],
-              cvc: formData.cvv,
+              number: values.cardNumber.replace(/\s/g, ""),
+              exp_month: values.expiryDate.split("/")[0],
+              exp_year: "20" + values.expiryDate.split("/")[1],
+              cvc: values.cvv,
             },
-            billing_details: { name: formData.cardholderName },
+            billing_details: { name: values.cardholderName },
           },
         }),
       });
@@ -95,6 +86,7 @@ const Payment = () => {
       setLoading(false);
     }
   };
+
   const handlePayWithPayPal = async () => {
     setLoading(true);
     try {
@@ -103,29 +95,20 @@ const Payment = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ total: total.toFixed(2) }),
       });
-
       const data = await res.json();
-
       if (res.ok && data.approveUrl) {
         Linking.openURL(data.approveUrl);
       } else {
         Alert.alert("Payment Failed", data.error || "Something went wrong");
       }
-    } catch (err) {
+    } catch {
       Alert.alert("Error", "Network error. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const InputField = ({
-    value,
-    onChangeText,
-    placeholder,
-    keyboardType = "default",
-    maxLength,
-    secureTextEntry = false,
-  }) => (
+  const InputField = ({ handleChange, handleBlur, value, placeholder, keyboardType = "default", maxLength, secureTextEntry = false, name }) => (
     <View style={tw`mb-4`}>
       <TextInput
         style={[
@@ -136,8 +119,9 @@ const Payment = () => {
             color: theme.black,
           },
         ]}
+        onChangeText={handleChange(name)}
+        onBlur={handleBlur(name)}
         value={value}
-        onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={theme.darkGray}
         keyboardType={keyboardType}
@@ -150,88 +134,112 @@ const Payment = () => {
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title="Payment" showBack={true} showCart={false} />
-      <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
-        {/* <View style={[tw`p-4 rounded-lg mb-6 mt-4`, { backgroundColor: theme.semiWhite }]}>
-          <Text style={[tw`text-lg font-bold mb-3`, { color: theme.black }]}>Order Summary</Text>
-          {cart.map((item, i) => (
-            <View key={i} style={tw`flex-row justify-between mb-2`}>
-              <Text style={[tw`flex-1`, { color: theme.darkGray }]}>{item.name} x {item.quantity}</Text>
-              <Text style={[tw`font-medium`, { color: theme.black }]}>${(item.price * item.quantity).toFixed(2)}</Text>
+      <Formik
+        initialValues={{
+          email: user?.email || "",
+          fullName: "",
+          address: "",
+          city: "",
+          state: "",
+          zipCode: "",
+          cardNumber: "",
+          expiryDate: "",
+          cvv: "",
+          cardholderName: "",
+        }}
+        validationSchema={validationSchema}
+        onSubmit={createCheckoutSession}
+      >
+        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+          <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
+            {/* Order Summary ... (keep same) */}
+            <View style={[tw`p-4 rounded-lg mb-6 mt-4`, { backgroundColor: theme.semiWhite }]}>
+              <Text style={[tw`text-lg font-bold mb-3`, { color: theme.black }]}>Order Summary</Text>
+              {cart.map((item, i) => (
+                <View key={i} style={tw`flex-row justify-between mb-2`}>
+                  <Text style={[tw`flex-1`, { color: theme.darkGray }]}>{item.name} x {item.quantity}</Text>
+                  <Text style={[tw`font-medium`, { color: theme.black }]}>${(item.price * item.quantity).toFixed(2)}</Text>
+                </View>
+              ))}
+              <View style={[tw`border-t pt-3 mt-3`, { borderTopColor: theme.lightGray }]}>
+                <View style={tw`flex-row justify-between mb-1`}>
+                  <Text style={{ color: theme.darkGray }}>Subtotal:</Text>
+                  <Text style={{ color: theme.black }}>${subtotal.toFixed(2)}</Text>
+                </View>
+                <View style={tw`flex-row justify-between mb-1`}>
+                  <Text style={{ color: theme.darkGray }}>Shipping:</Text>
+                  <Text style={{ color: shipping === 0 ? theme.green : theme.black }}>
+                    {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+                  </Text>
+                </View>
+                <View style={tw`flex-row justify-between mt-2 pt-2 border-t border-gray-200`}>
+                  <Text style={[tw`text-lg font-bold`, { color: theme.black }]}>Total:</Text>
+                  <Text style={[tw`text-lg font-bold`, { color: theme.primary }]}>${total.toFixed(2)}</Text>
+                </View>
+              </View>
             </View>
-          ))}
-          <View style={[tw`border-t pt-3 mt-3`, { borderTopColor: theme.lightGray }]}>
-            <View style={tw`flex-row justify-between mb-1`}>
-              <Text style={{ color: theme.darkGray }}>Subtotal:</Text>
-              <Text style={{ color: theme.black }}>${subtotal.toFixed(2)}</Text>
+            <View style={tw`mb-6`}>
+              <InputField name="email" value={values.email} handleChange={handleChange} handleBlur={handleBlur} placeholder="Email Address" keyboardType="email-address" />
+              <InputField name="fullName" value={values.fullName} handleChange={handleChange} handleBlur={handleBlur} placeholder="Full Name" />
+              <InputField name="address" value={values.address} handleChange={handleChange} handleBlur={handleBlur} placeholder="Address" />
+              {/* City + State */}
+              <View style={tw`flex-row gap-3`}>
+                <View style={tw`flex-1`}>
+                  <InputField name="city" value={values.city} handleChange={handleChange} handleBlur={handleBlur} placeholder="City" />
+                </View>
+                <View style={tw`flex-1`}>
+                  <InputField name="state" value={values.state} handleChange={handleChange} handleBlur={handleBlur} placeholder="State" />
+                </View>
+              </View>
+              <InputField name="zipCode" value={values.zipCode} handleChange={handleChange} handleBlur={handleBlur} placeholder="ZIP Code" keyboardType="numeric" maxLength={10} />
             </View>
-            <View style={tw`flex-row justify-between mb-1`}>
-              <Text style={{ color: theme.darkGray }}>Shipping:</Text>
-              <Text style={{ color: shipping === 0 ? theme.green : theme.black }}>
-                {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
-              </Text>
-            </View>
-            <View style={tw`flex-row justify-between mt-2 pt-2 border-t border-gray-200`}>
-              <Text style={[tw`text-lg font-bold`, { color: theme.black }]}>Total:</Text>
-              <Text style={[tw`text-lg font-bold`, { color: theme.primary }]}>${total.toFixed(2)}</Text>
-            </View>
-          </View>
-        </View> */}
-        <View style={tw`mb-6`}>
-          <InputField value={formData.email} onChangeText={(v) => handleInputChange("email", v)} placeholder="Email Address" keyboardType="email-address" />
-          <InputField value={formData.fullName} onChangeText={(v) => handleInputChange("fullName", v)} placeholder="Full Name" />
-          <InputField value={formData.address} onChangeText={(v) => handleInputChange("address", v)} placeholder="Address" />
-          <View style={tw`flex-row gap-3`}>
-            <View style={tw`flex-1`}>
-              <InputField value={formData.city} onChangeText={(v) => handleInputChange("city", v)} placeholder="City" />
-            </View>
-            <View style={tw`flex-1`}>
-              <InputField value={formData.state} onChangeText={(v) => handleInputChange("state", v)} placeholder="State" />
-            </View>
-          </View>
-          <InputField value={formData.zipCode} onChangeText={(v) => handleInputChange("zipCode", v)} placeholder="ZIP Code" keyboardType="numeric" maxLength={10} />
-        </View>
-        <View style={tw`mb-6`}>
-          <InputField value={formData.cardholderName} onChangeText={(v) => handleInputChange("cardholderName", v)} placeholder="Cardholder Name" />
-          <InputField value={formData.cardNumber} onChangeText={(v) => handleInputChange("cardNumber", formatCardNumber(v))} placeholder="Card Number" keyboardType="numeric" maxLength={19} />
-          <View style={tw`flex-row gap-3`}>
-            <View style={tw`flex-1`}>
-              <InputField value={formData.expiryDate} onChangeText={(v) => handleInputChange("expiryDate", formatExpiryDate(v))} placeholder="MM/YY" keyboardType="numeric" maxLength={5} />
-            </View>
-            <View style={tw`flex-1`}>
-              <InputField value={formData.cvv} onChangeText={(v) => handleInputChange("cvv", v.replace(/[^0-9]/g, ""))} placeholder="CVV" keyboardType="numeric" maxLength={4} secureTextEntry={true} />
-            </View>
-          </View>
-        </View>
-        <View style={[tw`p-4 rounded-lg mb-6 flex-row`, { backgroundColor: theme.lightBeige }]}>
-          <Icon name="security" size={20} color={theme.primary} style={tw`mr-3 mt-1`} />
-          <View style={tw`flex-1`}>
-            <Text style={[tw`text-sm font-medium`, { color: theme.black }]}>Secure Payment</Text>
-            <Text style={[tw`text-xs mt-1`, { color: theme.darkGray }]}>Your payment information is encrypted and secure. We use Stripe for payment processing.</Text>
-          </View>
-        </View>
-      </ScrollView>
 
-      <View style={[tw`p-4 border-t`, { borderTopColor: theme.lightGray }]}>
-        <TouchableOpacity onPress={createCheckoutSession} disabled={loading} style={[tw`py-4 rounded-lg flex-row items-center justify-center`, { backgroundColor: loading ? theme.darkGray : theme.primary }]}>
-          {loading ? (
-            <ActivityIndicator color={theme.white} style={tw`mr-2`} />
-          ) : (
-            <Icon name="payment" size={20} color={theme.white} style={tw`mr-2`} />
-          )}
-          <Text style={[tw`text-lg font-semibold text-white`]}>
-            {loading ? "Processing..." : `Pay $${total.toFixed(2)}`}
-          </Text>
-        </TouchableOpacity>
-          <TouchableOpacity onPress={handlePayWithPayPal} disabled={loading} style={[tw`py-4 rounded-lg flex-row items-center justify-center mt-3`,{ backgroundColor: theme.black },]}>
-            <Icon  name="account-balance-wallet" size={20} color={theme.white} style={tw`mr-2`}/>
-            <Text style={[tw`text-lg font-semibold text-white`]}>Pay with PayPal</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={[tw`py-3 mt-3 border rounded-lg`, { borderColor: theme.primary }]}>
-          <Text style={[tw`text-center text-base font-semibold`, { color: theme.primary }]}>
-            Back to Cart
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <View style={tw`mb-6`}>
+              <InputField name="cardholderName" value={values.cardholderName} handleChange={handleChange} handleBlur={handleBlur} placeholder="Cardholder Name" />
+              <InputField name="cardNumber" value={values.cardNumber} handleChange={(name) => (text) => handleChange(name)(formatCardNumber(text))} handleBlur={handleBlur} placeholder="Card Number" keyboardType="numeric" maxLength={19} />
+              <View style={tw`flex-row gap-3`}>
+                <View style={tw`flex-1`}>
+                  <InputField name="expiryDate" value={values.expiryDate} handleChange={(name) => (text) => handleChange(name)(formatExpiryDate(text))} handleBlur={handleBlur} placeholder="MM/YY" keyboardType="numeric" maxLength={5} />
+                </View>
+                <View style={tw`flex-1`}>
+                  <InputField name="cvv" value={values.cvv} handleChange={(name) => (text) => handleChange(name)(text.replace(/[^0-9]/g, ""))} handleBlur={handleBlur} placeholder="CVV" keyboardType="numeric" maxLength={4} secureTextEntry={true} />
+                </View>
+              </View>
+            </View>
+
+            {/* Secure Payment Note */}
+            <View style={[tw`p-4 rounded-lg mb-6 flex-row`, { backgroundColor: theme.lightBeige }]}>
+              <Icon name="security" size={20} color={theme.primary} style={tw`mr-3 mt-1`} />
+              <View style={tw`flex-1`}>
+                <Text style={[tw`text-sm font-medium`, { color: theme.black }]}>Secure Payment</Text>
+                <Text style={[tw`text-xs mt-1`, { color: theme.darkGray }]}>Your payment information is encrypted and secure. We use Stripe for payment processing.</Text>
+              </View>
+            </View>
+
+            <View style={[tw`p-4 border-t`, { borderTopColor: theme.lightGray }]}>
+              <TouchableOpacity onPress={handleSubmit} disabled={loading} style={[tw`py-4 rounded-lg flex-row items-center justify-center`, { backgroundColor: loading ? theme.darkGray : theme.primary }]}>
+                {loading ? (
+                  <ActivityIndicator color={theme.white} style={tw`mr-2`} />
+                ) : (
+                  <Icon name="payment" size={20} color={theme.white} style={tw`mr-2`} />
+                )}
+                <Text style={[tw`text-lg font-semibold text-white`]}>
+                  {loading ? "Processing..." : `Pay $${total.toFixed(2)}`}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={handlePayWithPayPal} disabled={loading} style={[tw`py-4 rounded-lg flex-row items-center justify-center mt-3`, { backgroundColor: theme.black }]}>
+                <Icon name="account-balance-wallet" size={20} color={theme.white} style={tw`mr-2`} />
+                <Text style={[tw`text-lg font-semibold text-white`]}>Pay with PayPal</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => navigation.goBack()} style={[tw`py-3 mt-3 border rounded-lg`, { borderColor: theme.primary }]}>
+                <Text style={[tw`text-center text-base font-semibold`, { color: theme.primary }]}>Back to Cart</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        )}
+      </Formik>
     </View>
   );
 };
