@@ -1,117 +1,18 @@
-import React, { createContext, useContext, useReducer, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors, darkColors } from "../constants/theme.jsx";
 
 const AppContext = createContext();
 
-const initialState = {
-  isDarkMode: false,
-  isAuthenticated: false,
-  user: null,
-  cart: [],
-  favorites: [],
-  products: [],
-  isOffline: false,
-  theme: colors,
-};
-
-const appReducer = (state, action) => {
-  switch (action.type) {
-    case "TOGGLE_THEME":
-      return {
-        ...state,
-        isDarkMode: !state.isDarkMode,
-        theme: !state.isDarkMode ? darkColors : colors,
-      };
-    case "SET_THEME":
-      return {
-        ...state,
-        isDarkMode: action.payload,
-        theme: action.payload ? darkColors : colors,
-      };
-    case "LOGIN":
-      return {
-        ...state,
-        isAuthenticated: true,
-        user: action.payload,
-      };
-    case "LOGOUT":
-      return {
-        ...state,
-        isAuthenticated: false,
-        user: null,
-        cart: [],
-        favorites: [],
-      };
-    case "UPDATE_USER":
-      return {
-        ...state,
-        user: action.payload,
-      };
-
-    case "ADD_TO_CART":
-      const existingItem = state.cart.find(
-        (item) => item.id === action.payload.id
-      );
-      if (existingItem) {
-        return {
-          ...state,
-          cart: state.cart.map((item) =>
-            item.id === action.payload.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          ),
-        };
-      }
-      return {
-        ...state,
-        cart: [...state.cart, { ...action.payload, quantity: 1 }],
-      };
-    case "REMOVE_FROM_CART":
-      return {
-        ...state,
-        cart: state.cart.filter((item) => item.id !== action.payload),
-      };
-    case "UPDATE_CART_QUANTITY":
-      return {
-        ...state,
-        cart: state.cart.map((item) =>
-          item.id === action.payload.id
-            ? { ...item, quantity: action.payload.quantity }
-            : item
-        ),
-      };
-    case "TOGGLE_FAVORITE":
-      const isFavorite = state.favorites.includes(action.payload);
-      return {
-        ...state,
-        favorites: isFavorite
-          ? state.favorites.filter((id) => id !== action.payload)
-          : [...state.favorites, action.payload],
-      };
-    case "SET_PRODUCTS":
-      return {
-        ...state,
-        products: action.payload,
-      };
-    case "SET_OFFLINE_STATUS":
-      return {
-        ...state,
-        isOffline: action.payload,
-      };
-    case "LOAD_STORED_DATA":
-      return {
-        ...state,
-        ...action.payload,
-        theme: action.payload.isDarkMode ? darkColors : colors,
-      };
-    default:
-      return state;
-  }
-};
-
 export const AppProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(appReducer, initialState);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [isOffline, setIsOffline] = useState(false);
+  const [theme, setTheme] = useState(colors);
 
   useEffect(() => {
     loadStoredData();
@@ -119,29 +20,20 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     saveDataToStorage();
-  }, [
-    state.isDarkMode,
-    state.cart,
-    state.favorites,
-    state.user,
-    state.isAuthenticated,
-  ]);
+  }, [isDarkMode, cart, favorites, user, isAuthenticated]);
 
   const loadStoredData = async () => {
     try {
       const appDataRaw = await AsyncStorage.getItem("appData");
       const userRaw = await AsyncStorage.getItem("user");
-
       const appData = appDataRaw ? JSON.parse(appDataRaw) : {};
-      const user = userRaw ? JSON.parse(userRaw) : null;
+      const storedUser = userRaw ? JSON.parse(userRaw) : null;
 
-      dispatch({
-        type: "LOAD_STORED_DATA",
-        payload: {
-          ...appData,
-          user,
-        },
-      });
+      setIsDarkMode(appData.isDarkMode || false);
+      setFavorites(appData.favorites || []);
+      setIsAuthenticated(appData.isAuthenticated || false);
+      setUser(storedUser);
+      setTheme(appData.isDarkMode ? darkColors : colors);
     } catch (error) {
       console.error("Error loading stored data:", error);
     }
@@ -150,46 +42,37 @@ export const AppProvider = ({ children }) => {
   const saveDataToStorage = async () => {
     try {
       const appData = {
-        isDarkMode: state.isDarkMode,
-        favorites: state.favorites,
-        isAuthenticated: state.isAuthenticated,
+        isDarkMode,
+        favorites,
+        isAuthenticated,
       };
-
       await AsyncStorage.setItem("appData", JSON.stringify(appData));
-      await AsyncStorage.setItem("user", JSON.stringify(state.user));
+      await AsyncStorage.setItem("user", JSON.stringify(user));
     } catch (error) {
       console.error("Error saving data:", error);
     }
   };
 
-  const addToCart = (product) => {
-    const filteredProduct = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      quantity: 1,
-    };
-
-    dispatch({ type: "ADD_TO_CART", payload: filteredProduct });
-    addProductToBackendCart(filteredProduct);
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    setTheme(newTheme ? darkColors : colors);
   };
-
-  const addProductToBackendCart = async (filteredProduct) => {
+  const addToCart = async (product) => {
     try {
-      if (state.user?.id) {
+      if (user?.id) {
         const res = await fetch(
-          `http://localhost:3001/api/cart/${state.user.id}/add-to-cart`,
+          `http://localhost:3001/api/cart/${user.id}/add-to-cart`,
           {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              productId: filteredProduct.id,
-              name: filteredProduct.name,
-              price: filteredProduct.price,
-              image: filteredProduct.image,
+              productId: product.id,
+              name: product.name,
+              price: product.price,
+              image: product.image,
               quantity: 1,
             }),
           }
@@ -198,11 +81,15 @@ export const AppProvider = ({ children }) => {
         const data = await res.json();
 
         if (res.ok) {
+          // تحديث الكارت المحلي من بيانات السيرفر (باك)
+          setCart(data.cart);
+
+          // تحديث اليوزر بالكارت الجديد
           const updatedUser = {
-            ...state.user,
+            ...user,
             cart: data.cart,
           };
-          dispatch({ type: "LOGIN", payload: updatedUser });
+          setUser(updatedUser);
           await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
         }
       }
@@ -212,15 +99,10 @@ export const AppProvider = ({ children }) => {
   };
 
   const removeFromCart = async (productId) => {
-    dispatch({ type: "REMOVE_FROM_CART", payload: productId });
-    await removeProductFromBackendCart(productId);
-  };
-
-  const removeProductFromBackendCart = async (productId) => {
     try {
-      if (state.user?.id) {
+      if (user?.id) {
         const res = await fetch(
-          `http://localhost:3001/api/cart/${state.user.id}/remove-from-cart`,
+          `http://localhost:3001/api/cart/${user.id}/remove-from-cart`,
           {
             method: "PATCH",
             headers: {
@@ -233,11 +115,15 @@ export const AppProvider = ({ children }) => {
         const data = await res.json();
 
         if (res.ok) {
+          // تحديث الكارت المحلي بالبيانات الجديدة من الباك
+          setCart(data.cart);
+
+          // تحديث اليوزر بالكارت الجديد
           const updatedUser = {
-            ...state.user,
+            ...user,
             cart: data.cart,
           };
-          dispatch({ type: "LOGIN", payload: updatedUser });
+          setUser(updatedUser);
           await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
         }
       }
@@ -246,46 +132,159 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const updateCartQuantity = (id, quantity) => {
+    setCart(
+      cart.map((item) => (item.id === id ? { ...item, quantity } : item))
+    );
+  };
+
+  const toggleFavorite = (id) => {
+    if (favorites.includes(id)) {
+      setFavorites(favorites.filter((fav) => fav !== id));
+    } else {
+      setFavorites([...favorites, id]);
+    }
+  };
+
   const updateUser = async (updatedUser) => {
-    dispatch({ type: "UPDATE_USER", payload: updatedUser });
+    setUser(updatedUser);
     await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
-  const value = {
-    ...state,
-    dispatch,
-    toggleTheme: () => dispatch({ type: "TOGGLE_THEME" }),
-    login: (user) => {
-      dispatch({ type: "LOGIN", payload: user });
-      user?.cart?.forEach((item) => {
-        dispatch({ type: "ADD_TO_CART", payload: item });
+  const login = async (email, password) => {
+    try {
+      const response = await fetch("http://localhost:3001/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
-    },
+      const data = await response.json();
 
-    logout: () => dispatch({ type: "LOGOUT" }),
+      if (!response.ok)
+        return { success: false, message: data.msg || "Login failed" };
+
+      if (data.token) await AsyncStorage.setItem("token", data.token);
+      setUser(data.user);
+      setIsAuthenticated(true);
+      return { success: true, user: data.user };
+    } catch (error) {
+      if (email === "admin@furniro.com" && password === "admin123") {
+        const admin = { id: 1, email, name: "Admin User", avatar: null };
+        await AsyncStorage.setItem("token", "mock_token_123");
+        await AsyncStorage.setItem("user", JSON.stringify(admin));
+        setUser(admin);
+        setIsAuthenticated(true);
+        return { success: true, user: admin };
+      }
+      return { success: false, message: "Network error" };
+    }
+  };
+
+  const register = async (userData) => {
+    try {
+      const res = await fetch("http://localhost:3001/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      });
+      const data = await res.json();
+      if (!res.ok)
+        return { success: false, message: data.msg || "Registration failed" };
+      return await login(data.user.email, userData.password);
+    } catch (error) {
+      const newUser = { id: Date.now(), ...userData, avatar: null };
+      await AsyncStorage.setItem("token", "mock_token_123");
+      await AsyncStorage.setItem("user", JSON.stringify(newUser));
+      setUser(newUser);
+      setIsAuthenticated(true);
+      return { success: true, user: newUser };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await AsyncStorage.removeItem("token");
+      await AsyncStorage.removeItem("user");
+      setUser(null);
+      setIsAuthenticated(false);
+      setCart([]);
+      setFavorites([]);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const getProducts = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/products/db");
+      const data = await res.json();
+      setProducts(data);
+      await AsyncStorage.setItem("products", JSON.stringify(data));
+      return data;
+    } catch {
+      const cached = await AsyncStorage.getItem("products");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        setProducts(parsed);
+        return parsed;
+      }
+      return [];
+    }
+  };
+
+  const searchProducts = async (q) => {
+    try {
+      const res = await fetch(
+        `http://localhost:3001/api/products/db/search?q=${q}`
+      );
+      return await res.json();
+    } catch {
+      const cached = await AsyncStorage.getItem("products");
+      if (cached) {
+        const list = JSON.parse(cached);
+        return list.filter(
+          (p) =>
+            p.name.toLowerCase().includes(q.toLowerCase()) ||
+            p.des.toLowerCase().includes(q.toLowerCase())
+        );
+      }
+      return [];
+    }
+  };
+
+  const getImageUrl = (path) => {
+    if (!path) return null;
+    if (path.startsWith("http")) return path;
+    return `http://localhost:3001/uploads/${path}`;
+  };
+
+  const value = {
+    isDarkMode,
+    isAuthenticated,
+    user,
+    cart,
+    favorites,
+    products,
+    isOffline,
+    theme,
+    toggleTheme,
+    login,
+    register,
+    logout,
     addToCart,
     removeFromCart,
-    updateCartQuantity: (productId, quantity) =>
-      dispatch({
-        type: "UPDATE_CART_QUANTITY",
-        payload: { id: productId, quantity },
-      }),
-    toggleFavorite: (productId) =>
-      dispatch({ type: "TOGGLE_FAVORITE", payload: productId }),
-    setProducts: (products) =>
-      dispatch({ type: "SET_PRODUCTS", payload: products }),
-    setOfflineStatus: (status) =>
-      dispatch({ type: "SET_OFFLINE_STATUS", payload: status }),
+    updateCartQuantity,
+    toggleFavorite,
+    setOfflineStatus: setIsOffline,
     updateUser,
+    getProducts,
+    setProducts,
+    searchProducts,
+    getImageUrl,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
-export const useAppContext = () => {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error("useAppContext must be used within an AppProvider");
-  }
-  return context;
-};
+export const useAppContext = () => useContext(AppContext);

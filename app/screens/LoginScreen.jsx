@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext";
-import { ApiService } from "../services/ApiService";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import FAIcon from "react-native-vector-icons/FontAwesome";
@@ -26,27 +25,26 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleEmailLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please enter email and password");
-      return;
-    }
+const handleEmailLogin = async () => {
+  if (!email || !password) {
+    Alert.alert("Error", "Please enter email and password");
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const result = await ApiService.login(email, password);
-      if (result.success) {
-        login(result.user);
-        navigation.reset({ index: 0, routes: [{ name: "Main" }] });
-      } else {
-        Alert.alert("Login Error", result.message || "Invalid credentials");
-      }
-    } catch (error) {
-      Alert.alert("Error", error.message || "An error occurred");
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  try {
+    const result = await login(email, password);
+    if (result.success) {
+      navigation.reset({ index: 0, routes: [{ name: "Main" }] });
+    } else {
+      Alert.alert("Login Error", result.message || "Invalid credentials");
     }
-  };
+  } catch (error) {
+    Alert.alert("Error", error.message || "An error occurred");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const InputField = ({ icon, placeholder, value, onChangeText, secure, showToggle, toggle }) => (
     <View style={tw`mb-4`}>

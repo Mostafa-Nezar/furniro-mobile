@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext.jsx";
-import { DataService } from "../services/DataService.jsx";
 import Header from "../components/Header.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 import tw from "twrnc";
@@ -21,7 +20,7 @@ const { width } = Dimensions.get("window");
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const { theme, setProducts, products, isOffline } = useAppContext();
+  const { theme, setProducts, isOffline, getProducts } = useAppContext();
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -30,19 +29,19 @@ const HomeScreen = () => {
     loadProducts();
   }, []);
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      const productsData = await DataService.getProducts();
-      setProducts(productsData);
-      // Get first 6 products as featured
-      setFeaturedProducts(productsData.slice(0, 8));
-    } catch (error) {
-      console.error("Error loading products:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const loadProducts = async () => {
+  try {
+    setLoading(true);
+    const productsData = await getProducts(); 
+    setProducts(productsData);
+    setFeaturedProducts(productsData.slice(0, 8));
+  } catch (error) {
+    console.error("Error loading products:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const onRefresh = async () => {
     setRefreshing(true);

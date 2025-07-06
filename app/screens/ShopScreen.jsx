@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
-import { DataService } from '../services/DataService';
 import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
 import tw from 'twrnc';
@@ -20,7 +19,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 const ShopScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { theme } = useAppContext();
+  const { theme, getProducts } = useAppContext();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,17 +46,18 @@ const ShopScreen = () => {
     filterAndSortProducts();
   }, [products, searchQuery, sortBy, priceRange, selectedCategory]);
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      const productsData = await DataService.getProducts();
-      setProducts(productsData);
-    } catch (error) {
-      console.error('Error loading products:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const loadProducts = async () => {
+  try {
+    setLoading(true);
+    const productsData = await getProducts(); // من الكونتكست
+    setProducts(productsData);
+  } catch (error) {
+    console.error('Error loading products:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const onRefresh = async () => {
     setRefreshing(true);

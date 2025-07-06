@@ -12,8 +12,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSocket } from '../context/SocketContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import tw from 'twrnc';
-import { colors as theme } from '../constants/theme';
-import Header from "../components/Header"
+import { useAppContext } from '../context/AppContext';
+import Header from '../components/Header';
+
 const NotificationsList = ({ navigation }) => {
   const {
     notifications,
@@ -23,6 +24,7 @@ const NotificationsList = ({ navigation }) => {
     sendTestNotification,
   } = useSocket();
 
+  const { theme } = useAppContext();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -137,7 +139,8 @@ const NotificationsList = ({ navigation }) => {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      style={[tw`flex-row p-4 rounded-xl mb-3 shadow-sm`,
+      style={[
+        tw`flex-row p-4 rounded-xl mb-3 shadow-sm`,
         {
           backgroundColor: theme.white,
           borderLeftWidth: item.read ? 0 : 4,
@@ -159,8 +162,12 @@ const NotificationsList = ({ navigation }) => {
           </Text>
         </View>
         <Text
-          style={[tw`text-sm`,
-            { color: item.read ? theme.darkGray : theme.black, fontWeight: item.read ? 'normal' : '600' },
+          style={[
+            tw`text-sm`,
+            {
+              color: item.read ? theme.darkGray : theme.black,
+              fontWeight: item.read ? 'normal' : '600',
+            },
           ]}
         >
           {item.message}
@@ -177,7 +184,7 @@ const NotificationsList = ({ navigation }) => {
 
   if (loading) {
     return (
-      <View style={[tw`flex-1 justify-center items-center`, { backgroundColor: theme.semiWhite }]}> 
+      <View style={[tw`flex-1 justify-center items-center`, { backgroundColor: theme.semiWhite }]}>
         <ActivityIndicator size="large" color={theme.primary} />
         <Text style={[tw`mt-3`, { color: theme.gray }]}>Loading notifications...</Text>
       </View>
@@ -185,17 +192,22 @@ const NotificationsList = ({ navigation }) => {
   }
 
   return (
-    <View style={[tw`flex-1`, { backgroundColor: theme.semiWhite }]}> 
-      {/* Header */}
-      <Header title={"Notifications"} showBack />
-
+    <View style={[tw`flex-1`, { backgroundColor: theme.semiWhite }]}>
+      <Header title="Notifications" showBack showCart={false} showSearch={false} />
 
       {notifications.length === 0 ? (
         <View style={tw`flex-1 justify-center items-center px-6`}>
           <Ionicons name="notifications-off-outline" size={64} color={theme.gray} />
-          <Text style={[tw`text-xl font-semibold mt-4`, { color: theme.black }]}>No notifications</Text>
-          <Text style={[tw`text-sm text-center mt-2`, { color: theme.darkGray }]}>You're all caught up!</Text>
-          <TouchableOpacity onPress={sendTestNotification} style={[tw`mt-4 px-5 py-2 rounded-lg`, { backgroundColor: theme.primary }]}>
+          <Text style={[tw`text-xl font-semibold mt-4`, { color: theme.black }]}>
+            No notifications
+          </Text>
+          <Text style={[tw`text-sm text-center mt-2`, { color: theme.darkGray }]}>
+            You're all caught up!
+          </Text>
+          <TouchableOpacity
+            onPress={sendTestNotification}
+            style={[tw`mt-4 px-5 py-2 rounded-lg`, { backgroundColor: theme.primary }]}
+          >
             <Text style={[tw`text-white text-base font-semibold`]}>Send Test</Text>
           </TouchableOpacity>
         </View>
@@ -204,7 +216,9 @@ const NotificationsList = ({ navigation }) => {
           data={notifications}
           renderItem={renderItem}
           keyExtractor={(item) => item._id || item.id}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchNotifications} />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={fetchNotifications} />
+          }
           contentContainerStyle={tw`p-4`}
         />
       )}

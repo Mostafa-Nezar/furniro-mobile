@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
-import { ApiService } from '../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import tw from 'twrnc';
@@ -14,7 +13,7 @@ import FAIcon from 'react-native-vector-icons/FontAwesome';
 
 const RegisterScreen = () => {
   const navigation = useNavigation();
-  const { theme, login } = useAppContext();
+  const { theme, login, register } = useAppContext();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -27,21 +26,24 @@ const RegisterScreen = () => {
       .required('Please confirm your password'),
   });
 
-  const handleRegister = async (values, { setSubmitting }) => {
-    try {
-      const result = await ApiService.register({
-        name: values.name, email: values.email, password: values.password,
-      });
+const handleRegister = async (values, { setSubmitting }) => {
+  try {
+    const result = await register(values); 
 
-      if (result.success) {
-        login(result.user);
-        Alert.alert('Success', 'Account created successfully');
-        navigation.replace('Main')
-      } 
-    }finally {
-      setSubmitting(false);
+    if (result.success) {
+      login(result.user);
+      Alert.alert('Success', 'Account created successfully');
+      navigation.replace('Main');
+    } else {
+      Alert.alert("Registration Error", result.message || "Something went wrong");
     }
-  };
+  } catch (error) {
+    Alert.alert("Error", error.message || "An error occurred");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   const InputField = ({ icon, placeholder, secure, value, onChange, onBlur, toggleSecure, show, error, touched }) => (
     <View style={tw`mb-4`}>

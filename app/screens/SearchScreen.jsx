@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext";
-import { DataService } from "../services/DataService";
 import Header from "../components/Header";
 import ProductCard from "../components/ProductCard";
 import tw from "twrnc";
@@ -17,7 +16,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 
 const SearchScreen = () => {
   const navigation = useNavigation();
-  const { theme } = useAppContext();
+  const { theme, searchProducts } = useAppContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
@@ -41,21 +40,22 @@ const SearchScreen = () => {
     }
   }, [searchQuery]);
 
-  const performSearch = async () => {
-    try {
-      setLoading(true);
-      const results = await DataService.searchProducts(searchQuery);
-      setSearchResults(results);
+const performSearch = async () => {
+  try {
+    setLoading(true);
+    const results = await searchProducts(searchQuery);
+    setSearchResults(results);
 
-      if (!recentSearches.includes(searchQuery)) {
-        setRecentSearches((prev) => [searchQuery, ...prev.slice(0, 4)]);
-      }
-    } catch (error) {
-      console.error("Search error:", error);
-    } finally {
-      setLoading(false);
+    if (!recentSearches.includes(searchQuery)) {
+      setRecentSearches((prev) => [searchQuery, ...prev.slice(0, 4)]);
     }
-  };
+  } catch (error) {
+    console.error("Search error:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleSearchPress = (query) => {
     setSearchQuery(query);

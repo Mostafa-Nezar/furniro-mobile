@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext";
-import { AuthService } from "../services/AuthService";
 import Header from "../components/Header";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -99,19 +98,9 @@ const ProfileScreen = () => {
   };
 
   const handleLogout = async () => {
-    Alert.alert("Logout", "Are you sure?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Log Out",
-        style: "destructive",
-        onPress: async () => {
-          await AuthService.signOut();
-          logout();
-          await AsyncStorage.clear();
-          navigation.reset({ index: 0, routes: [{ name: "Login" }] });
-        },
-      },
-    ]);
+    await AsyncStorage.removeItem("user");
+    logout();
+    navigation.reset({ index: 0, routes: [{ name: "Login" }] });
   };
 
   const openSidebar = (content) => {
