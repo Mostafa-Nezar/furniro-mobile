@@ -17,6 +17,7 @@ import SearchScreen from "../screens/SearchScreen.jsx";
 import SplashScreen from "../screens/SplashScreen.jsx";
 import AuthLoadingScreen from "../screens/AuthLoadingScreen.jsx";
 import Payment from "../screens/Payment.jsx";
+import NotificationsList from "../components/NotificationsList.jsx";
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -129,6 +130,7 @@ const AppNavigator = () => {
         <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
         <Stack.Screen name="Payment" component={Payment} />
+        <Stack.Screen name="NotificationsList" component={NotificationsList} />
       </Stack.Navigator>
     </NavigationContainer>
   );

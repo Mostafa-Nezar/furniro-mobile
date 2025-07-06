@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext.jsx';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import NotificationBell from './NotificationBell'; 
 
 const Header = ({ title, showBack = false, showCart = true, showSearch = true }) => {
   const navigation = useNavigation();
@@ -43,6 +44,7 @@ const Header = ({ title, showBack = false, showCart = true, showSearch = true })
 
       {/* Right side */}
       <View style={tw`flex-row items-center`}>
+        <NotificationBell navigation={navigation} />
         {/* Theme toggle */}
         <TouchableOpacity
           onPress={toggleTheme}
@@ -93,4 +95,3 @@ const Header = ({ title, showBack = false, showCart = true, showSearch = true })
 };
 
 export default Header;
-

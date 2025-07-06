@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
-import { AppProvider,useAppContext } from "./app/context/AppContext";
+import { AppProvider, useAppContext } from "./app/context/AppContext";
+import { SocketProvider } from "./app/context/SocketContext";
 import AppNavigator from "./app/navigation/AppNavigator";
 
 SplashScreen.preventAutoHideAsync();
@@ -30,7 +31,9 @@ function InnerApp() {
 export default function App() {
   return (
     <AppProvider>
-      <InnerApp />
+      <SocketProvider>
+        <InnerApp />
+      </SocketProvider>
     </AppProvider>
   );
 }
