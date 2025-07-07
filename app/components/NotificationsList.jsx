@@ -32,30 +32,40 @@ const NotificationsList = ({ navigation }) => {
     fetchNotifications();
   }, []);
 
-  const fetchNotifications = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) return;
+const fetchNotifications = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    const userStr = await AsyncStorage.getItem('user');
+    const userId = JSON.parse(userStr)?.id;
 
-      const response = await fetch('http://localhost:3001/api/notifications', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+    if (!token || !userId) return;
 
-      if (response.ok) {
-        const data = await response.json();
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.unreadCount || 0);
-      }
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+    const response = await fetch('http://localhost:3001/api/notifications', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      const userNotifications = (data.notifications || []).filter(
+        (n) => n.userId === userId
+      );
+
+      const unread = userNotifications.filter((n) => !n.read);
+
+      setNotifications(userNotifications);
+      setUnreadCount(unread.length);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+  } finally {
+    setLoading(false);
+    setRefreshing(false);
+  }
+};
 
   const handleMarkAsRead = async (id) => {
     try {

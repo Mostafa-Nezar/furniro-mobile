@@ -129,10 +129,6 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const updateCartQuantity = (id, quantity) => {
-    setCart(cart.map((item) => (item.id === id ? { ...item, quantity } : item)));
-  };
-
   const toggleFavorite = (id) => {
     if (favorites.includes(id)) {
       setFavorites(favorites.filter((fav) => fav !== id));
@@ -198,6 +194,39 @@ export const AppProvider = ({ children }) => {
       return true;
     } catch (e) {
       return false;
+    }
+  };
+  const updateCartQuantity = async (id, quantity) => {
+    if (!user?.id) return;
+
+    try {
+      setCart(
+        cart.map((item) => (item.id === id ? { ...item, quantity } : item))
+      );
+
+      const data = await fetchInstance(
+        `/cart/${user.id}/update-cart-quantity`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ productId: id, quantity }),
+        }
+      );
+
+      setCart(data.cart);
+      const updatedUser = { ...user, cart: data.cart };
+      setUser(updatedUser);
+      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+    } catch (error) {
+      console.error("Error syncing cart quantity with backend:", error);
+      try {
+        const userData = await fetchInstance(`/auth/user/${user.id}`);
+        setCart(userData.cart || []);
+        const updatedUser = { ...user, cart: userData.cart || [] };
+        setUser(updatedUser);
+        await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+      } catch (reloadError) {
+        console.error("Error reloading cart data:", reloadError);
+      }
     }
   };
 
