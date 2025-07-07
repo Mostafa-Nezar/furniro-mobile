@@ -3,6 +3,36 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors, darkColors } from "../constants/theme.jsx";
 
 const AppContext = createContext();
+const API_BASE_URL = "http://localhost:3001/api";
+
+const fetchInstance = async (endpoint, options = {}) => {
+  const token = await AsyncStorage.getItem("token");
+
+  const defaultHeaders = {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+
+  const finalOptions = {
+    ...options,
+    headers: {
+      ...defaultHeaders,
+      ...(options.headers || {}),
+    },
+  };
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, finalOptions);
+  const data = await response.json();
+
+  if (!response.ok) {
+    const error = new Error(data?.msg || "Unknown error");
+    error.response = response;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+};
 
 export const AppProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -58,84 +88,49 @@ export const AppProvider = ({ children }) => {
     setIsDarkMode(newTheme);
     setTheme(newTheme ? darkColors : colors);
   };
+
   const addToCart = async (product) => {
+    if (!user?.id) return;
     try {
-      if (user?.id) {
-        const res = await fetch(
-          `http://localhost:3001/api/cart/${user.id}/add-to-cart`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              productId: product.id,
-              name: product.name,
-              price: product.price,
-              image: product.image,
-              quantity: 1,
-            }),
-          }
-        );
+      const data = await fetchInstance(`/cart/${user.id}/add-to-cart`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          quantity: 1,
+        }),
+      });
 
-        const data = await res.json();
-
-        if (res.ok) {
-          // تحديث الكارت المحلي من بيانات السيرفر (باك)
-          setCart(data.cart);
-
-          // تحديث اليوزر بالكارت الجديد
-          const updatedUser = {
-            ...user,
-            cart: data.cart,
-          };
-          setUser(updatedUser);
-          await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-        }
-      }
+      setCart(data.cart);
+      const updatedUser = { ...user, cart: data.cart };
+      setUser(updatedUser);
+      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
     } catch (error) {
       console.error("Error syncing cart with backend:", error);
     }
   };
 
   const removeFromCart = async (productId) => {
+    if (!user?.id) return;
     try {
-      if (user?.id) {
-        const res = await fetch(
-          `http://localhost:3001/api/cart/${user.id}/remove-from-cart`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ productId }),
-          }
-        );
+      const data = await fetchInstance(`/cart/${user.id}/remove-from-cart`, {
+        method: "PATCH",
+        body: JSON.stringify({ productId }),
+      });
 
-        const data = await res.json();
-
-        if (res.ok) {
-          // تحديث الكارت المحلي بالبيانات الجديدة من الباك
-          setCart(data.cart);
-
-          // تحديث اليوزر بالكارت الجديد
-          const updatedUser = {
-            ...user,
-            cart: data.cart,
-          };
-          setUser(updatedUser);
-          await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-        }
-      }
+      setCart(data.cart);
+      const updatedUser = { ...user, cart: data.cart };
+      setUser(updatedUser);
+      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
     } catch (error) {
       console.error("Error syncing cart removal with backend:", error);
     }
   };
 
   const updateCartQuantity = (id, quantity) => {
-    setCart(
-      cart.map((item) => (item.id === id ? { ...item, quantity } : item))
-    );
+    setCart(cart.map((item) => (item.id === id ? { ...item, quantity } : item)));
   };
 
   const toggleFavorite = (id) => {
@@ -153,15 +148,10 @@ export const AppProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch("http://localhost:3001/api/auth/signin", {
+      const data = await fetchInstance("/auth/signin", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const data = await response.json();
-
-      if (!response.ok)
-        return { success: false, message: data.msg || "Login failed" };
 
       if (data.token) await AsyncStorage.setItem("token", data.token);
       setUser(data.user);
@@ -176,20 +166,16 @@ export const AppProvider = ({ children }) => {
         setIsAuthenticated(true);
         return { success: true, user: admin };
       }
-      return { success: false, message: "Network error" };
+      return { success: false, message: error.message };
     }
   };
 
   const register = async (userData) => {
     try {
-      const res = await fetch("http://localhost:3001/api/auth/signup", {
+      const data = await fetchInstance("/auth/signup", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
       });
-      const data = await res.json();
-      if (!res.ok)
-        return { success: false, message: data.msg || "Registration failed" };
       return await login(data.user.email, userData.password);
     } catch (error) {
       const newUser = { id: Date.now(), ...userData, avatar: null };
@@ -217,8 +203,7 @@ export const AppProvider = ({ children }) => {
 
   const getProducts = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/products/db");
-      const data = await res.json();
+      const data = await fetchInstance("/products/db");
       setProducts(data);
       await AsyncStorage.setItem("products", JSON.stringify(data));
       return data;
@@ -235,10 +220,8 @@ export const AppProvider = ({ children }) => {
 
   const searchProducts = async (q) => {
     try {
-      const res = await fetch(
-        `http://localhost:3001/api/products/db/search?q=${q}`
-      );
-      return await res.json();
+      const data = await fetchInstance(`/products/db/search?q=${q}`);
+      return data;
     } catch {
       const cached = await AsyncStorage.getItem("products");
       if (cached) {
@@ -259,32 +242,36 @@ export const AppProvider = ({ children }) => {
     return `http://localhost:3001/uploads/${path}`;
   };
 
-  const value = {
-    isDarkMode,
-    isAuthenticated,
-    user,
-    cart,
-    favorites,
-    products,
-    isOffline,
-    theme,
-    toggleTheme,
-    login,
-    register,
-    logout,
-    addToCart,
-    removeFromCart,
-    updateCartQuantity,
-    toggleFavorite,
-    setOfflineStatus: setIsOffline,
-    updateUser,
-    getProducts,
-    setProducts,
-    searchProducts,
-    getImageUrl,
-  };
-
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider
+      value={{
+        isDarkMode,
+        isAuthenticated,
+        user,
+        cart,
+        favorites,
+        products,
+        isOffline,
+        theme,
+        toggleTheme,
+        login,
+        register,
+        logout,
+        addToCart,
+        removeFromCart,
+        updateCartQuantity,
+        toggleFavorite,
+        setOfflineStatus: setIsOffline,
+        updateUser,
+        getProducts,
+        setProducts,
+        searchProducts,
+        getImageUrl,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
 };
 
 export const useAppContext = () => useContext(AppContext);

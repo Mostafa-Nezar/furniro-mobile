@@ -28,7 +28,7 @@ const SpecificationRow = ({ label, value, theme }) => (
 );
 
 const ProductDetailScreen = () => {
-  const { user, theme, addToCart, toggleFavorite, favorites } = useAppContext();
+  const { user, theme, addToCart, toggleFavorite, favorites,getImageUrl } = useAppContext();
   const { product } = useRoute().params;
 
   const [selectedImage, setSelectedImage] = useState(product.image);
@@ -42,8 +42,6 @@ const ProductDetailScreen = () => {
     : 0;
 
   const productImages = [product.image, product.image1, product.image2, product.image3, product.image4].filter(Boolean);
-
-  const getImageUri = (img) => img?.startsWith("http") ? img : `http://localhost:3001/uploads/${img}`;
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) addToCart(product);
@@ -91,11 +89,11 @@ const ProductDetailScreen = () => {
 
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
-      <Header title={product.name} showBack />
+      <Header title={product.name} showBack showSearch={false} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={tw`relative`}>
-          <Image source={{ uri: getImageUri(selectedImage) }} style={[tw`w-full`, { height: width * 0.6 }]} resizeMode="contain" />
+          <Image source={{ uri: getImageUrl(selectedImage) }} style={[tw`w-full`, { height: width * 0.6 }]} resizeMode="contain" />
 
           <View style={tw`absolute top-4 right-4 flex-row`}>
             {hasDiscount && (
@@ -123,7 +121,7 @@ const ProductDetailScreen = () => {
                 onPress={() => setSelectedImage(img)}
                 style={[tw`w-16 h-16 rounded-lg mr-2 border-2`, { borderColor: selectedImage === img ? theme.primary : theme.lightGray }]}
               >
-                <Image source={{ uri: getImageUri(img) }} style={tw`w-full h-full rounded-lg`} resizeMode="cover" />
+                <Image source={{ uri: getImageUrl(img) }} style={tw`w-full h-full rounded-lg`} resizeMode="cover" />
               </TouchableOpacity>
             ))}
           </ScrollView>

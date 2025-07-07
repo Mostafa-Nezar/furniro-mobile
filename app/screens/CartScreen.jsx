@@ -12,12 +12,10 @@ import Header from "../components/Header.jsx";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-const getImage = (img) =>
-  img?.startsWith("http") ? img : `http://localhost:3001/uploads/${img}`;
 
 const CartScreen = () => {
   const navigation = useNavigation();
-  const { theme, user, updateCartQuantity, removeFromCart } = useAppContext();
+  const { theme, user, updateCartQuantity, removeFromCart,getImageUrl } = useAppContext();
 
   const cart = user?.cart || [];
   const totalPrice = cart.reduce((t, i) => t + i.price * i.quantity, 0);
@@ -40,7 +38,7 @@ const CartScreen = () => {
       ]}
     >
       <Image
-        source={{ uri: getImage(item.image) }}
+        source={{ uri: getImageUrl(item.image) }}
         style={tw`w-20 h-20 rounded-lg`}
       />
       <View style={tw`flex-1 ml-4`}>

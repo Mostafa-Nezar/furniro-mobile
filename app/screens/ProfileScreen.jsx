@@ -33,12 +33,15 @@ const ProfileScreen = () => {
     cart,
     favorites,
     updateUser,
+    products,
+    getImageUrl,
+    toggleFavorite
   } = useAppContext();
   const [isUploading, setIsUploading] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarContent, setSidebarContent] = useState(null);
   const slideAnim = useRef(new Animated.Value(width)).current;
-
+  const favoriteProducts = products.filter((p) => favorites.includes(p.id));
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted)
@@ -136,54 +139,65 @@ const ProfileScreen = () => {
     </View>
   );
 
-  const renderFavoritesContent = () => (
-    <View style={tw`flex-1 p-4`}>
-      <View style={tw`flex-row justify-between items-center mb-6`}>
-        <Text style={[tw`text-xl font-bold`, { color: theme.black }]}>
-          My Favorites
-        </Text>
-        <TouchableOpacity onPress={closeSidebar}>
-          <Icon name="close" size={24} color={theme.darkGray} />
-        </TouchableOpacity>
-      </View>
-      <ScrollView>
-        {favorites.length > 0
-          ? favorites.map((item, i) => (
-              <View
-                key={i}
-                style={[
-                  tw`flex-row p-4 mb-3 rounded-lg`,
-                  { backgroundColor: theme.semiWhite },
-                ]}
-              >
-                <Image
-                  source={{ uri: item.image }}
-                  style={tw`w-15 h-15 rounded-lg`}
-                />
-                <View style={tw`ml-3 flex-1`}>
-                  <Text
-                    style={[
-                      tw`text-base font-semibold`,
-                      { color: theme.black },
-                    ]}
-                  >
-                    {item.name}
-                  </Text>
-                  <Text style={[tw`text-sm`, { color: theme.darkGray }]}>
-                    ${item.price}
-                  </Text>
-                </View>
-                <Icon name="favorite" size={20} color={theme.red} />
-              </View>
-            ))
-          : renderEmptyContent(
-              "favorite-border",
-              "No Favorites",
-              "Add items to favorites"
-            )}
-      </ScrollView>
+const renderFavoritesContent = () => (
+  <View style={tw`flex-1 p-4`}>
+    <View style={tw`flex-row justify-between items-center mb-6`}>
+      <Text style={[tw`text-xl font-bold`, { color: theme.black }]}>
+        My Favorites
+      </Text>
+      <TouchableOpacity onPress={closeSidebar}>
+        <Icon name="close" size={24} color={theme.darkGray} />
+      </TouchableOpacity>
     </View>
-  );
+
+    <ScrollView>
+      {favoriteProducts.length > 0 ? (
+        favoriteProducts.map((item, i) => {
+          const isFav = favorites.includes(item.id);
+          return (
+            <View
+              key={i}
+              style={[
+                tw`flex-row p-4 mb-3 rounded-lg`,
+                { backgroundColor: theme.semiWhite },
+              ]}
+            >
+              <Image
+                source={{ uri: getImageUrl(item.image) }}
+                style={tw`w-15 h-15 rounded-lg`}
+              />
+              <View style={tw`ml-3 flex-1`}>
+                <Text
+                  style={[tw`text-base font-semibold`, { color: theme.black }]}
+                >
+                  {item.name}
+                </Text>
+                <Text style={[tw`text-sm`, { color: theme.darkGray }]}>
+                  ${item.price}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
+                <Icon
+                  name={isFav ? "favorite" : "favorite-border"}
+                  size={24}
+                  color={isFav ? theme.red : theme.darkGray}
+                />
+              </TouchableOpacity>
+            </View>
+          );
+        })
+      ) : (
+        renderEmptyContent(
+          "favorite-border",
+          "No Favorites",
+          "Add items to favorites"
+        )
+      )}
+    </ScrollView>
+  </View>
+);
+
+
 
   const renderGenericContent = (title, icon) => (
     <View style={tw`flex-1 p-4`}>

@@ -49,7 +49,7 @@ const ShopScreen = () => {
 const loadProducts = async () => {
   try {
     setLoading(true);
-    const productsData = await getProducts(); // من الكونتكست
+    const productsData = await getProducts();
     setProducts(productsData);
   } catch (error) {
     console.error('Error loading products:', error);

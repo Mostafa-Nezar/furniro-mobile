@@ -193,7 +193,7 @@ const NotificationsList = ({ navigation }) => {
 
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.semiWhite }]}>
-      <Header title="Notifications" showBack showCart={false} showSearch={false} />
+      <Header title="Notifications" showBack showNotification={false} showSearch={false}  showCart={true}/>
 
       {notifications.length === 0 ? (
         <View style={tw`flex-1 justify-center items-center px-6`}>
