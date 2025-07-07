@@ -127,15 +127,19 @@ const NotificationsList = ({ navigation }) => {
     ]);
   };
 
-  const formatDate = (str) => {
-    const date = new Date(str);
-    const now = new Date();
-    const diff = (now - date) / (1000 * 60 * 60);
+const formatDate = (str) => {
+  const date = new Date(str);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMinutes = diffMs / (1000 * 60);
+  const diffHours = diffMinutes / 60;
 
-    if (diff < 1) return 'Just now';
-    if (diff < 24) return `${Math.floor(diff)}h ago`;
-    return date.toLocaleDateString();
-  };
+  if (diffMinutes < 1) return 'Just now';
+  if (diffMinutes < 60) return `${Math.floor(diffMinutes)}m ago`;
+  if (diffHours < 24) return `${Math.floor(diffHours)}h ago`;
+  return date.toLocaleDateString();
+};
+
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
