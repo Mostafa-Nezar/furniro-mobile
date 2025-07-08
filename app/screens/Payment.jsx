@@ -20,7 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Payment = () => {
   const navigation = useNavigation();
-  const { theme, user } = useAppContext();
+  const { theme, user, clearCartAndUpdateOrsers } = useAppContext();
   const [loading, setLoading] = useState(false);
 
   const cart = user?.cart || [];
@@ -89,11 +89,11 @@ const Payment = () => {
           }),
         }
       );
-
       const data = await res.json();
-
       if (res.ok && data.url) {
         Linking.openURL(data.url);
+        await clearCartAndUpdateOrsers();
+        Alert.alert("جارٍ التحويل", "تم فتح صفحة الدفع وتم مسح السلة بنجاح.");
       } else {
         Alert.alert("Payment Failed", data.error || "Something went wrong");
       }
@@ -112,10 +112,8 @@ const Payment = () => {
         setLoading(false);
         return;
       }
-
       const userId = JSON.parse(user)?.id;
       console.log("PayPal pressed ✅", userId);
-
       const res = await fetch(
         "http://localhost:3001/api/paypal/create-paypal-order",
         {
@@ -131,9 +129,10 @@ const Payment = () => {
       const data = await res.json();
       if (res.ok && data.approveUrl) {
         Linking.openURL(data.approveUrl);
+        await clearCartAndUpdateOrsers();
         Alert.alert(
           "جارٍ التحويل",
-          "تم فتح صفحة PayPal. سيتم إشعارك بعد الدفع."
+          "تم فتح صفحة PayPal. تم إفراغ السلة بنجاح."
         );
       } else {
         Alert.alert("فشل الدفع", data.error || "حدث خطأ أثناء التحويل.");
@@ -177,7 +176,6 @@ const Payment = () => {
       />
     </View>
   );
-
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title="Payment" showBack={true} showCart={false} />

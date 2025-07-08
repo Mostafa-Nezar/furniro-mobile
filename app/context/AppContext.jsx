@@ -68,7 +68,6 @@ export const AppProvider = ({ children }) => {
       console.error("Error loading stored data:", error);
     }
   };
-
   const saveDataToStorage = async () => {
     try {
       const appData = {
@@ -82,13 +81,11 @@ export const AppProvider = ({ children }) => {
       console.error("Error saving data:", error);
     }
   };
-
   const toggleTheme = () => {
     const newTheme = !isDarkMode;
     setIsDarkMode(newTheme);
     setTheme(newTheme ? darkColors : colors);
   };
-
   const addToCart = async (product) => {
     if (!user?.id) return;
 
@@ -149,7 +146,28 @@ export const AppProvider = ({ children }) => {
       console.error("❌ Error removing from cart:", err);
     }
   };
-
+  const clearCartAndUpdateOrsers = async () => {
+    console.log("hi");
+    if (!user?.id) return;
+    // await fetchInstance("/orders", {
+    //   method: "POST",
+    //   body: JSON.stringify({
+    //     id: Date.now(),
+    //     userId: user.id,
+    //     products: user.cart,
+    //     date: new Date().toISOString(),
+    //     products: user.cart,
+    //     total: 8,
+    //   }),
+    // });
+    await fetchInstance(`/auth/user/${user.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ cart: [] }),
+    });
+    const updatedUser = { ...user, cart: [] };
+    setUser(updatedUser);
+    await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+  };
   const toggleFavorite = (id) => {
     if (favorites.includes(id)) {
       setFavorites(favorites.filter((fav) => fav !== id));
@@ -157,12 +175,10 @@ export const AppProvider = ({ children }) => {
       setFavorites([...favorites, id]);
     }
   };
-
   const updateUser = async (updatedUser) => {
     setUser(updatedUser);
     await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
   };
-
   const login = async (email, password) => {
     try {
       const data = await fetchInstance("/auth/signin", {
@@ -186,7 +202,6 @@ export const AppProvider = ({ children }) => {
       return { success: false, message: error.message };
     }
   };
-
   const register = async (userData) => {
     try {
       const data = await fetchInstance("/auth/signup", {
@@ -203,7 +218,6 @@ export const AppProvider = ({ children }) => {
       return { success: true, user: newUser };
     }
   };
-
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("token");
@@ -217,37 +231,41 @@ export const AppProvider = ({ children }) => {
       return false;
     }
   };
-const updateCartQuantity = async (productId, newQuantity) => {
-  if (!user?.id) return;
+  const updateCartQuantity = async (productId, newQuantity) => {
+    if (!user?.id) return;
 
-  try {
-    const cart = user.cart || [];
+    try {
+      const cart = user.cart || [];
 
-    let updatedCart;
+      let updatedCart;
 
-    if (newQuantity < 1) {
-      updatedCart = cart.filter(item => item.id !== productId);
-      console.log("🗑️ Product removed from cart:", productId);
-    } else {
-      updatedCart = cart.map(item =>
-        item.id === productId ? { ...item, quantity: newQuantity } : item
-      );
-      console.log("🔁 Quantity updated for product:", productId, "to", newQuantity);
+      if (newQuantity < 1) {
+        updatedCart = cart.filter((item) => item.id !== productId);
+        console.log("🗑️ Product removed from cart:", productId);
+      } else {
+        updatedCart = cart.map((item) =>
+          item.id === productId ? { ...item, quantity: newQuantity } : item
+        );
+        console.log(
+          "🔁 Quantity updated for product:",
+          productId,
+          "to",
+          newQuantity
+        );
+      }
+
+      const data = await fetchInstance(`/auth/user/${user.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ cart: updatedCart }),
+      });
+
+      const updatedUser = { ...user, cart: updatedCart };
+      setUser(updatedUser);
+      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+    } catch (err) {
+      console.error("❌ Error updating quantity:", err);
     }
-
-    const data = await fetchInstance(`/auth/user/${user.id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ cart: updatedCart }),
-    });
-
-    const updatedUser = { ...user, cart: updatedCart };
-    setUser(updatedUser);
-    await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-  } catch (err) {
-    console.error("❌ Error updating quantity:", err);
-  }
-};
-
+  };
   const getProducts = async () => {
     try {
       const data = await fetchInstance("/products/db");
@@ -264,7 +282,6 @@ const updateCartQuantity = async (productId, newQuantity) => {
       return [];
     }
   };
-
   const searchProducts = async (q) => {
     try {
       const data = await fetchInstance(`/products/db/search?q=${q}`);
@@ -282,7 +299,6 @@ const updateCartQuantity = async (productId, newQuantity) => {
       return [];
     }
   };
-
   const getImageUrl = (path) => {
     if (!path) return null;
     if (path.startsWith("http")) return path;
@@ -314,6 +330,7 @@ const updateCartQuantity = async (productId, newQuantity) => {
         setProducts,
         searchProducts,
         getImageUrl,
+        clearCartAndUpdateOrsers,
       }}
     >
       {children}
