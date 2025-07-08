@@ -12,23 +12,15 @@ import Header from "../components/Header.jsx";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-
 const CartScreen = () => {
   const navigation = useNavigation();
-  const { theme, user, updateCartQuantity, removeFromCart,getImageUrl } = useAppContext();
+  const { theme, user, updateCartQuantity, removeFromCart, getImageUrl } =
+    useAppContext();
 
   const cart = user?.cart || [];
   const totalPrice = cart.reduce((t, i) => t + i.price * i.quantity, 0);
   const totalItems = cart.reduce((t, i) => t + i.quantity, 0);
 
-  const handleQuantityChange = (id, q) => {
-    q <= 0
-      ? Alert.alert("Remove?", "", [
-          { text: "Cancel" },
-          { text: "Yes", onPress: () => removeFromCart(id) },
-        ])
-      : updateCartQuantity(id, q);
-  };
 
   const renderItem = ({ item }) => (
     <View
@@ -52,7 +44,7 @@ const CartScreen = () => {
           </Text>
           <View style={tw`flex-row items-center`}>
             <TouchableOpacity
-              onPress={() => handleQuantityChange(item.id, item.quantity - 1)}
+              onPress={() => updateCartQuantity(item.id, item.quantity - 1)}
               style={[
                 tw`w-8 h-8 rounded-full items-center justify-center`,
                 { backgroundColor: theme.lightGray },
@@ -64,7 +56,7 @@ const CartScreen = () => {
               {item.quantity}
             </Text>
             <TouchableOpacity
-              onPress={() => handleQuantityChange(item.id, item.quantity + 1)}
+              onPress={() => updateCartQuantity(item.id, item.quantity + 1)}
               style={[
                 tw`w-8 h-8 rounded-full items-center justify-center`,
                 { backgroundColor: theme.primary },
@@ -76,7 +68,7 @@ const CartScreen = () => {
         </View>
       </View>
       <TouchableOpacity
-        onPress={() => handleQuantityChange(item.id, 0)}
+        onPress={() => removeFromCart(item.id)}
         style={tw`ml-2 p-2`}
       >
         <Icon name="delete" size={20} color={theme.red} />

@@ -12,13 +12,11 @@ const ProductCard = ({ product, onPress }) => {
     ? Math.round(((product.oldprice - product.price) / product.oldprice) * 100)
     : 0;
 
-  const handleAddToCart = () => {
-    addToCart(product);
-    Alert.alert(
-      "Added to Cart",
-      "The product was successfully added to your cart"
-    );
-  };
+const handleAddToCart = async () => {
+  await addToCart(product);
+  Alert.alert("✅ Added to Cart", "Product successfully added to your cart");
+};
+
 
   const imageUrl = getImageUrl(product.image);
 

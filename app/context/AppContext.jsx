@@ -91,41 +91,62 @@ export const AppProvider = ({ children }) => {
 
   const addToCart = async (product) => {
     if (!user?.id) return;
+
     try {
-      const data = await fetchInstance(`/cart/${user.id}/add-to-cart`, {
+      const cart = user.cart || [];
+      const existingItem = cart.find((item) => item.id === product.id);
+      let updatedCart;
+
+      if (existingItem) {
+        updatedCart = cart.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      } else {
+        updatedCart = [
+          ...cart,
+          {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            quantity: 1,
+          },
+        ];
+      }
+
+      const data = await fetchInstance(`/auth/user/${user.id}`, {
         method: "PATCH",
-        body: JSON.stringify({
-          productId: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          quantity: 1,
-        }),
+        body: JSON.stringify({ cart: updatedCart }),
       });
 
-      setCart(data.cart);
-      const updatedUser = { ...user, cart: data.cart };
+      const updatedUser = { ...user, cart: updatedCart };
       setUser(updatedUser);
       await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-    } catch (error) {
-      console.error("Error syncing cart with backend:", error);
+      console.log("✅ Product added to cart:", product.name);
+    } catch (err) {
+      console.error("❌ Error adding to cart:", err);
     }
   };
-
   const removeFromCart = async (productId) => {
     if (!user?.id) return;
+
     try {
-      const data = await fetchInstance(`/cart/${user.id}/remove-from-cart`, {
+      const cart = user.cart || [];
+      const updatedCart = cart.filter((item) => item.id !== productId);
+
+      const data = await fetchInstance(`/auth/user/${user.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ productId }),
+        body: JSON.stringify({ cart: updatedCart }),
       });
 
-      setCart(data.cart);
-      const updatedUser = { ...user, cart: data.cart };
+      const updatedUser = { ...user, cart: updatedCart };
       setUser(updatedUser);
       await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-    } catch (error) {
-      console.error("Error syncing cart removal with backend:", error);
+      console.log("🗑️ Product removed from cart:", productId);
+    } catch (err) {
+      console.error("❌ Error removing from cart:", err);
     }
   };
 
@@ -196,39 +217,36 @@ export const AppProvider = ({ children }) => {
       return false;
     }
   };
-  const updateCartQuantity = async (id, quantity) => {
-    if (!user?.id) return;
+const updateCartQuantity = async (productId, newQuantity) => {
+  if (!user?.id) return;
 
-    try {
-      setCart(
-        cart.map((item) => (item.id === id ? { ...item, quantity } : item))
+  try {
+    const cart = user.cart || [];
+
+    let updatedCart;
+
+    if (newQuantity < 1) {
+      updatedCart = cart.filter(item => item.id !== productId);
+      console.log("🗑️ Product removed from cart:", productId);
+    } else {
+      updatedCart = cart.map(item =>
+        item.id === productId ? { ...item, quantity: newQuantity } : item
       );
-
-      const data = await fetchInstance(
-        `/cart/${user.id}/update-cart-quantity`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({ productId: id, quantity }),
-        }
-      );
-
-      setCart(data.cart);
-      const updatedUser = { ...user, cart: data.cart };
-      setUser(updatedUser);
-      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-    } catch (error) {
-      console.error("Error syncing cart quantity with backend:", error);
-      try {
-        const userData = await fetchInstance(`/auth/user/${user.id}`);
-        setCart(userData.cart || []);
-        const updatedUser = { ...user, cart: userData.cart || [] };
-        setUser(updatedUser);
-        await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-      } catch (reloadError) {
-        console.error("Error reloading cart data:", reloadError);
-      }
+      console.log("🔁 Quantity updated for product:", productId, "to", newQuantity);
     }
-  };
+
+    const data = await fetchInstance(`/auth/user/${user.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ cart: updatedCart }),
+    });
+
+    const updatedUser = { ...user, cart: updatedCart };
+    setUser(updatedUser);
+    await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+  } catch (err) {
+    console.error("❌ Error updating quantity:", err);
+  }
+};
 
   const getProducts = async () => {
     try {
