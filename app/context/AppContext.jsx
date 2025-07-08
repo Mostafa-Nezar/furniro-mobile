@@ -142,53 +142,29 @@ export const AppProvider = ({ children }) => {
     await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
-const login = async (email, password) => {
-  try {
-    const response = await fetch("http://localhost:3001/api/auth/signin", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+  const login = async (email, password) => {
+    try {
+      const data = await fetchInstance("/auth/signin", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.msg || "Login failed");
-    }
-
-    if (data.token) {
-      await AsyncStorage.setItem("token", data.token);
-      await AsyncStorage.setItem("user", JSON.stringify(data.user));
-    }
-
-    setUser(data.user);
-    setIsAuthenticated(true);
-
-    return { success: true, user: data.user };
-
-  } catch (error) {
-    if (email === "admin@furniro.com" && password === "admin123") {
-      const admin = {
-        id: 1,
-        email,
-        name: "Admin User",
-        avatar: null,
-      };
-
-      await AsyncStorage.setItem("token", "mock_token_123");
-      await AsyncStorage.setItem("user", JSON.stringify(admin));
-
-      setUser(admin);
+      if (data.token) await AsyncStorage.setItem("token", data.token);
+      setUser(data.user);
       setIsAuthenticated(true);
-
-      return { success: true, user: admin };
+      return { success: true, user: data.user };
+    } catch (error) {
+      if (email === "admin@furniro.com" && password === "admin123") {
+        const admin = { id: 1, email, name: "Admin User", avatar: null };
+        await AsyncStorage.setItem("token", "mock_token_123");
+        await AsyncStorage.setItem("user", JSON.stringify(admin));
+        setUser(admin);
+        setIsAuthenticated(true);
+        return { success: true, user: admin };
+      }
+      return { success: false, message: error.message };
     }
-
-    return { success: false, message: error.message };
-  }
-};
+  };
 
   const register = async (userData) => {
     try {
