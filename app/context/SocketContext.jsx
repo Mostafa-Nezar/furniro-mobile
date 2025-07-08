@@ -19,7 +19,6 @@ export const SocketProvider = ({ children }) => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    // Initialize socket connection
     const initSocket = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
@@ -28,7 +27,6 @@ export const SocketProvider = ({ children }) => {
         if (token && user) {
           const userData = JSON.parse(user);
           
-          // Connect to socket server
           const newSocket = io('http://localhost:3001', {
             auth: {
               token: token
@@ -38,27 +36,18 @@ export const SocketProvider = ({ children }) => {
           newSocket.on('connect', () => {
             console.log('✅ Connected to socket server');
             setConnected(true);
-            
-            // Join user's notification room
-            newSocket.emit('join', userData.id);
+            user? newSocket.emit('join', userData.id):null;
           });
 
           newSocket.on('disconnect', () => {
             console.log('❌ Disconnected from socket server');
             setConnected(false);
           });
-
-          // Listen for new notifications
           newSocket.on('newNotification', (notification) => {
             console.log('🔔 New notification received:', notification);
             setNotifications(prev => [notification, ...prev]);
             setUnreadCount(prev => prev + 1);
-            
-            // Show notification alert or toast here
-            // You can add your notification display logic
           });
-
-          // Listen for notification read updates
           newSocket.on('notificationRead', ({ notificationId }) => {
             setNotifications(prev => 
               prev.map(notif => 
@@ -78,8 +67,6 @@ export const SocketProvider = ({ children }) => {
     };
 
     initSocket();
-
-    // Cleanup on unmount
     return () => {
       if (socket) {
         socket.disconnect();
