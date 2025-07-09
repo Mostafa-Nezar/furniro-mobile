@@ -4,7 +4,6 @@ import { useAppContext } from "../context/AppContext.jsx";
 import Header from "../components/Header.jsx";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import Toast from "react-native-toast-message";
 
 const CartScreen = () => {
   const navigation = useNavigation();
