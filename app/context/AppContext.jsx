@@ -149,17 +149,15 @@ export const AppProvider = ({ children }) => {
   const clearCartAndUpdateOrsers = async () => {
     console.log("hi");
     if (!user?.id) return;
-    // await fetchInstance("/orders", {
-    //   method: "POST",
-    //   body: JSON.stringify({
-    //     id: Date.now(),
-    //     userId: user.id,
-    //     products: user.cart,
-    //     date: new Date().toISOString(),
-    //     products: user.cart,
-    //     total: 8,
-    //   }),
-    // });
+    await fetchInstance("/orders", {
+      method: "POST",
+      body: JSON.stringify({
+        userId: user.id,
+        products: user.cart,
+        date: new Date().toISOString(),
+        total: user.cart.reduce((sum, p) => sum + (p.price * (p.quantity || 1)), 0),
+      }),
+    });
     await fetchInstance(`/auth/user/${user.id}`, {
       method: "PATCH",
       body: JSON.stringify({ cart: [] }),
