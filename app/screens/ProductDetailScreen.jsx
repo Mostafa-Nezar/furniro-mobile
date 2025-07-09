@@ -16,7 +16,7 @@ const SpecificationRow = ({ label, value, theme }) => (
 );
 
 const ProductDetailScreen = () => {
-  const { user, theme, addToCart, toggleFavorite, favorites, getImageUrl, updateCartQuantity } = useAppContext();
+  const { user, theme, addToCart, toggleFavorite, favorites, getImageUrl, updateCartQuantity,removeFromCart } = useAppContext();
   const { product } = useRoute().params;
   const [selectedImage, setSelectedImage] = useState(product.image);
   const [rating, setRating] = useState(0);
@@ -67,9 +67,14 @@ const ProductDetailScreen = () => {
       return;
     }
     const newQuantity = type === "increase" ? itemInCart.quantity + 1 : itemInCart.quantity - 1;
-    if (newQuantity < 1) return;
+    if (newQuantity < 1) {
+      removeFromCart(product.id);
+      Toast.show({ type: "info", text1: "Removed from cart", text2: `${product.name} has been removed.` });
+      return;
+    }
     updateCartQuantity(product.id, newQuantity);
   };
+
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title={product.name} showBack showSearch={false} showNotification={false} />
@@ -116,7 +121,6 @@ const ProductDetailScreen = () => {
               </TouchableOpacity>
             </View>
           </View>
-
           <View style={tw`mb-6`}>
             <View style={tw`flex-row`}>
               {[1, 2, 3, 4, 5].map((star) => (
@@ -129,7 +133,6 @@ const ProductDetailScreen = () => {
               </Text>
             </View>
           </View>
-
           <TouchableOpacity onPress={() => modifyCartQuantity("increase")} style={[tw`py-4 rounded-lg mb-6`, { backgroundColor: theme.primary }]}>
             <Text style={[tw`text-center text-lg font-semibold`, { color: theme.white }]}>
               Add to cart {(product.price * quantity).toFixed()} $
