@@ -88,12 +88,10 @@ export const AppProvider = ({ children }) => {
   };
   const addToCart = async (product) => {
     if (!user?.id) return;
-
     try {
       const cart = user.cart || [];
       const existingItem = cart.find((item) => item.id === product.id);
       let updatedCart;
-
       if (existingItem) {
         updatedCart = cart.map((item) =>
           item.id === product.id
@@ -231,12 +229,9 @@ export const AppProvider = ({ children }) => {
   };
   const updateCartQuantity = async (productId, newQuantity) => {
     if (!user?.id) return;
-
     try {
       const cart = user.cart || [];
-
       let updatedCart;
-
       if (newQuantity < 1) {
         updatedCart = cart.filter((item) => item.id !== productId);
         console.log("🗑️ Product removed from cart:", productId);
@@ -244,12 +239,7 @@ export const AppProvider = ({ children }) => {
         updatedCart = cart.map((item) =>
           item.id === productId ? { ...item, quantity: newQuantity } : item
         );
-        console.log(
-          "🔁 Quantity updated for product:",
-          productId,
-          "to",
-          newQuantity
-        );
+        console.log("🔁 Quantity updated for product:", productId, "to", newQuantity);
       }
 
       const data = await fetchInstance(`/auth/user/${user.id}`, {

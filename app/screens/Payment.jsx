@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
   ActivityIndicator,
   Linking,
 } from "react-native";
@@ -17,6 +16,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
 
 const Payment = () => {
   const navigation = useNavigation();
@@ -93,12 +93,17 @@ const Payment = () => {
       if (res.ok && data.url) {
         Linking.openURL(data.url);
         await clearCartAndUpdateOrsers();
-        Alert.alert("جارٍ التحويل", "تم فتح صفحة الدفع وتم مسح السلة بنجاح.");
       } else {
-        Alert.alert("Payment Failed", data.error || "Something went wrong");
+        Toast.show({
+          type: "error",
+          text1: "Payment Failure",
+        });
       }
     } catch (err) {
-      Alert.alert("Error", "Network error. Please try again.");
+      Toast.show({
+        type: "error",
+        text1: "Network Error",
+      });
     } finally {
       setLoading(false);
     }
@@ -108,7 +113,10 @@ const Payment = () => {
     try {
       const user = await AsyncStorage.getItem("user");
       if (!user) {
-        Alert.alert("خطأ", "لم يتم العثور على بيانات المستخدم.");
+        Toast.show({
+          type: "error",
+          text1: "User Not Found",
+        });
         setLoading(false);
         return;
       }
@@ -130,16 +138,18 @@ const Payment = () => {
       if (res.ok && data.approveUrl) {
         Linking.openURL(data.approveUrl);
         await clearCartAndUpdateOrsers();
-        Alert.alert(
-          "جارٍ التحويل",
-          "تم فتح صفحة PayPal. تم إفراغ السلة بنجاح."
-        );
       } else {
-        Alert.alert("فشل الدفع", data.error || "حدث خطأ أثناء التحويل.");
+        Toast.show({
+          type: "error",
+          text1: "Payment Failure",
+        });
       }
     } catch (err) {
       console.error("❌ PayPal error:", err);
-      Alert.alert("خطأ", "تعذر الاتصال بالخادم.");
+      Toast.show({
+        type: "error",
+        text1: "Disconnected",
+      });
     } finally {
       setLoading(false);
     }

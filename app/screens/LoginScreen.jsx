@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   ScrollView,
   Image,
   KeyboardAvoidingView,
@@ -15,38 +14,52 @@ import { useAppContext } from "../context/AppContext";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import FAIcon from "react-native-vector-icons/FontAwesome";
+import { Formik } from "formik";
+import * as Yup from "yup";
+import Toast from "react-native-toast-message";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
   const { theme, login } = useAppContext();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-const handleEmailLogin = async () => {
-  if (!email || !password) {
-    Alert.alert("Error", "Please enter email and password");
-    return;
-  }
+  const validationSchema = Yup.object().shape({
+    email: Yup.string().email("Invalid Email").required("Email Required"),
+    password: Yup.string().required("PassWord Required"),
+  });
 
-  setLoading(true);
-  try {
-    const result = await login(email, password);
-    if (result.success) {
-      navigation.reset({ index: 0, routes: [{ name: "Main" }] });
-    } else {
-      Alert.alert("Login Error", result.message || "Invalid credentials");
+  const handleLogin = async (values) => {
+    const { email, password } = values;
+    setLoading(true);
+    try {
+      const result = await login(email, password);
+      if (result.success) {
+        Toast.show({
+          type: "success",
+          text1: "Login Successfully",
+          text2: "Welcome",
+        });
+        navigation.reset({ index: 0, routes: [{ name: "Main" }] });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Login Error",
+          text2: result.message || "البيانات غير صحيحة",
+        });
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Login Error",
+        text2: error.message || "يرجى المحاولة لاحقًا",
+      });
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    Alert.alert("Error", error.message || "An error occurred");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-  const InputField = ({ icon, placeholder, value, onChangeText, secure, showToggle, toggle }) => (
+  const InputField = ({ icon, placeholder, value, onChangeText, onBlur, error, secure, showToggle, toggle }) => (
     <View style={tw`mb-4`}>
       <View style={[
         tw`flex-row items-center border rounded-lg px-4 py-3`,
@@ -60,6 +73,7 @@ const handleEmailLogin = async () => {
           secureTextEntry={secure && !showToggle}
           value={value}
           onChangeText={onChangeText}
+          onBlur={onBlur}
           autoCapitalize="none"
         />
         {secure && (
@@ -68,6 +82,7 @@ const handleEmailLogin = async () => {
           </TouchableOpacity>
         )}
       </View>
+      {error && <Text style={[tw`text-sm mt-1 ml-2`, { color: "red" }]}>{error}</Text>}
     </View>
   );
 
@@ -89,38 +104,47 @@ const handleEmailLogin = async () => {
 
         <Text style={[tw`text-lg text-center mb-6`, { color: theme.darkGray }]}>Welcome back!</Text>
 
-        {/* Email */}
-        <InputField
-          icon="email"
-          placeholder="Enter your email"
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        {/* Password */}
-        <InputField
-          icon="lock"
-          placeholder="Enter your password"
-          value={password}
-          onChangeText={setPassword}
-          secure
-          showToggle={showPassword}
-          toggle={() => setShowPassword(!showPassword)}
-        />
-
-        {/* Login Button */}
-        <TouchableOpacity
-          onPress={handleEmailLogin}
-          disabled={loading}
-          style={[
-            tw`py-4 rounded-lg mb-4`,
-            { backgroundColor: theme.primary, opacity: loading ? 0.7 : 1 }
-          ]}
+        <Formik
+          initialValues={{ email: "", password: "" }}
+          validationSchema={validationSchema}
+          onSubmit={handleLogin}
         >
-          <Text style={[tw`text-center text-lg font-semibold`, { color: theme.white }]}>
-            {loading ? "Logging in..." : "Login"}
-          </Text>
-        </TouchableOpacity>
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+            <>
+              <InputField
+                icon="email"
+                placeholder="Enter your email"
+                value={values.email}
+                onChangeText={handleChange("email")}
+                onBlur={handleBlur("email")}
+                error={touched.email && errors.email}
+              />
+              <InputField
+                icon="lock"
+                placeholder="Enter your password"
+                value={values.password}
+                onChangeText={handleChange("password")}
+                onBlur={handleBlur("password")}
+                error={touched.password && errors.password}
+                secure
+                showToggle={showPassword}
+                toggle={() => setShowPassword(!showPassword)}
+              />
+              <TouchableOpacity
+                onPress={handleSubmit}
+                disabled={loading}
+                style={[
+                  tw`py-4 rounded-lg mb-4`,
+                  { backgroundColor: theme.primary, opacity: loading ? 0.7 : 1 }
+                ]}
+              >
+                <Text style={[tw`text-center text-lg font-semibold`, { color: theme.white }]}>
+                  {loading ? "Logging in..." : "Login"}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </Formik>
 
         {/* Divider */}
         <View style={tw`flex-row items-center mb-4`}>
@@ -131,7 +155,11 @@ const handleEmailLogin = async () => {
 
         {/* Google */}
         <TouchableOpacity
-          onPress={() => Alert.alert("Coming Soon")}
+          onPress={() => Toast.show({
+            type: "info",
+            text1: "Soon",
+            text2: "الميزة تحت التطوير",
+          })}
           style={[
             tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,
             { borderColor: theme.lightGray, backgroundColor: theme.white }
@@ -145,7 +173,11 @@ const handleEmailLogin = async () => {
 
         {/* Facebook */}
         <TouchableOpacity
-          onPress={() => Alert.alert("Coming Soon")}
+          onPress={() => Toast.show({
+            type: "info",
+            text1: "Soon",
+            text2: "",
+          })}
           style={[
             tw`flex-row items-center justify-center py-3 rounded-lg mb-6 border`,
             { borderColor: theme.lightGray, backgroundColor: theme.white }
