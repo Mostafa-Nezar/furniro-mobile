@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  Image,
   View,
   Text,
   TextInput,
@@ -19,48 +20,39 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 
 const Payment = () => {
-  const navigation = useNavigation();
+  const nav = useNavigation();
   const { theme, user, clearCartAndUpdateOrsers } = useAppContext();
   const [loading, setLoading] = useState(false);
+  const cart = user?.cart || [],
+    subtotal = cart.reduce((t, i) => t + i.price * i.quantity, 0);
+  const shipping = subtotal >= 100 ? 0 : 10,
+    total = subtotal + shipping;
 
-  const cart = user?.cart || [];
-  const subtotal = cart.reduce((t, i) => t + i.price * i.quantity, 0);
-  const shipping = subtotal >= 100 ? 0 : 10;
-  const total = subtotal + shipping;
-
-  const formatCardNumber = (v) => {
-    v = v.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-    const m = v.match(/\d{4,16}/g),
-      parts = [];
-    const match = (m && m[0]) || "";
-    for (let i = 0; i < match.length; i += 4)
-      parts.push(match.substring(i, i + 4));
-    return parts.length ? parts.join(" ") : v;
-  };
-
-  const formatExpiryDate = (v) => {
-    v = v.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-    return v.length >= 2 ? v.substring(0, 2) + "/" + v.substring(2, 4) : v;
-  };
+  const formatCardNumber = (v) => (
+    (v = v.replace(/\s+/g, "").replace(/[^0-9]/gi, "")),
+    (v.match(/\d{4,16}/g)?.[0] || "").match(/.{1,4}/g)?.join(" ") || v
+  );
+  const formatExpiryDate = (v) => (
+    (v = v.replace(/\s+/g, "").replace(/[^0-9]/gi, "")),
+    v.length >= 2 ? v.substring(0, 2) + "/" + v.substring(2, 4) : v
+  );
 
   const validationSchema = Yup.object().shape({
-    email: Yup.string().email("Invalid email").required("Email is required"),
-    fullName: Yup.string().required("Full name is required"),
-    address: Yup.string().required("Address is required"),
-    city: Yup.string().required("City is required"),
-    state: Yup.string().required("State is required"),
-    zipCode: Yup.string().required("ZIP Code is required"),
-    cardNumber: Yup.string()
-      .min(19, "Card number is too short")
-      .required("Card number is required"),
+    email: Yup.string().email("Invalid email").required(),
+    fullName: Yup.string().required(),
+    address: Yup.string().required(),
+    city: Yup.string().required(),
+    state: Yup.string().required(),
+    zipCode: Yup.string().required(),
+    cardNumber: Yup.string().min(19).required(),
     expiryDate: Yup.string()
-      .matches(/^\d{2}\/\d{2}$/, "Expiry date must be MM/YY")
-      .required("Expiry date is required"),
-    cvv: Yup.string().min(3).max(4).required("CVV is required"),
-    cardholderName: Yup.string().required("Cardholder name is required"),
+      .matches(/^\d{2}\/\d{2}$/)
+      .required(),
+    cvv: Yup.string().min(3).max(4).required(),
+    cardholderName: Yup.string().required(),
   });
 
-  const createCheckoutSession = async (values) => {
+  const createCheckoutSession = async (v) => {
     setLoading(true);
     try {
       const res = await fetch(
@@ -77,13 +69,13 @@ const Payment = () => {
               quantity: i.quantity,
             })),
             customerInfo: {
-              email: values.email,
-              name: values.fullName,
+              email: v.email,
+              name: v.fullName,
               address: {
-                line1: values.address,
-                city: values.city,
-                state: values.state,
-                postal_code: values.zipCode,
+                line1: v.address,
+                city: v.city,
+                state: v.state,
+                postal_code: v.zipCode,
               },
             },
           }),
@@ -93,63 +85,159 @@ const Payment = () => {
       if (res.ok && data.url) {
         Linking.openURL(data.url);
         await clearCartAndUpdateOrsers();
-      } else {
-        Toast.show({
-          type: "error",
-          text1: "Payment Failure",
-        });
-      }
-    } catch (err) {
-      Toast.show({
-        type: "error",
-        text1: "Network Error",
-      });
+      } else Toast.show({ type: "error", text1: "Payment Failure" });
+    } catch {
+      Toast.show({ type: "error", text1: "Network Error" });
     } finally {
       setLoading(false);
     }
   };
+
+  const getCardType = (number) => {
+    const clean = number.replace(/\s+/g, "");
+    if (/^4/.test(clean)) return "visa";
+    if (/^5[1-5]/.test(clean) || /^2(2[2-9]|[3-6]|7[01]|720)/.test(clean))
+      return "mastercard";
+    if (/^3[47]/.test(clean)) return "amex";
+    return null;
+  };
+
+  const InputCardField = ({
+    handleChange,
+    handleBlur,
+    value,
+    placeholder,
+    name,
+  }) => {
+    const [cardType, setCardType] = useState(null);
+
+    const handleInputChange = (t) => {
+      const formatted = formatCardNumber(t);
+      handleChange(name)(formatted);
+      const type = getCardType(formatted);
+      setCardType(type);
+    };
+
+    const renderCardLogo = () => {
+      const logoStyle = tw`w-8 h-6 rounded bg-white`;
+
+      switch (cardType) {
+        case "mastercard":
+          return (
+            <Image
+              source={require("../../assets/images/mastercard-logo.png")}
+              style={logoStyle}
+            />
+          );
+        case "visa":
+          return (
+            <Image
+              source={require("../../assets/images/visa.png")}
+              style={logoStyle}
+            />
+          );
+        case "amex":
+          return (
+            <Image
+              source={require("../../assets/images/cib-logo.png")}
+              style={logoStyle}
+            />
+          );
+        case "amex":
+          return (
+            <Image
+              source={require("../../assets/images/paypal-logo.png")}
+              style={logoStyle}
+            />
+          );
+        case "amex":
+          return (
+            <Image
+              source={require("../../assets/images/amex-logo.png")}
+              style={logoStyle}
+            />
+          );
+        default:
+          return (
+            <>
+              <Image
+                source={require("../../assets/images/mastercard-logo.png")}
+                style={logoStyle}
+              />
+              <Image
+                source={require("../../assets/images/visa.png")}
+                style={logoStyle}
+              />
+              <Image
+                source={require("../../assets/images/cib-logo.png")}
+                style={logoStyle}
+              />
+              <Image
+                source={require("../../assets/images/paypal-logo.png")}
+                style={logoStyle}
+              />
+              <Image
+                source={require("../../assets/images/amex-logo.png")}
+                style={logoStyle}
+              />
+            </>
+          );
+      }
+    };
+
+    return (
+      <View style={tw`mb-4`}>
+        <View
+          style={[
+            tw`rounded-lg border flex-row items-center px-4`,
+            {
+              borderColor: theme.lightGray,
+              backgroundColor: theme.semiWhite,
+            },
+          ]}
+        >
+          <TextInput
+            style={[tw`flex-1 py-4`, { color: theme.black }]}
+            onChangeText={handleInputChange}
+            onBlur={handleBlur(name)}
+            value={value}
+            placeholder={placeholder}
+            placeholderTextColor={theme.darkGray}
+            keyboardType="numeric"
+            maxLength={19}
+          />
+          <View style={tw`flex-row gap-2 ml-2`}>{renderCardLogo()}</View>
+        </View>
+      </View>
+    );
+  };
+
   const handlePayWithPayPal = async () => {
     setLoading(true);
     try {
-      const user = await AsyncStorage.getItem("user");
-      if (!user) {
-        Toast.show({
-          type: "error",
-          text1: "User Not Found",
-        });
-        setLoading(false);
-        return;
-      }
-      const userId = JSON.parse(user)?.id;
-      console.log("PayPal pressed ✅", userId);
+      const u = await AsyncStorage.getItem("user");
+      if (!u)
+        return (
+          Toast.show({ type: "error", text1: "User Not Found" }),
+          setLoading(false)
+        );
+      const userId = JSON.parse(u)?.id;
       const res = await fetch(
         "http://localhost:3001/api/paypal/create-paypal-order",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            total: total.toFixed(2),
-            userId,
-          }),
+          body: JSON.stringify({ total: total.toFixed(2), userId }),
         }
       );
-
       const data = await res.json();
       if (res.ok && data.approveUrl) {
         Linking.openURL(data.approveUrl);
         await clearCartAndUpdateOrsers();
-      } else {
-        Toast.show({
-          type: "error",
-          text1: "Payment Failure",
-        });
-      }
-    } catch (err) {
-      console.error("❌ PayPal error:", err);
-      Toast.show({
-        type: "error",
-        text1: "Disconnected",
-      });
+      } else Toast.show({ type: "error", text1: "Payment Failure" });
+    } catch (e) {
+      console.error("❌ PayPal error:", e);
+      Toast.show({ type: "error", text1: "Disconnected" });
     } finally {
       setLoading(false);
     }
@@ -186,9 +274,10 @@ const Payment = () => {
       />
     </View>
   );
+
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
-      <Header title="Payment" showBack={true} showCart={false} />
+      <Header title="Payment" showBack showCart={false} />
       <Formik
         initialValues={{
           email: user?.email || "",
@@ -205,19 +294,11 @@ const Payment = () => {
         validationSchema={validationSchema}
         onSubmit={createCheckoutSession}
       >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          errors,
-          touched,
-        }) => (
+        {({ handleChange, handleBlur, handleSubmit, values }) => (
           <ScrollView
             style={tw`flex-1 px-4`}
             showsVerticalScrollIndicator={false}
           >
-            {/* Order Summary ... (keep same) */}
             <View
               style={[
                 tw`p-4 rounded-lg mb-6 mt-4`,
@@ -298,7 +379,6 @@ const Payment = () => {
                 handleBlur={handleBlur}
                 placeholder="Address"
               />
-              {/* City + State */}
               <View style={tw`flex-row gap-3`}>
                 <View style={tw`flex-1`}>
                   <InputField
@@ -329,7 +409,6 @@ const Payment = () => {
                 maxLength={10}
               />
             </View>
-
             <View style={tw`mb-6`}>
               <InputField
                 name="cardholderName"
@@ -338,23 +417,22 @@ const Payment = () => {
                 handleBlur={handleBlur}
                 placeholder="Cardholder Name"
               />
-              <InputField
+              {/* <InputField name="cardNumber" value={values.cardNumber} handleChange={(n) => (t) => handleChange(n)(formatCardNumber(t))} handleBlur={handleBlur} placeholder="Card Number" keyboardType="numeric" maxLength={19} /> */}
+              <InputCardField
                 name="cardNumber"
                 value={values.cardNumber}
-                handleChange={(name) => (text) =>
-                  handleChange(name)(formatCardNumber(text))}
+                handleChange={handleChange}
                 handleBlur={handleBlur}
                 placeholder="Card Number"
-                keyboardType="numeric"
-                maxLength={19}
               />
+
               <View style={tw`flex-row gap-3`}>
                 <View style={tw`flex-1`}>
                   <InputField
                     name="expiryDate"
                     value={values.expiryDate}
-                    handleChange={(name) => (text) =>
-                      handleChange(name)(formatExpiryDate(text))}
+                    handleChange={(n) => (t) =>
+                      handleChange(n)(formatExpiryDate(t))}
                     handleBlur={handleBlur}
                     placeholder="MM/YY"
                     keyboardType="numeric"
@@ -365,19 +443,17 @@ const Payment = () => {
                   <InputField
                     name="cvv"
                     value={values.cvv}
-                    handleChange={(name) => (text) =>
-                      handleChange(name)(text.replace(/[^0-9]/g, ""))}
+                    handleChange={(n) => (t) =>
+                      handleChange(n)(t.replace(/[^0-9]/g, ""))}
                     handleBlur={handleBlur}
                     placeholder="CVV"
                     keyboardType="numeric"
                     maxLength={4}
-                    secureTextEntry={true}
+                    secureTextEntry
                   />
                 </View>
               </View>
             </View>
-
-            {/* Secure Payment Note */}
             <View
               style={[
                 tw`p-4 rounded-lg mb-6 flex-row`,
@@ -400,7 +476,6 @@ const Payment = () => {
                 </Text>
               </View>
             </View>
-
             <View
               style={[tw`p-4 border-t`, { borderTopColor: theme.lightGray }]}
             >
@@ -426,7 +501,6 @@ const Payment = () => {
                   {loading ? "Processing..." : `Pay $${total.toFixed(2)}`}
                 </Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 onPress={handlePayWithPayPal}
                 disabled={loading}
@@ -445,9 +519,8 @@ const Payment = () => {
                   Pay with PayPal
                 </Text>
               </TouchableOpacity>
-
               <TouchableOpacity
-                onPress={() => navigation.goBack()}
+                onPress={() => nav.goBack()}
                 style={[
                   tw`py-3 mt-3 border rounded-lg`,
                   { borderColor: theme.primary },
