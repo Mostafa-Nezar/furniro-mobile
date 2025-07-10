@@ -56,7 +56,6 @@ const performSearch = async () => {
   }
 };
 
-
   const handleSearchPress = (query) => {
     setSearchQuery(query);
   };
