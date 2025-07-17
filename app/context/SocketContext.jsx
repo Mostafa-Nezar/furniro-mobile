@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -74,52 +74,11 @@ export const SocketProvider = ({ children }) => {
     };
   }, []);
 
-  const markNotificationAsRead = (notificationId) => {
-    if (socket && connected) {
-      socket.emit('markNotificationRead', { 
-        notificationId, 
-        userId: socket.auth?.userId 
-      });
-    }
-  };
-
-  const sendTestNotification = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        console.log('No token found');
-        return;
-      }
-
-      const response = await fetch('http://localhost:3001/api/notifications/test', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: 'Test notification sent at ' + new Date().toLocaleTimeString()
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Test notification sent:', data);
-      } else {
-        console.error('Failed to send test notification');
-      }
-    } catch (error) {
-      console.error('Error sending test notification:', error);
-    }
-  };
-
   const value = {
     socket,
     connected,
     notifications,
     unreadCount,
-    markNotificationAsRead,
-    sendTestNotification,
     setNotifications,
     setUnreadCount
   };
