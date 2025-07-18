@@ -292,6 +292,19 @@ export const AppProvider = ({ children }) => {
     if (path.startsWith("http")) return path;
     return `http://localhost:3001/uploads/${path}`;
   };
+  const refreshUser = async () => {
+    if (!user?.id) return;
+    try {
+      const data = await fetchInstance(`/auth/user/${user.id}`);
+      updateUser(data);
+      await AsyncStorage.setItem("user", JSON.stringify(data));
+      console.log("✅ User refreshed:", data.name);
+      return true;
+    } catch (err) {
+      console.error("❌ Error refreshing user:", err.message);
+      return false;
+    }
+  };
 
   return (
     <AppContext.Provider
@@ -319,6 +332,7 @@ export const AppProvider = ({ children }) => {
         searchProducts,
         getImageUrl,
         clearCartAndUpdateOrsers,
+        refreshUser
       }}
     >
       {children}

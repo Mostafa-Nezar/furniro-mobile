@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, Alert, Switch, Animated, Dimensions, Modal } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Image, Alert, Switch, Animated, Dimensions, Modal, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext";
 import Header from "../components/Header";
@@ -12,20 +12,25 @@ const { width } = Dimensions.get("window");
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
-  const { theme, user, isAuthenticated, logout, isDarkMode, toggleTheme, cart, favorites, updateUser, products, getImageUrl, toggleFavorite } = useAppContext();
+  const { theme, user, isAuthenticated, logout, isDarkMode, toggleTheme, cart, favorites, updateUser, products, getImageUrl, toggleFavorite, refreshUser } = useAppContext();
   const [isUploading, setIsUploading] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarContent, setSidebarContent] = useState(null);
   const slideAnim = useRef(new Animated.Value(width)).current;
   const favoriteProducts = products.filter((p) => favorites.includes(p.id));
-
+  const [refreshing, setRefreshing] = useState(false);  
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const success = await refreshUser();
+    setRefreshing(false);
+    if (!success) Alert.alert("Error", "Failed to refresh user data");
+  };
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) return Alert.alert("Permission required", "Access your gallery");
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [1, 1], quality: 0.8 });
     if (!result.canceled && result.assets?.length > 0) await uploadImage(result.assets[0]);
   };
-
   const uploadImage = async (image) => {
     if (!image) return;
     setIsUploading(true);
@@ -47,23 +52,19 @@ const ProfileScreen = () => {
       setIsUploading(false);
     }
   };
-
   const handleLogout = async () => {
     await AsyncStorage.removeItem("user");
     logout();
     navigation.reset({ index: 0, routes: [{ name: "Login" }] });
   };
-
   const openSidebar = (content) => {
     setSidebarContent(content);
     setSidebarVisible(true);
     Animated.timing(slideAnim, { toValue: 0, duration: 300, useNativeDriver: true }).start();
   };
-
   const closeSidebar = () => {
     Animated.timing(slideAnim, { toValue: width, duration: 300, useNativeDriver: true }).start(() => { setSidebarVisible(false); setSidebarContent(null); });
   };
-
   const renderEmptyContent = (icon, title, subtitle) => (
     <View style={tw`flex-1 justify-center items-center py-20`}>
       <Icon name={icon} size={60} color={theme.darkGray} />
@@ -71,7 +72,6 @@ const ProfileScreen = () => {
       <Text style={[tw`text-sm mt-2 text-center`, { color: theme.darkGray }]}>{subtitle}</Text>
     </View>
   );
-
   const renderFavoritesContent = () => (
     <View style={tw`flex-1 p-4`}>
       <View style={tw`flex-row justify-between items-center mb-6`}>
@@ -95,7 +95,6 @@ const ProfileScreen = () => {
       </ScrollView>
     </View>
   );
-
   const renderGenericContent = (title, icon) => (
     <View style={tw`flex-1 p-4`}>
       <View style={tw`flex-row justify-between items-center mb-6`}>
@@ -105,7 +104,6 @@ const ProfileScreen = () => {
       {renderEmptyContent(icon, "Coming Soon", "This feature will be available soon")}
     </View>
   );
-
   const menuItems = [
     { icon: "favorite", title: "Favorites", subtitle: `${favorites.length} items`, onPress: () => openSidebar(renderFavoritesContent()) },
     { icon: "history", title: "Order History", subtitle: "Your previous orders", onPress: () => openSidebar(renderGenericContent("Order History", "history")) },
@@ -128,11 +126,10 @@ const ProfileScreen = () => {
       </View>
     </View>
   );
-
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title="Profile" />
-      <ScrollView>
+      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View style={[tw`p-6 items-center`, { backgroundColor: theme.lightBeige }]}>
           <TouchableOpacity onPress={pickImage} disabled={isUploading}>
             <View style={[tw`w-24 h-24 rounded-full items-center justify-center mb-4`, { backgroundColor: theme.primary }]}>
