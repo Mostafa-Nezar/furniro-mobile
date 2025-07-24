@@ -16,13 +16,14 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.mostafanezar.furniromobile"
     },
-      "web": {
-        "bundler": "metro",
-        "output": "single",
-        "favicon": "./assets/images/favicon.png"
-        },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
     "plugins": [
       [
         "expo-splash-screen",
@@ -36,6 +37,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e8948e70-f5fa-4e9e-b7d6-c6ca06ce1f6d"
+      }
     }
   }
 }
