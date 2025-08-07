@@ -125,7 +125,7 @@ const Payment = () => {
         case "mastercard":
           return (
             <Image
-              source={require("../../assets/images/mastercard-logo.png")}
+              source={require("../../assets/images/mastercard.png")}
               style={logoStyle}
             />
           );
@@ -136,24 +136,17 @@ const Payment = () => {
               style={logoStyle}
             />
           );
-        case "amex":
+        case "paypal":
           return (
             <Image
-              source={require("../../assets/images/cib-logo.png")}
+              source={require("../../assets/images/paypal.png")}
               style={logoStyle}
             />
           );
         case "amex":
           return (
             <Image
-              source={require("../../assets/images/paypal-logo.png")}
-              style={logoStyle}
-            />
-          );
-        case "amex":
-          return (
-            <Image
-              source={require("../../assets/images/amex-logo.png")}
+              source={require("../../assets/images/amex.png")}
               style={logoStyle}
             />
           );
@@ -161,7 +154,7 @@ const Payment = () => {
           return (
             <>
               <Image
-                source={require("../../assets/images/mastercard-logo.png")}
+                source={require("../../assets/images/mastercard.png")}
                 style={logoStyle}
               />
               <Image
@@ -169,15 +162,11 @@ const Payment = () => {
                 style={logoStyle}
               />
               <Image
-                source={require("../../assets/images/cib-logo.png")}
+                source={require("../../assets/images/paypal.png")}
                 style={logoStyle}
               />
               <Image
-                source={require("../../assets/images/paypal-logo.png")}
-                style={logoStyle}
-              />
-              <Image
-                source={require("../../assets/images/amex-logo.png")}
+                source={require("../../assets/images/amex.png")}
                 style={logoStyle}
               />
             </>
