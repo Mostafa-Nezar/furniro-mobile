@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors, darkColors } from "../constants/theme.jsx";
 
 const AppContext = createContext();
-const API_BASE_URL = "http://localhost:3001/api";
+const API_BASE_URL = "https://furniro-back-production.up.railway.app/api";
 
 const fetchInstance = async (endpoint, options = {}) => {
   const token = await AsyncStorage.getItem("token");

@@ -27,7 +27,7 @@ export const SocketProvider = ({ children }) => {
         if (token && user) {
           const userData = JSON.parse(user);
           
-          const newSocket = io('http://localhost:3001', {
+          const newSocket = io('https://furniro-back-production.up.railway.app/api', {
             auth: {
               token: token
             }

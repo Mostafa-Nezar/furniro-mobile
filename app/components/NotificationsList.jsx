@@ -12,7 +12,7 @@ const NotificationsList = () => {
   const { theme } = useAppContext();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const API = "http://localhost:3001/api/notifications";
+  const API = "https://furniro-back-production.up.railway.app/api/notifications";
 
   useEffect(() => {
     (async () => {
