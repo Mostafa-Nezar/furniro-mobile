@@ -37,7 +37,7 @@ const ProfileScreen = () => {
     const formData = new FormData();
     formData.append("avatar", { uri: image.uri, name: image.fileName || "avatar.jpg", type: image.type || "image/jpeg" });
     try {
-      const res = await fetch(`http://localhost:3001/api/upload/${user?.id}/update-image`, { method: "PATCH", headers: { "Content-Type": "multipart/form-data", Authorization: `Bearer ${user?.token}` }, body: formData });
+      const res = await fetch(`https://furniro-back-production.up.railway.app/api/upload/${user?.id}/update-image`, { method: "PATCH", headers: { "Content-Type": "multipart/form-data", Authorization: `Bearer ${user?.token}` }, body: formData });
       const data = await res.json();
       if (data.success && data.imageUrl) {
         const updated = { ...user, image: data.imageUrl };
