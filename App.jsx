@@ -69,7 +69,7 @@ const InnerApp = () => {
     <>
       <StatusBar
         barStyle={isDarkMode ? "light-content" : "dark-content"}
-        backgroundColor={theme.semiWhite}
+        backgroundColor={isDarkMode ? theme.semiWhite : theme.primary}
       />
       <AppNavigator />
       <Toast config={toastConfig} />

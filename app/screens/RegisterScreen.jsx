@@ -38,7 +38,7 @@ const RegisterScreen=()=>{
       await GoogleSignin.hasPlayServices();
       const userInfo=await GoogleSignin.signIn();
       const token=userInfo.idToken;
-      const res=await fetch('http://localhost:3001/api/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+      const res=await fetch('https://furniro-back-production.up.railway.app/api/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
       const data=await res.json();
       if(data.user){Alert.alert('Success','Google account created!'); login(data.user); navigation.replace('Main'); } 
       else{Alert.alert('Error',data.msg||'Google sign-up error');}

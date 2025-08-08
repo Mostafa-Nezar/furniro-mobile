@@ -11,6 +11,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~5.0.4",
     "@expo/vector-icons": "^14.1.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-google-signin/google-signin": "^15.0.0",
@@ -50,8 +51,7 @@
     "socket.io-client": "^4.8.1",
     "toast": "^0.5.4",
     "twrnc": "^4.9.1",
-    "yup": "^1.6.1",
-    "@expo/metro-runtime": "~5.0.4"
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
