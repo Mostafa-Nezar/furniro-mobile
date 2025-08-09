@@ -7,7 +7,7 @@ import * as Yup from 'yup';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FAIcon from 'react-native-vector-icons/FontAwesome';
-// import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 const RegisterScreen=()=>{ 
   const navigation=useNavigation();
@@ -15,7 +15,7 @@ const RegisterScreen=()=>{
   const [showPassword,setShowPassword]=useState(false);
   const [showConfirmPassword,setShowConfirmPassword]=useState(false);
 
-  // useEffect(()=>{GoogleSignin.configure({webClientId:'866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh.apps.googleusercontent.com'});},[]);
+  useEffect(()=>{GoogleSignin.configure({webClientId:'866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh.apps.googleusercontent.com'});},[]);
 
   const validationSchema=Yup.object({
     name:Yup.string().required('Full name is required'),
@@ -33,17 +33,17 @@ const RegisterScreen=()=>{
     finally{setSubmitting(false);}
   };
 
-  // const handleGoogleSignup=async()=>{
-  //   try{
-  //     await GoogleSignin.hasPlayServices();
-  //     const userInfo=await GoogleSignin.signIn();
-  //     const token=userInfo.idToken;
-  //     const res=await fetch('https://furniro-back-2-production.up.railway.app/api/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
-  //     const data=await res.json();
-  //     if(data.user){Alert.alert('Success','Google account created!'); login(data.user); navigation.replace('Main'); } 
-  //     else{Alert.alert('Error',data.msg||'Google sign-up error');}
-  //   }catch(error){Alert.alert('Google Error',error.message);}
-  // };
+  const handleGoogleSignup=async()=>{
+    try{
+      await GoogleSignin.hasPlayServices();
+      const userInfo=await GoogleSignin.signIn();
+      const token=userInfo.idToken;
+      const res=await fetch('https://furniro-back-2-production.up.railway.app/api/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+      const data=await res.json();
+      if(data.user){Alert.alert('Success','Google account created!'); login(data.user); navigation.replace('Main'); } 
+      else{Alert.alert('Error',data.msg||'Google sign-up error');}
+    }catch(error){Alert.alert('Google Error',error.message);}
+  };
 
   const InputField=({icon,placeholder,secure,value,onChange,onBlur,toggleSecure,show,error,touched})=>(
     <View style={tw`mb-4`}>
@@ -89,10 +89,10 @@ const RegisterScreen=()=>{
           <View style={[tw`flex-1 h-px`,{backgroundColor:theme.lightGray}]}/>
         </View>
 
-        {/* <TouchableOpacity onPress={handleGoogleSignup} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,{borderColor:theme.lightGray,backgroundColor:theme.white}]}>
+        <TouchableOpacity onPress={handleGoogleSignup} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,{borderColor:theme.lightGray,backgroundColor:theme.white}]}>
           <FAIcon name="google" size={20} color="#DB4437"/>
           <Text style={[tw`ml-3 text-base font-medium`,{color:theme.black}]}>Sign up with Google</Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
 
         <TouchableOpacity onPress={()=>Alert.alert('Sign up with Facebook not implemented')} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,{borderColor:theme.lightGray,backgroundColor:theme.white}]}>
           <FAIcon name="facebook" size={20} color="#4267B2"/>
