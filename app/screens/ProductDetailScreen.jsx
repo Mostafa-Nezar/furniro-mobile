@@ -30,16 +30,16 @@ const ProductDetailScreen = () => {
     if (!user?.id) return;
     try {
       const rateId = `${user.id}-${product.id}`;
-      await fetch("https://furniro-back-production.up.railway.app/api/ratings", {
+      await fetch("https://furniro-back-2-production.up.railway.app/api/ratings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userid: user.id, productid: product.id, rateid: rateId, rate: selectedRate }),
       });
-      const res = await fetch("https://furniro-back-production.up.railway.app/api/ratings");
+      const res = await fetch("https://furniro-back-2-production.up.railway.app/api/ratings");
       const allRatings = await res.json();
       const productRatings = allRatings.filter((r) => r.productid === product.id);
       const avg = productRatings.reduce((acc, cur) => acc + cur.rate, 0) / productRatings.length;
-      await fetch(`https://furniro-back-production.up.railway.app/api/products/db/${product.id}`, {
+      await fetch(`https://furniro-back-2-production.up.railway.app/api/products/db/${product.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ averagerate: +avg.toFixed(1), ratecount: productRatings.length }),

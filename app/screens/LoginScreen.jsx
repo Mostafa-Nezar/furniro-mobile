@@ -45,14 +45,14 @@ const LoginScreen = () => {
         Toast.show({
           type: "error",
           text1: "Login Error",
-          text2: result.message || "البيانات غير صحيحة",
+          text2: result.message || "false data",
         });
       }
     } catch (error) {
       Toast.show({
         type: "error",
         text1: "Login Error",
-        text2: error.message || "يرجى المحاولة لاحقًا",
+        text2: error.message || "try again later",
       });
     } finally {
       setLoading(false);
@@ -157,8 +157,7 @@ const LoginScreen = () => {
         <TouchableOpacity
           onPress={() => Toast.show({
             type: "info",
-            text1: "Soon",
-            text2: "الميزة تحت التطوير",
+            text1: "Soon"
           })}
           style={[
             tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,

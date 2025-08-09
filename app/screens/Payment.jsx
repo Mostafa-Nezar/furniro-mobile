@@ -56,7 +56,7 @@ const Payment = () => {
     setLoading(true);
     try {
       const res = await fetch(
-        "https://furniro-back-production.up.railway.app/api/payment/create-checkout-session",
+        "https://furniro-back-2-production.up.railway.app/api/payment/create-checkout-session",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -212,7 +212,7 @@ const Payment = () => {
         );
       const userId = JSON.parse(u)?.id;
       const res = await fetch(
-        "https://furniro-back-production.up.railway.app/api/paypal/create-paypal-order",
+        "https://furniro-back-2-production.up.railway.app/api/paypal/create-paypal-order",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
