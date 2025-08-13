@@ -20,7 +20,7 @@ import Toast from "react-native-toast-message";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
-  const { theme, login } = useAppContext();
+  const { theme, login, GoogleSignup} = useAppContext();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -155,10 +155,7 @@ const LoginScreen = () => {
 
         {/* Google */}
         <TouchableOpacity
-          onPress={() => Toast.show({
-            type: "info",
-            text1: "Soon"
-          })}
+          onPress={GoogleSignup}
           style={[
             tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,
             { borderColor: theme.lightGray, backgroundColor: theme.white }

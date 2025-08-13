@@ -40,19 +40,21 @@ const CartScreen = () => {
 
   if (!cart.length)
     return (
+      <View style={[tw`flex-1 justify-center px-6`, { backgroundColor: theme.white }]}>
+        <Header title="Cart" showBack={false} />
       <View style={[tw`flex-1 items-center justify-center px-6`, { backgroundColor: theme.white }]}>
-        <Header title="Cart" showBack={false} showCart={false} />
         <Icon name="shopping-cart" size={80} color={theme.darkGray} />
         <Text style={[tw`text-xl font-bold mt-4`, { color: theme.black }]}>Your cart is empty</Text>
         <TouchableOpacity onPress={() => navigation.navigate("Shop")} style={[tw`py-4 px-8 rounded-lg mt-6`, { backgroundColor: theme.primary }]}>
           <Text style={[tw`text-lg font-semibold text-white`]}>Shop Now</Text>
         </TouchableOpacity>
       </View>
+      </View>
     );
 
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
-      <Header title="Cart" showBack={false} showCart={false} />
+      <Header title="Cart" showBack={false} />
       <FlatList
         data={cart}
         renderItem={renderItem}

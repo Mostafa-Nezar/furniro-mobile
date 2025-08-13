@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, Alert, Switch, Animated, Dimensions, Modal, RefreshControl } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Image, Switch, Animated, Dimensions, Modal, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext";
 import Header from "../components/Header";
@@ -7,6 +7,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import * as ImagePicker from "expo-image-picker";
 import { useState, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
 
 const { width } = Dimensions.get("window");
 
@@ -23,35 +24,54 @@ const ProfileScreen = () => {
     setRefreshing(true);
     const success = await refreshUser();
     setRefreshing(false);
-    if (!success) Alert.alert("Error", "Failed to refresh user data");
+    if (!success) Toast.show({type: 'error', text1: 'Failed to refresh user data'});
   };
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) return Alert.alert("Permission required", "Access your gallery");
+    if (!permission.granted) return  Toast.show({type: 'success', text1: 'Permission required',text2:"Access your gallery"});
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [1, 1], quality: 0.8 });
     if (!result.canceled && result.assets?.length > 0) await uploadImage(result.assets[0]);
   };
-  const uploadImage = async (image) => {
-    if (!image) return;
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append("avatar", { uri: image.uri, name: image.fileName || "avatar.jpg", type: image.type || "image/jpeg" });
-    try {
-      const res = await fetch(`https://furniro-back-2-production.up.railway.app/api/upload/${user?.id}/update-image`, { method: "PATCH", headers: { "Content-Type": "multipart/form-data", Authorization: `Bearer ${user?.token}` }, body: formData });
-      const data = await res.json();
-      if (data.success && data.imageUrl) {
-        const updated = { ...user, image: data.imageUrl };
-        updateUser(updated);
-        await AsyncStorage.setItem("user", JSON.stringify(updated));
-        Alert.alert("Success", "Image updated");
-      } else Alert.alert("Error", data.message || "Upload failed");
-    } catch (err) {
-      console.error("Upload error:", err);
-      Alert.alert("Error", "Check your connection");
-    } finally {
-      setIsUploading(false);
+ const uploadImage = async (image) => {
+  if (!image) return;
+  setIsUploading(true);
+
+  const formData = new FormData();
+  formData.append("avatar", {
+    uri: image.uri,
+    name: image.fileName || `avatar_${Date.now()}.jpg`,
+    type: image.type?.includes("/") ? image.type : "image/jpeg",
+  });
+
+  try {
+    const res = await fetch(
+      `https://furniro-back-2-production.up.railway.app/api/upload/${user?.id}/update-image`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+        },
+        body: formData,
+      }
+    );
+
+    const data = await res.json();
+    if (data.success && data.imageUrl) {
+      const updated = { ...user, image: data.imageUrl };
+      updateUser(updated);
+      await AsyncStorage.setItem("user", JSON.stringify(updated));
+      Toast.show({type: 'success', text1:"Image Updated"})
+    } else {
+     Toast.show({type: 'success', text1: `${data.message}`||"Upload Failed"})
     }
-  };
+  } catch (err) {
+    console.error("Upload error:", err);
+    Toast.show({type: 'error', text1: 'Check Your Connection'})
+  } finally {
+    setIsUploading(false);
+  }
+};
+
   const handleLogout = async () => {
     await AsyncStorage.removeItem("user");
     logout();
@@ -111,7 +131,7 @@ const ProfileScreen = () => {
     { icon: "payment", title: "Payment", subtitle: "Manage cards", onPress: () => openSidebar(renderGenericContent("Payment Methods", "payment")) },
     { icon: "notifications", title: "Notifications", subtitle: "Notification settings", onPress: () => openSidebar(renderGenericContent("Notifications", "notifications")) },
     { icon: "help", title: "Help & Support", subtitle: "FAQs", onPress: () => openSidebar(renderGenericContent("Help & Support", "help")) },
-    { icon: "info", title: "About App", subtitle: "App info", onPress: () => Alert.alert("Furniro v1.0.0", "Modern furniture app") }
+    { icon: "info", title: "About App", subtitle: "App info", onPress: () => Toast.show({type: 'success', text1: 'Modern Furniture App'}) }
   ];
 
   if (!isAuthenticated) return (

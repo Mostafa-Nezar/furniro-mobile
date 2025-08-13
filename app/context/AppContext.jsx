@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors, darkColors } from "../constants/theme.jsx";
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 const AppContext = createContext();
 const API_BASE_URL = "https://furniro-back-2-production.up.railway.app/api";
@@ -46,6 +47,7 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     loadStoredData();
+    GoogleSignin.configure({webClientId:'866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh.apps.googleusercontent.com',offlineAccess:true});
   }, []);
 
   useEffect(() => {
@@ -199,21 +201,68 @@ export const AppProvider = ({ children }) => {
     }
   };
   const register = async (userData) => {
-    try {
-      const data = await fetchInstance("/auth/signup", {
-        method: "POST",
-        body: JSON.stringify(userData),
-      });
-      return await login(data.user.email, userData.password);
-    } catch (error) {
-      const newUser = { id: Date.now(), ...userData, avatar: null };
-      await AsyncStorage.setItem("token", "mock_token_123");
-      await AsyncStorage.setItem("user", JSON.stringify(newUser));
-      setUser(newUser);
-      setIsAuthenticated(true);
-      return { success: true, user: newUser };
+ try {
+    // جرب تعمل تسجيل جديد
+    const data = await fetchInstance("/auth/signup", {
+      method: "POST",
+      body: JSON.stringify(userData),
+    });
+
+    // لو نجح التسجيل، اعمل لوجين بالبيانات اللي جاية من الباك إند
+    return await login(data.user.email, userData.password);
+
+  } catch (error) {
+    if (error.status === 409 || error.message?.includes("already exists")) {
+      try {
+        const existingUserLogin = await login(userData.email, userData.password);
+        return existingUserLogin;
+      } catch (loginError) {
+        return { success: false, message: "Login failed for existing user" };
+      }
     }
+    const newUser = { id: Date.now(), ...userData, avatar: null };
+    await AsyncStorage.setItem("token", "mock_token_123");
+    await AsyncStorage.setItem("user", JSON.stringify(newUser));
+    setUser(newUser);
+    setIsAuthenticated(true);
+    return { success: true, user: newUser };
+  }
   };
+const GoogleSignup = async () => {
+  try {
+    await GoogleSignin.hasPlayServices();
+    const userInfo = await GoogleSignin.signIn();
+    const token = userInfo.idToken;
+
+    const res = await fetch(
+      'https://furniro-back-2-production.up.railway.app/api/auth/google',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.user && data.token) {
+      // تخزين البيانات
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(data.user));
+
+      // تحديث الحالة
+      setUser(data.user);
+      setIsAuthenticated(true);
+
+      return { success: true, user: data.user };
+    } else {
+      return { success: false, message: data.msg || 'Google sign-up error' };
+    }
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("token");
@@ -332,7 +381,8 @@ export const AppProvider = ({ children }) => {
         searchProducts,
         getImageUrl,
         clearCartAndUpdateOrsers,
-        refreshUser
+        refreshUser,
+        GoogleSignup
       }}
     >
       {children}

@@ -1,5 +1,5 @@
-import {useState,useEffect} from 'react';
-import {View,Text,TextInput,TouchableOpacity,Alert,ScrollView,Image,KeyboardAvoidingView,Platform} from 'react-native';
+import {useState} from 'react';
+import {View,Text,TextInput,TouchableOpacity,ScrollView,Image,KeyboardAvoidingView,Platform} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useAppContext} from '../context/AppContext';
 import {Formik} from 'formik';
@@ -7,15 +7,13 @@ import * as Yup from 'yup';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FAIcon from 'react-native-vector-icons/FontAwesome';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-
+import Toast from "react-native-toast-message";
 const RegisterScreen=()=>{ 
   const navigation=useNavigation();
-  const {theme,login,register}=useAppContext();
+  const {theme,login,register,GoogleSignup}=useAppContext();
   const [showPassword,setShowPassword]=useState(false);
   const [showConfirmPassword,setShowConfirmPassword]=useState(false);
 
-  useEffect(()=>{GoogleSignin.configure({webClientId:'866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh.apps.googleusercontent.com'});},[]);
 
   const validationSchema=Yup.object({
     name:Yup.string().required('Full name is required'),
@@ -27,24 +25,18 @@ const RegisterScreen=()=>{
   const handleRegister=async(values,{setSubmitting})=>{
     try{
       const result=await register(values);
-      if(result.success){login(result.user);Alert.alert('Success','Account created successfully');navigation.replace('Main');}
-      else{Alert.alert('Registration Error',result.message||'Something went wrong');}
-    }catch(error){Alert.alert('Error',error.message||'An error occurred');}
+        if(result.success){login(result.user);Toast.show({type: "success", text1: "Account Created Successfully", text2: "Welcome"});;navigation.replace('Main');}
+        else{Toast.show({type: 'error', text1: 'Registration Error', text2: result.message || 'Something went wrong',});}
+      }catch(error){Toast.show({type: 'error', text1: 'Registration Error', text2: result.message || 'Something went wrong',});}
     finally{setSubmitting(false);}
   };
-
-  const handleGoogleSignup=async()=>{
-    try{
-      await GoogleSignin.hasPlayServices();
-      const userInfo=await GoogleSignin.signIn();
-      const token=userInfo.idToken;
-      const res=await fetch('https://furniro-back-2-production.up.railway.app/api/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
-      const data=await res.json();
-      if(data.user){Alert.alert('Success','Google account created!'); login(data.user); navigation.replace('Main'); } 
-      else{Alert.alert('Error',data.msg||'Google sign-up error');}
-    }catch(error){Alert.alert('Google Error',error.message);}
+  const handleGoogleSignup = async () => {
+    const result = await GoogleSignup();
+    if (result.success) {
+      Toast.show({type: 'success', text1: 'Google account created!'});
+      navigation.replace('Main');
+    }else{Toast.show({type: 'error', text1: 'Registration Error', text2: result.message || 'Something went wrong',});}
   };
-
   const InputField=({icon,placeholder,secure,value,onChange,onBlur,toggleSecure,show,error,touched})=>(
     <View style={tw`mb-4`}>
       <View style={[tw`flex-row items-center border rounded-lg px-4 py-3`,{borderColor:theme.lightGray,backgroundColor:theme.semiWhite}]}>
@@ -68,7 +60,6 @@ const RegisterScreen=()=>{
           <Text style={[tw`text-3xl font-bold`,{color:theme.black}]}>Furniro</Text>
         </View>
         <Text style={[tw`text-lg text-center mb-6`,{color:theme.darkGray}]}>Create New Account</Text>
-
         <Formik initialValues={{name:'',email:'',password:'',confirmPassword:''}} validationSchema={validationSchema} onSubmit={handleRegister}>
           {({handleChange,handleBlur,handleSubmit,values,errors,touched,isSubmitting})=>(
             <>
@@ -82,23 +73,19 @@ const RegisterScreen=()=>{
             </>
           )}
         </Formik>
-
         <View style={tw`flex-row items-center mb-4`}>
           <View style={[tw`flex-1 h-px`,{backgroundColor:theme.lightGray}]}/>
           <Text style={[tw`mx-4 text-sm`,{color:theme.darkGray}]}>or</Text>
           <View style={[tw`flex-1 h-px`,{backgroundColor:theme.lightGray}]}/>
         </View>
-
         <TouchableOpacity onPress={handleGoogleSignup} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,{borderColor:theme.lightGray,backgroundColor:theme.white}]}>
           <FAIcon name="google" size={20} color="#DB4437"/>
           <Text style={[tw`ml-3 text-base font-medium`,{color:theme.black}]}>Sign up with Google</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity onPress={()=>Alert.alert('Sign up with Facebook not implemented')} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,{borderColor:theme.lightGray,backgroundColor:theme.white}]}>
+        <TouchableOpacity onPress={()=>Toast.show({type: 'success', text1: 'Soon'})} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,{borderColor:theme.lightGray,backgroundColor:theme.white}]}>
           <FAIcon name="facebook" size={20} color="#4267B2"/>
           <Text style={[tw`ml-3 text-base font-medium`,{color:theme.black}]}>Sign up with Facebook</Text>
         </TouchableOpacity>
-
         <View style={tw`flex-row justify-center mt-2`}>
           <Text style={[tw`text-base`,{color:theme.darkGray}]}>Already have an account? </Text>
           <TouchableOpacity onPress={()=>navigation.navigate('Login')}>

@@ -33,6 +33,13 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "webClientId": "866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh.apps.googleusercontent.com",
+          "iosUrlScheme": "com.googleusercontent.apps.866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh"
+        }
       ]
     ],
     "experiments": {
