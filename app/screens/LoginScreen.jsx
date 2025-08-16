@@ -19,7 +19,6 @@ const LoginScreen = () => {
     email: Yup.string().email("Invalid Email").required("Email Required"),
     password: Yup.string().required("PassWord Required"),
   });
-
   const handleLogin = async ({ email, password }) => {
     setLoading(true);
     try {
@@ -36,21 +35,11 @@ const LoginScreen = () => {
       setLoading(false);
     }
   };
-
   const InputField = ({ icon, placeholder, value, onChangeText, onBlur, error, secure, showToggle, toggle }) => (
     <View style={tw`mb-4`}>
       <View style={[tw`flex-row items-center border rounded-lg px-4 py-3`, { borderColor: theme.lightGray, backgroundColor: theme.semiWhite }]}>
         <Icon name={icon} size={20} color={theme.darkGray} />
-        <TextInput
-          style={[tw`flex-1 ml-3 text-base`, { color: theme.black }]}
-          placeholder={placeholder}
-          placeholderTextColor={theme.darkGray}
-          secureTextEntry={secure && !showToggle}
-          value={value}
-          onChangeText={onChangeText}
-          onBlur={onBlur}
-          autoCapitalize="none"
-        />
+        <TextInput style={[tw`flex-1 ml-3 text-base`, { color: theme.black }]} placeholder={placeholder} placeholderTextColor={theme.darkGray} secureTextEntry={secure && !showToggle} value={value} onChangeText={onChangeText} onBlur={onBlur} autoCapitalize="none"/>
         {secure && (
           <TouchableOpacity onPress={toggle}>
             <Icon name={showToggle ? "visibility" : "visibility-off"} size={20} color={theme.darkGray} />
@@ -60,7 +49,6 @@ const LoginScreen = () => {
       {error && <Text style={[tw`text-sm mt-1 ml-2`, { color: "red" }]}>{error}</Text>}
     </View>
   );
-
   return (
     <KeyboardAvoidingView style={[tw`flex-1`, { backgroundColor: theme.white }]} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <ScrollView contentContainerStyle={tw`flex-grow justify-center px-6`}>
@@ -72,30 +60,9 @@ const LoginScreen = () => {
         <Formik initialValues={{ email: "", password: "" }} validationSchema={validationSchema} onSubmit={handleLogin}>
           {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
             <>
-              <InputField
-                icon="email"
-                placeholder="Enter your email"
-                value={values.email}
-                onChangeText={handleChange("email")}
-                onBlur={handleBlur("email")}
-                error={touched.email && errors.email}
-              />
-              <InputField
-                icon="lock"
-                placeholder="Enter your password"
-                value={values.password}
-                onChangeText={handleChange("password")}
-                onBlur={handleBlur("password")}
-                error={touched.password && errors.password}
-                secure
-                showToggle={showPassword}
-                toggle={() => setShowPassword(!showPassword)}
-              />
-              <TouchableOpacity
-                onPress={handleSubmit}
-                disabled={loading}
-                style={[tw`py-4 rounded-lg mb-4`, { backgroundColor: theme.primary, opacity: loading ? 0.7 : 1 }]}
-              >
+              <InputField icon="email" placeholder="Enter your email" value={values.email} onChangeText={handleChange("email")} onBlur={handleBlur("email")} error={touched.email && errors.email} />
+              <InputField icon="lock" placeholder="Enter your password" value={values.password} onChangeText={handleChange("password")} onBlur={handleBlur("password")} error={touched.password && errors.password} secure showToggle={showPassword} toggle={() => setShowPassword(!showPassword)} />
+              <TouchableOpacity onPress={handleSubmit} disabled={loading} style={[tw`py-4 rounded-lg mb-4`, { backgroundColor: theme.primary, opacity: loading ? 0.7 : 1 }]}>
                 <Text style={[tw`text-center text-lg font-semibold`, { color: theme.white }]}>{loading ? "Logging in..." : "Login"}</Text>
               </TouchableOpacity>
             </>
@@ -106,17 +73,11 @@ const LoginScreen = () => {
           <Text style={[tw`mx-4 text-sm`, { color: theme.darkGray }]}>or</Text>
           <View style={[tw`flex-1 h-px`, { backgroundColor: theme.lightGray }]} />
         </View>
-        <TouchableOpacity
-          onPress={GoogleSignup}
-          style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`, { borderColor: theme.lightGray, backgroundColor: theme.white }]}
-        >
+        <TouchableOpacity onPress={GoogleSignup} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`, { borderColor: theme.lightGray, backgroundColor: theme.white }]}>
           <FAIcon name="google" size={20} color="#DB4437" />
           <Text style={[tw`ml-3 text-base font-medium`, { color: theme.black }]}>Sign in with Google</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => Toast.show({ type: "info", text1: "Soon", text2: "" })}
-          style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-6 border`, { borderColor: theme.lightGray, backgroundColor: theme.white }]}
-        >
+        <TouchableOpacity onPress={() => Toast.show({ type: "info", text1: "Soon", text2: "" })} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-6 border`, { borderColor: theme.lightGray, backgroundColor: theme.white }]}>
           <FAIcon name="facebook" size={20} color="#4267B2" />
           <Text style={[tw`ml-3 text-base font-medium`, { color: theme.black }]}>Sign in with Facebook</Text>
         </TouchableOpacity>
