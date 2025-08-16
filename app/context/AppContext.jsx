@@ -44,16 +44,30 @@ export const AppProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [isOffline, setIsOffline] = useState(false);
   const [theme, setTheme] = useState(colors);
+  const [orders,setorders] = useState([]);
+  
 
   useEffect(() => {
     loadStoredData();
     GoogleSignin.configure({webClientId:'866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh.apps.googleusercontent.com',offlineAccess:true});
   }, []);
-
   useEffect(() => {
     saveDataToStorage();
   }, [isDarkMode, cart, favorites, user, isAuthenticated]);
-
+  useEffect(() => {
+  if (user && user.id) {
+    fetchOrders(user.id);
+  }
+}, [user]);
+  const fetchOrders = async (userId) => {
+      const response = await fetch(`https://furniro-back-production.up.railway.app/api/orders/user/${userId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setorders(data);
+      return data;
+  };
   const loadStoredData = async () => {
     try {
       const appDataRaw = await AsyncStorage.getItem("appData");
@@ -166,12 +180,7 @@ export const AppProvider = ({ children }) => {
     setUser(updatedUser);
     await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
   };
-  const toggleFavorite = (id) => {
-    if (favorites.includes(id)) {
-      setFavorites(favorites.filter((fav) => fav !== id));
-    } else {
-      setFavorites([...favorites, id]);
-    }
+  const toggleFavorite = (id) => {favorites.includes(id)?setFavorites(favorites.filter((fav) => fav !== id)):setFavorites([...favorites, id]);
   };
   const updateUser = async (updatedUser) => {
     setUser(updatedUser);
@@ -202,13 +211,11 @@ export const AppProvider = ({ children }) => {
   };
   const register = async (userData) => {
  try {
-    // جرب تعمل تسجيل جديد
     const data = await fetchInstance("/auth/signup", {
       method: "POST",
       body: JSON.stringify(userData),
     });
 
-    // لو نجح التسجيل، اعمل لوجين بالبيانات اللي جاية من الباك إند
     return await login(data.user.email, userData.password);
 
   } catch (error) {
@@ -228,41 +235,40 @@ export const AppProvider = ({ children }) => {
     return { success: true, user: newUser };
   }
   };
-const GoogleSignup = async () => {
-  try {
-    await GoogleSignin.hasPlayServices();
-    const userInfo = await GoogleSignin.signIn();
-    const token = userInfo.idToken;
+  const GoogleSignup = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const token = userInfo.idToken;
 
-    const res = await fetch(
-      'https://furniro-back-2-production.up.railway.app/api/auth/google',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
+      const res = await fetch(
+        'https://furniro-back-2-production.up.railway.app/api/auth/google',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.user && data.token) {
+        // تخزين البيانات
+        await AsyncStorage.setItem('token', data.token);
+        await AsyncStorage.setItem('user', JSON.stringify(data.user));
+
+        // تحديث الحالة
+        setUser(data.user);
+        setIsAuthenticated(true);
+
+        return { success: true, user: data.user };
+      } else {
+        return { success: false, message: data.msg || 'Google sign-up error' };
       }
-    );
-
-    const data = await res.json();
-
-    if (data.user && data.token) {
-      // تخزين البيانات
-      await AsyncStorage.setItem('token', data.token);
-      await AsyncStorage.setItem('user', JSON.stringify(data.user));
-
-      // تحديث الحالة
-      setUser(data.user);
-      setIsAuthenticated(true);
-
-      return { success: true, user: data.user };
-    } else {
-      return { success: false, message: data.msg || 'Google sign-up error' };
+    } catch (error) {
+      return { success: false, message: error.message };
     }
-  } catch (error) {
-    return { success: false, message: error.message };
-  }
-};
-
+  };
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("token");
@@ -382,7 +388,8 @@ const GoogleSignup = async () => {
         getImageUrl,
         clearCartAndUpdateOrsers,
         refreshUser,
-        GoogleSignup
+        GoogleSignup,
+        orders
       }}
     >
       {children}
