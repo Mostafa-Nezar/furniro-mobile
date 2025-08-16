@@ -83,26 +83,25 @@ const ProfileScreen = () => {
       </ScrollView>
     </View>
   );
-const renderNotificationsContent = () => (
-  <View style={tw`flex-1 p-4`}>
-    <View style={tw`flex-row justify-between items-center mb-6`}>
-      <Text style={[tw`text-xl font-bold`, { color: theme.black }]}>Notifications</Text>
-      <TouchableOpacity onPress={closeSidebar}><Icon name="close" size={24} color={theme.darkGray} /></TouchableOpacity>
-    </View>
-    <ScrollView contentContainerStyle={tw`pb-4`}>
-      {notifications.length > 0 ? notifications.map(n => (
-        <View key={n.id} style={[tw`p-4 mb-3 rounded-lg flex-row justify-between`, { backgroundColor: n.read ? theme.semiWhite : theme.lightBeige }]}>
-          <View style={tw`flex-1 pr-2`}>
-            <Text style={[tw`text-base font-semibold`, { color: theme.black }]}>{n.message}</Text>
-            <Text style={[tw`text-sm mt-1`, { color: theme.darkGray }]}>{new Date(n.date).toLocaleString()}</Text>
+  const renderNotificationsContent = () => (
+    <View style={tw`flex-1 p-4`}>
+      <View style={tw`flex-row justify-between items-center mb-6`}>
+        <Text style={[tw`text-xl font-bold`, { color: theme.black }]}>Notifications</Text>
+        <TouchableOpacity onPress={closeSidebar}><Icon name="close" size={24} color={theme.darkGray} /></TouchableOpacity>
+      </View>
+      <ScrollView contentContainerStyle={tw`pb-4`}>
+        {notifications.length > 0 ? notifications.map(n => (
+          <View key={n.id} style={[tw`p-4 mb-3 rounded-lg flex-row justify-between`, { backgroundColor: n.read ? theme.semiWhite : theme.lightBeige }]}>
+            <View style={tw`flex-1 pr-2`}>
+              <Text style={[tw`text-base font-semibold`, { color: theme.black }]}>{n.message}</Text>
+              <Text style={[tw`text-sm mt-1`, { color: theme.darkGray }]}>{new Date(n.date).toLocaleString()}</Text>
+            </View>
+            <Icon name={n.read ? "notifications-none" : "notifications"} size={24} color={theme.primary} />
           </View>
-          <Icon name={n.read ? "notifications-none" : "notifications"} size={24} color={theme.primary} />
-        </View>
-      )) : renderEmptyContent("notifications-none","No Notifications","You have no notifications yet")}
-    </ScrollView>
-  </View>
-);
-
+        )) : renderEmptyContent("notifications-none","No Notifications","You have no notifications yet")}
+      </ScrollView>
+    </View>
+  );
   const renderGenericContent = (title, icon) => (
     <View style={tw`flex-1 p-4`}>
       <View style={tw`flex-row justify-between items-center mb-6`}>

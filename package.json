@@ -54,7 +54,8 @@
     "socket.io-client": "^4.8.1",
     "toast": "^0.5.4",
     "twrnc": "^4.9.1",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "expo-location": "~18.1.6"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
