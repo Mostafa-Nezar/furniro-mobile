@@ -124,17 +124,7 @@ const Payment = () => {
 
   const InputField = ({ handleChange, handleBlur, value, placeholder, keyboardType = "default", maxLength, secureTextEntry = false, name }) => (
     <View style={tw`mb-4`}>
-      <TextInput
-        style={[tw`p-4 rounded-lg border`, { borderColor: theme.lightGray, backgroundColor: theme.semiWhite, color: theme.black }]}
-        onChangeText={handleChange(name)}
-        onBlur={handleBlur(name)}
-        value={value}
-        placeholder={placeholder}
-        placeholderTextColor={theme.darkGray}
-        keyboardType={keyboardType}
-        maxLength={maxLength}
-        secureTextEntry={secureTextEntry}
-      />
+      <TextInput style={[tw`p-4 rounded-lg border`, { borderColor: theme.lightGray, backgroundColor: theme.semiWhite, color: theme.black }]} onChangeText={handleChange(name)} onBlur={handleBlur(name)} value={value} placeholder={placeholder} placeholderTextColor={theme.darkGray} keyboardType={keyboardType} maxLength={maxLength} secureTextEntry={secureTextEntry}/>
     </View>
   );
 
