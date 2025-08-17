@@ -11,7 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 
 const Payment = () => {
-  const nav = useNavigation(), { theme, user, clearCartAndUpdateOrsers } = useAppContext(), [loading, setLoading] = useState(false),
+  const nav = useNavigation(), { theme, user, clearCartAndUpdateOrsers } = useAppContext(), [loading, setLoading] = useState(false), [loadingPayPal, setLoadingPayPal] = useState(false);
     cart = user?.cart || [], subtotal = cart.reduce((t, i) => t + i.price * i.quantity, 0),
     shipping = subtotal >= 100 ? 0 : 10, total = subtotal + shipping;
 
@@ -103,10 +103,10 @@ const Payment = () => {
   };
 
   const handlePayWithPayPal = async () => {
-    setLoading(true);
+    setLoadingPayPal(true);
     try {
       const u = await AsyncStorage.getItem("user");
-      if (!u) return Toast.show({ type: "error", text1: "User Not Found" }), setLoading(false);
+      if (!u) return Toast.show({ type: "error", text1: "User Not Found" }), setLoadingPayPal(false);
       const userId = JSON.parse(u)?.id,
         res = await fetch("https://furniro-back-production.up.railway.app/api/paypal/create-paypal-order", {
           method: "POST",
@@ -118,7 +118,7 @@ const Payment = () => {
       console.error("❌ PayPal error:", e);
       Toast.show({ type: "error", text1: "Disconnected" });
     } finally {
-      setLoading(false);
+      setLoadingPayPal(false);
     }
   };
 
@@ -191,9 +191,9 @@ const Payment = () => {
                 {loading ? <ActivityIndicator color={theme.white} style={tw`mr-2`} /> : <Icon name="payment" size={20} color={theme.white} style={tw`mr-2`} />}
                 <Text style={[tw`text-lg font-semibold text-white`]}>{loading ? "Processing..." : `Pay $${total.toFixed(2)}`}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handlePayWithPayPal} disabled={loading} style={[tw`py-4 rounded-lg flex-row items-center justify-center mt-3`, { backgroundColor: theme.black }]}>
-                <Icon name="account-balance-wallet" size={20} color={theme.white} style={tw`mr-2`} />
-                <Text style={[tw`text-lg font-semibold text-white`]}>Pay with PayPal</Text>
+              <TouchableOpacity onPress={handlePayWithPayPal} disabled={loadingPayPal} style={[tw`py-4 rounded-lg flex-row items-center justify-center mt-3`, { backgroundColor: theme.black }]}>
+                {loadingPayPal ? <ActivityIndicator color={theme.white} style={tw`mr-2`} /> : <Icon name="account-balance-wallet" size={20} color={theme.white} style={tw`mr-2`} />}
+                <Text style={[tw`text-lg font-semibold`,{color:theme.white}]}>Pay with PayPal</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => nav.goBack()} style={[tw`py-3 mt-3 border rounded-lg`, { borderColor: theme.primary }]}>
                 <Text style={[tw`text-center text-base font-semibold`, { color: theme.primary }]}>Back to Cart</Text>
