@@ -4,7 +4,7 @@ import { colors, darkColors } from "../constants/theme.jsx";
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 const AppContext = createContext();
-const API_BASE_URL = "https://furniro-back-2-production.up.railway.app/api";
+const API_BASE_URL = "https://furniro-back-production.up.railway.app/api";
 
 const fetchInstance = async (endpoint, options = {}) => {
   const token = await AsyncStorage.getItem("token");
@@ -242,7 +242,7 @@ export const AppProvider = ({ children }) => {
       const token = userInfo.idToken;
 
       const res = await fetch(
-        'https://furniro-back-2-production.up.railway.app/api/auth/google',
+        'https://furniro-back-production.up.railway.app/api/auth/google',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

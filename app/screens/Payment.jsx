@@ -33,7 +33,7 @@ const Payment = () => {
   const createCheckoutSession = async (v) => {
     setLoading(true);
     try {
-      const res = await fetch("https://furniro-back-2-production.up.railway.app/api/payment/create-checkout-session", {
+      const res = await fetch("https://furniro-back-production.up.railway.app/api/payment/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -108,7 +108,7 @@ const Payment = () => {
       const u = await AsyncStorage.getItem("user");
       if (!u) return Toast.show({ type: "error", text1: "User Not Found" }), setLoading(false);
       const userId = JSON.parse(u)?.id,
-        res = await fetch("https://furniro-back-2-production.up.railway.app/api/paypal/create-paypal-order", {
+        res = await fetch("https://furniro-back-production.up.railway.app/api/paypal/create-paypal-order", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ total: total.toFixed(2), userId }),

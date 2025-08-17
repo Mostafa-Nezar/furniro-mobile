@@ -27,7 +27,7 @@ const ProfileScreen = () => {
     const formData = new FormData();
     formData.append("avatar", { uri: image.uri, name: image.fileName || `avatar_${Date.now()}.jpg`, type: image.type?.includes("/") ? image.type : "image/jpeg" });
     try {
-      const res = await fetch(`https://furniro-back-2-production.up.railway.app/api/upload/${user?.id}/update-image`, {
+      const res = await fetch(`https://furniro-back-production.up.railway.app/api/upload/${user?.id}/update-image`, {
         method: "PATCH", headers: { Authorization: `Bearer ${user?.token}` }, body: formData,
       }), data = await res.json();
       if (data.success && data.imageUrl) {
@@ -47,7 +47,6 @@ const ProfileScreen = () => {
         const data = await res.json();
         const userNotifications = (data.notifications || []).filter(n => n.userId === user.id);
         setNotifications(userNotifications);
-        setUnreadCount(userNotifications.filter(n => !n.read).length);
       }
   };
   useEffect(()=>{

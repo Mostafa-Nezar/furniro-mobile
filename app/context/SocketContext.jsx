@@ -27,7 +27,7 @@ export const SocketProvider = ({ children }) => {
         if (token && user) {
           const userData = JSON.parse(user);
           
-          const newSocket = io('https://furniro-back-2-production.up.railway.app/api', {
+          const newSocket = io('https://furniro-back-production.up.railway.app/api', {
             auth: {
               token: token
             }
