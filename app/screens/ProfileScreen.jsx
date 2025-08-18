@@ -163,7 +163,7 @@ const ProfileScreen = () => {
         <Text style={[tw`text-xl font-bold`, { color: theme.black }]}>My Location</Text>
         <TouchableOpacity onPress={closeSidebar}><Icon name="close" size={24} color={theme.darkGray} /></TouchableOpacity>
       </View>
-      {user?.location ? (
+      {user?.location.lat ? (
         <View style={[tw`p-4`, { color: theme.black }]}>
           <Icon name="location-on" size={60} color={theme.primary} />
           <Text style={[tw`text-base font-bold mb-2`, { color: theme.black }]}>Current Location</Text>
@@ -197,7 +197,7 @@ const ProfileScreen = () => {
     { icon: "notifications", title: "Notifications", subtitle: "Notification settings", onPress: () => openSidebar(renderNotificationsContent()) },
     { icon: "help", title: "Help & Support", subtitle: "FAQs", onPress: () => openSidebar(renderGenericContent("Help & Support", "help")) },
     { icon: "info", title: "About App", subtitle: "App info", onPress: () => Toast.show({ type: "success", text1: "Modern Furniture App" }) },
-    { icon: "location-on", title: "My Location", subtitle: user?.location ? "Location saved" : "No location yet", onPress: () => openSidebar(renderLocationContent()) },
+    { icon: "location-on", title: "My Location", subtitle: user?.location.lat ? "Location saved" : "No location yet", onPress: () => openSidebar(renderLocationContent()) },
   ];
   if (!isAuthenticated) return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
@@ -272,3 +272,4 @@ const ProfileScreen = () => {
 };
 
 export default ProfileScreen;
+
