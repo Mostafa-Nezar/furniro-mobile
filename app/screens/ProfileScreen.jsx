@@ -170,11 +170,12 @@ const ProfileScreen = () => {
           <ActivityIndicator size="large" color={theme.primary} />
           <Text style={[tw`mt-4`, { color: theme.darkGray }]}>Updating Location...</Text>
         </View>
-      ) : user?.location?.address ? (
+      ) : user?.location?.lat ? (
         <View style={tw`items-center text-center p-4`}>
           <Icon name="location-on" size={60} color={theme.primary} />
           <Text style={[tw`text-base font-bold mt-4 mb-2`, { color: theme.black }]}>Current Location</Text>
-          <Text style={[tw`text-sm text-center`, { color: theme.darkGray }]}>{user.location.address}</Text>
+          <Text style={[tw`text-sm text-center`, { color: theme.darkGray }]}>{user.location.lng}</Text>
+          <Text style={[tw`text-sm text-center`, { color: theme.darkGray }]}>{user.location.lat}</Text>
         </View>
       ) : (
         <View style={tw`flex-1 justify-center items-center`}>
@@ -221,7 +222,7 @@ const ProfileScreen = () => {
   );
   const menuItems = [ { key: 'favorites', icon: "favorite", title: "Favorites", subtitle: `${favorites.length} items` },
     { key: 'history', icon: "history", title: "Order History", subtitle: `${orders.length} orders` },
-    { key: 'location', icon: "location-on", title: "My Location", subtitle: user?.location?.address ? "Location Saved" : "Set location" },
+    { key: 'location', icon: "location-on", title: "My Location", subtitle: user?.location?.lat ? "Location Saved" : "Set location" },
     { key: 'notifications', icon: "notifications", title: "Notifications", subtitle: `${notifications.filter(n=>!n.read).length} new` },
     { key: 'addresses', icon: "pin-drop", title: "Addresses", subtitle: "Manage delivery" },
     { key: 'payment', icon: "payment", title: "Payment", subtitle: "Manage cards" },
