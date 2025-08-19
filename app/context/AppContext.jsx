@@ -5,7 +5,6 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 const AppContext = createContext();
 const API_BASE_URL = "https://furniro-back-production.up.railway.app/api";
-
 const fetchInstance = async (endpoint, options = {}) => {
   const token = await AsyncStorage.getItem("token");
 
@@ -45,8 +44,6 @@ export const AppProvider = ({ children }) => {
   const [isOffline, setIsOffline] = useState(false);
   const [theme, setTheme] = useState(colors);
   const [orders,setorders] = useState([]);
-  
-
   useEffect(() => {
     loadStoredData();
     GoogleSignin.configure({webClientId:'866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh.apps.googleusercontent.com',offlineAccess:true});
@@ -192,7 +189,6 @@ export const AppProvider = ({ children }) => {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
-
       if (data.token) await AsyncStorage.setItem("token", data.token);
       setUser(data.user);
       setIsAuthenticated(true);
@@ -215,9 +211,7 @@ export const AppProvider = ({ children }) => {
       method: "POST",
       body: JSON.stringify(userData),
     });
-
     return await login(data.user.email, userData.password);
-
   } catch (error) {
     if (error.status === 409 || error.message?.includes("already exists")) {
       try {
@@ -240,7 +234,6 @@ export const AppProvider = ({ children }) => {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       const token = userInfo.idToken;
-
       const res = await fetch(
         'https://furniro-back-production.up.railway.app/api/auth/google',
         {
@@ -249,18 +242,12 @@ export const AppProvider = ({ children }) => {
           body: JSON.stringify({ token }),
         }
       );
-
       const data = await res.json();
-
       if (data.user && data.token) {
-        // تخزين البيانات
         await AsyncStorage.setItem('token', data.token);
         await AsyncStorage.setItem('user', JSON.stringify(data.user));
-
-        // تحديث الحالة
         setUser(data.user);
         setIsAuthenticated(true);
-
         return { success: true, user: data.user };
       } else {
         return { success: false, message: data.msg || 'Google sign-up error' };
