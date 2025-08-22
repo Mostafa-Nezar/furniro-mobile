@@ -7,12 +7,10 @@ const AppContext = createContext();
 const API_BASE_URL = "https://furniro-back-production.up.railway.app/api";
 const fetchInstance = async (endpoint, options = {}) => {
   const token = await AsyncStorage.getItem("token");
-
   const defaultHeaders = {
     "Content-Type": "application/json",
     ...(token && { Authorization: `Bearer ${token}` }),
   };
-
   const finalOptions = {
     ...options,
     headers: {
@@ -20,17 +18,14 @@ const fetchInstance = async (endpoint, options = {}) => {
       ...(options.headers || {}),
     },
   };
-
   const response = await fetch(`${API_BASE_URL}${endpoint}`, finalOptions);
   const data = await response.json();
-
   if (!response.ok) {
     const error = new Error(data?.msg || "Unknown error");
     error.response = response;
     error.data = data;
     throw error;
   }
-
   return data;
 };
 
@@ -56,6 +51,16 @@ export const AppProvider = ({ children }) => {
     fetchOrders(user.id);
   }
 }, [user]);
+  const fetchNotifications = async (setNotifications) => {
+    const user = JSON.parse(await AsyncStorage.getItem("user"));
+    if (!user?.id) return;
+    try {
+      const data = await fetchInstance("/notifications");
+      setNotifications((data.notifications || []).filter(n => n.userId === user.id));
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    }
+  };
   const fetchOrders = async (userId) => {
       const response = await fetch(`https://furniro-back-production.up.railway.app/api/orders/user/${userId}`);
       if (!response.ok) {
