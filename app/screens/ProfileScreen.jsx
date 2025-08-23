@@ -5,21 +5,21 @@ import Header from "../components/Header";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as ImagePicker from "expo-image-picker";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 import Geolocation from "react-native-geolocation-service";
-
-const { width } = Dimensions.get("window");
+import { useSocket } from "../context/SocketContext";
 
 const ProfileScreen = () => {
+const { width } = Dimensions.get("window");
   const navigation = useNavigation();
   const { theme, user, isAuthenticated, logout, isDarkMode, toggleTheme, cart, favorites, updateUser, products, getImageUrl, toggleFavorite, refreshUser, orders } = useAppContext();
   const [isUploading, setIsUploading] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarContentKey, setSidebarContentKey] = useState(null); 
   const [isLocationLoading, setLocationLoading] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+  const {notifications} = useSocket();
   const [refreshing, setRefreshing] = useState(false);
   const slideAnim = useRef(new Animated.Value(width)).current;
   const favoriteProducts = products.filter((p) => favorites.includes(p.id));
@@ -51,19 +51,6 @@ const ProfileScreen = () => {
     } catch (err) { Toast.show({ type: "error", text1: "Check Your Connection" }); } 
     finally { setIsUploading(false); }
   };
-  const fetchNotifications = async () => {
-    const token = await AsyncStorage.getItem("token");
-    const user = JSON.parse(await AsyncStorage.getItem("user"));
-    if (!token || !user?.id) return;
-    try {
-      const res = await fetch("https://furniro-back-production.up.railway.app/api/notifications", { headers: { Authorization: `Bearer ${token}` } } );
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications((data.notifications || []).filter(n => n.userId === user.id));
-      }
-    } catch (error) { console.error("Failed to fetch notifications:", error); }
-  };
-  useEffect(() => { if (isAuthenticated) fetchNotifications(); }, [isAuthenticated]);
   const handleLogout = async () => {
     await AsyncStorage.removeItem("user");
     logout();
@@ -235,7 +222,6 @@ const ProfileScreen = () => {
     { key: 'payment', icon: "payment", title: "Payment", subtitle: "Manage cards" },
     { key: 'help', icon: "help", title: "Help & Support", subtitle: "FAQs" },
   ];
-
   if (!isAuthenticated) {
     return (
       <View style={[tw`flex-1 justify-center items-center px-6`, { backgroundColor: theme.white }]}>
@@ -249,7 +235,6 @@ const ProfileScreen = () => {
       </View>
     );
   }
-
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title="Profile" />

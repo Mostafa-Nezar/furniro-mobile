@@ -20,62 +20,16 @@ const InnerApp = () => {
   }, []);
 
   const toastConfig = {
-    success: (props) => (
-      <BaseToast
-        {...props}
-        style={[
-          tw`rounded-lg`,
-          {
-            borderLeftColor: theme.green,
-            backgroundColor: theme.semiWhite,
-          },
-        ]}
-        contentContainerStyle={tw`px-4`}
-        text1Style={[
-          tw`text-base font-bold`,
-          { color: theme.black, fontFamily: "Poppins-SemiBold" },
-        ]}
-        text2Style={[
-          tw`text-sm`,
-          { color: theme.darkGray, fontFamily: "Poppins-Regular" },
-        ]}
-      />
-    ),
-
-    error: (props) => (
-      <ErrorToast
-        {...props}
-        style={[
-          tw`rounded-lg`,
-          {
-            borderLeftColor: theme.red,
-            backgroundColor: theme.semiWhite,
-          },
-        ]}
-        contentContainerStyle={tw`px-4`}
-        text1Style={[
-          tw`text-base font-bold`,
-          { color: theme.black, fontFamily: "Poppins-SemiBold" },
-        ]}
-        text2Style={[
-          tw`text-sm`,
-          { color: theme.darkGray, fontFamily: "Poppins-Regular" },
-        ]}
-      />
-    ),
+    success: (props) => ( <BaseToast {...props} style={[ tw`rounded-lg`, { borderLeftColor: theme.green, backgroundColor: theme.semiWhite } ]} contentContainerStyle={tw`px-4`} text1Style={[ tw`text-base font-bold`, { color: theme.black, fontFamily: "Poppins-SemiBold" }]} text2Style={[ tw`text-sm`,{ color: theme.darkGray, fontFamily: "Poppins-Regular" }]}/>),
+    error: (props) => ( <ErrorToast {...props} style={[ tw`rounded-lg`, { borderLeftColor: theme.red, backgroundColor: theme.semiWhite}]} contentContainerStyle={tw`px-4`} text1Style={[ tw`text-base font-bold`, { color: theme.black, fontFamily: "Poppins-SemiBold" } ]} text2Style={[ tw`text-sm`, { color: theme.darkGray, fontFamily: "Poppins-Regular" } ]} />),
   };
 
-  return (
-    <>
-      <StatusBar
-        barStyle={isDarkMode ? "light-content" : "dark-content"}
-        backgroundColor={isDarkMode ? theme.semiWhite : theme.primary}
-      />
-      <AppNavigator />
-      <Toast config={toastConfig} />
-    </>
-  );
-};
+  return (<>
+          <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={isDarkMode ? theme.semiWhite : theme.primary}/>
+          <AppNavigator />
+          <Toast config={toastConfig} />
+        </>);
+  };
 
 export default function App() {
   return (
