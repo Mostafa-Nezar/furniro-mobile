@@ -74,7 +74,7 @@ export const SocketProvider = ({ children }) => {
     if (diff < 1440) return `${Math.floor(diff / 60)}h ago`;
     return date.toLocaleDateString();
   };
-  useEffect(() => {
+  useEffect( async () => {
     const initSocket = async () => {
         const token = await AsyncStorage.getItem('token');
         const user = await AsyncStorage.getItem('user');
@@ -106,6 +106,7 @@ export const SocketProvider = ({ children }) => {
     };
 
     initSocket();
+    await fetchNotifications();
     return () => {
       if (socket) {
         socket.disconnect();

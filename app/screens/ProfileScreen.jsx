@@ -19,7 +19,7 @@ const { width } = Dimensions.get("window");
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarContentKey, setSidebarContentKey] = useState(null); 
   const [isLocationLoading, setLocationLoading] = useState(false);
-  const {notifications} = useSocket();
+  const {notifications, formatDate} = useSocket();
   const [refreshing, setRefreshing] = useState(false);
   const slideAnim = useRef(new Animated.Value(width)).current;
   const favoriteProducts = products.filter((p) => favorites.includes(p.id));
@@ -200,11 +200,14 @@ const { width } = Dimensions.get("window");
       <SidebarHeader title="Notifications" />
       <ScrollView>
         {notifications.length > 0 ? notifications.map(n => (
-          <View key={n.id} style={[tw`p-4 mb-3 rounded-lg`, { backgroundColor: n.read ? theme.semiWhite : theme.lightBeige }]}>
-            <Text style={[tw`text-base font-semibold`, { color: theme.black }]}>{n.message}</Text>
-            <Text style={[tw`text-sm mt-1`, { color: theme.darkGray }]}>{new Date(n.date).toLocaleString()}</Text>
+          <View key={n.id} style={[tw`p-4 mb-3 rounded-lg flex-row justify-between`,{backgroundColor:n.read?theme.semiWhite:theme.lightBeige}]}>
+            <View style={tw`flex-1 pr-2`}>
+              <Text style={[tw`text-base font-semibold`,{color:theme.black}]}>{n.message}</Text>
+              <Text style={[tw`text-sm mt-1`,{color:theme.darkGray}]}>{formatDate(n.createdAt)}</Text>
+            </View>
+            <Icon name={n.read?"notifications-none":"notifications"} size={24} color={theme.primary}/>
           </View>
-        )) : <EmptyContent icon="notifications-off" title="No Notifications" subtitle="You have no new notifications." />}
+        )):<EmptyContent icon="notifications-off" title="No Notifications" subtitle="You have no new notifications."/>}
       </ScrollView>
     </View>
   );
@@ -258,7 +261,7 @@ const { width } = Dimensions.get("window");
             </View>
           </View>
         </View>
-        <View style={[tw`flex-row justify-between p-4 mx-4 mt-4 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
+        <View style={[tw`flex-row justify-between p-4 py-7 mx-4 mt-4 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
           <View style={tw`flex-row items-center`}>
             <Icon name={isDarkMode ? "dark-mode" : "light-mode"} size={24} color={theme.primary} />
             <Text style={[tw`text-base font-semibold ml-3`, { color: theme.black }]}>Dark Mode</Text>
