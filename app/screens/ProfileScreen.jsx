@@ -258,7 +258,7 @@ const { width } = Dimensions.get("window");
             </View>
           </View>
         </View>
-        <View style={[tw`flex-row justify-between p-4 mx-4 mt-4 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
+        <View style={[tw`flex-row justify-between p-4 py-6 mx-4 mt-4 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
           <View style={tw`flex-row items-center`}>
             <Icon name={isDarkMode ? "dark-mode" : "light-mode"} size={24} color={theme.primary} />
             <Text style={[tw`text-base font-semibold ml-3`, { color: theme.black }]}>Dark Mode</Text>
