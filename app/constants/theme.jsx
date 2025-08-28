@@ -1,4 +1,3 @@
-// Theme colors extracted from web project
 export const colors = {
   primary: '#B88E2F',
   secondary: '#F6D8C6',
@@ -38,4 +37,3 @@ export const fonts = {
   semiBold: 'Poppins-SemiBold',
   bold: 'Poppins-Bold',
 };
-

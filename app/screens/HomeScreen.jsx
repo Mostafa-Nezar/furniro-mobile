@@ -24,8 +24,6 @@ const HomeScreen = () => {
       const data = await getProducts();
       setProducts(data);
       setFeaturedProducts(data.slice(0, 8));
-    } catch (e) {
-      console.error("Error loading products:", e);
     } finally {
       setLoading(false);
     }
@@ -82,14 +80,7 @@ const HomeScreen = () => {
 
         <View style={tw`mt-6`}>
           <Text style={[tw`text-xl font-bold mx-4 mb-4`, { color: theme.black, fontFamily: "Poppins-Bold" }]}>Shop by Category</Text>
-          <FlatList
-            data={categories}
-            renderItem={renderCategory}
-            keyExtractor={(item) => item.id.toString()}
-            numColumns={2}
-            contentContainerStyle={tw`px-2`}
-            scrollEnabled={false}
-          />
+          <FlatList data={categories} renderItem={renderCategory} keyExtractor={(item) => item.id.toString()} numColumns={2} contentContainerStyle={tw`px-2`} scrollEnabled={false} />
         </View>
 
         <View style={tw`mt-6`}>
@@ -105,14 +96,7 @@ const HomeScreen = () => {
               <Text style={[tw`text-base`, { color: theme.darkGray, fontFamily: "Poppins-Regular" }]}>Loading...</Text>
             </View>
           ) : (
-            <FlatList
-              data={featuredProducts}
-              renderItem={renderProduct}
-              keyExtractor={(item) => item.id.toString()}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={tw`px-4`}
-            />
+            <FlatList data={featuredProducts} renderItem={renderProduct} keyExtractor={(item) => item.id.toString()} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={tw`px-4`}/>
           )}
         </View>
         <View style={[tw`mt-8 mx-4 p-4 rounded-lg`, { backgroundColor: theme.lightBeige }]}>

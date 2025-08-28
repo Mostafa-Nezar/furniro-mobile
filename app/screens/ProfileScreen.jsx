@@ -69,7 +69,7 @@ const { width } = Dimensions.get("window");
   };
   const getAddressFromCoords = async (lat, lng) => {
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json` );
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en` );
       const data = await response.json();
       return data?.display_name || "Unknown location";
     } catch (error) { return "Could not fetch address"; }
@@ -227,14 +227,15 @@ const { width } = Dimensions.get("window");
   ];
   if (!isAuthenticated) {
     return (
-      <View style={[tw`flex-1 justify-center items-center px-6`, { backgroundColor: theme.white }]}>
+      <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
         <Header title="Profile" />
-        <Icon name="person-off" size={80} color={theme.darkGray} />
-        <Text style={[tw`text-xl font-bold mt-4`, { color: theme.black }]}>Welcome</Text>
-        <Text style={[tw`text-base mt-2 text-center`, { color: theme.darkGray }]}>Sign in to access your profile</Text>
-        <TouchableOpacity style={[tw`py-3 px-8 mt-6 rounded-lg w-full`, { backgroundColor: theme.primary }]} onPress={() => navigation.navigate("Login")}>
-          <Text style={[tw`text-lg font-semibold text-center`, { color: theme.white }]}>Sign In</Text>
-        </TouchableOpacity>
+        <View style={tw`flex-1 justify-center items-center px-6`}>
+          <Icon name="person" size={80} color={theme.darkGray} />
+          <Text style={[tw`text-xl font-bold mt-4`, { color: theme.black }]}>Welcome</Text>
+          <Text style={[tw`text-base mt-2 text-center`, { color: theme.darkGray }]}>Sign in to access profile</Text>
+          <TouchableOpacity style={[tw`py-4 px-8 mt-6 rounded-lg`, { backgroundColor: theme.primary }]} onPress={() => navigation.navigate("Login")}><Text style={[tw`text-lg font-semibold`, { color: theme.white }]}>Sign In</Text></TouchableOpacity>
+          <TouchableOpacity style={[tw`py-3 px-8 mt-3 border rounded-lg`, { borderColor: theme.primary }]} onPress={() => navigation.navigate("Register")}><Text style={[tw`text-base font-semibold`, { color: theme.primary }]}>Create Account</Text></TouchableOpacity>
+        </View>
       </View>
     );
   }

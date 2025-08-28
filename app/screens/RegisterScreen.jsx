@@ -13,15 +13,12 @@ const RegisterScreen=()=>{
   const {theme,login,register,GoogleSignup}=useAppContext();
   const [showPassword,setShowPassword]=useState(false);
   const [showConfirmPassword,setShowConfirmPassword]=useState(false);
-
-
   const validationSchema=Yup.object({
     name:Yup.string().required('Full name is required'),
     email:Yup.string().email('Invalid email').required('Email is required'),
     password:Yup.string().min(6).required('Password is required'),
     confirmPassword:Yup.string().oneOf([Yup.ref('password'),null],'Passwords must match').required('Please confirm your password'),
   });
-
   const handleRegister=async(values,{setSubmitting})=>{
     try{
       const result=await register(values);

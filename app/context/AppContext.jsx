@@ -51,16 +51,6 @@ export const AppProvider = ({ children }) => {
     fetchOrders(user.id);
   }
 }, [user]);
-  const fetchNotifications = async (setNotifications) => {
-    const user = JSON.parse(await AsyncStorage.getItem("user"));
-    if (!user?.id) return;
-    try {
-      const data = await fetchInstance("/notifications");
-      setNotifications((data.notifications || []).filter(n => n.userId === user.id));
-    } catch (error) {
-      console.error("Failed to fetch notifications:", error);
-    }
-  };
   const fetchOrders = async (userId) => {
       const response = await fetch(`https://furniro-back-production.up.railway.app/api/orders/user/${userId}`);
       if (!response.ok) {
@@ -87,17 +77,9 @@ export const AppProvider = ({ children }) => {
     }
   };
   const saveDataToStorage = async () => {
-    try {
-      const appData = {
-        isDarkMode,
-        favorites,
-        isAuthenticated,
-      };
+      const appData = {isDarkMode, favorites, isAuthenticated};
       await AsyncStorage.setItem("appData", JSON.stringify(appData));
       await AsyncStorage.setItem("user", JSON.stringify(user));
-    } catch (error) {
-      console.error("Error saving data:", error);
-    }
   };
   const toggleTheme = () => {
     const newTheme = !isDarkMode;
@@ -144,11 +126,9 @@ export const AppProvider = ({ children }) => {
   };
   const removeFromCart = async (productId) => {
     if (!user?.id) return;
-
     try {
       const cart = user.cart || [];
       const updatedCart = cart.filter((item) => item.id !== productId);
-
       const data = await fetchInstance(`/auth/user/${user.id}`, {
         method: "PATCH",
         body: JSON.stringify({ cart: updatedCart }),
@@ -239,14 +219,7 @@ export const AppProvider = ({ children }) => {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       const token = userInfo.idToken;
-      const res = await fetch(
-        'https://furniro-back-production.up.railway.app/api/auth/google',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
-        }
-      );
+      const res = await fetch('https://furniro-back-production.up.railway.app/api/auth/google', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token })});
       const data = await res.json();
       if (data.user && data.token) {
         await AsyncStorage.setItem('token', data.token);
@@ -262,7 +235,6 @@ export const AppProvider = ({ children }) => {
     }
   };
   const logout = async () => {
-    try {
       await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("user");
       setUser(null);
@@ -270,9 +242,6 @@ export const AppProvider = ({ children }) => {
       setCart([]);
       setFavorites([]);
       return true;
-    } catch (e) {
-      return false;
-    }
   };
   const updateCartQuantity = async (productId, newQuantity) => {
     if (!user?.id) return;
@@ -337,7 +306,6 @@ export const AppProvider = ({ children }) => {
   const getImageUrl = (path) => {
     if (!path) return null;
     if (path.startsWith("http")) return path;
-    return `http://localhost:3001/uploads/${path}`;
   };
   const refreshUser = async () => {
     if (!user?.id) return;
