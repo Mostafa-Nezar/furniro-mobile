@@ -14,7 +14,7 @@ import { useSocket } from "../context/SocketContext";
 const ProfileScreen = () => {
 const { width } = Dimensions.get("window");
   const navigation = useNavigation();
-  const { theme, user, isAuthenticated, logout, isDarkMode, toggleTheme, cart, favorites, updateUser, products, getImageUrl, toggleFavorite, refreshUser, orders } = useAppContext();
+  const { theme, user, isAuthenticated, logout, isDarkMode, toggleTheme, cart, favorites, products, getImageUrl, toggleFavorite, refreshUser, orders } = useAppContext();
   const [isUploading, setIsUploading] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarContentKey, setSidebarContentKey] = useState(null); 
@@ -44,7 +44,6 @@ const { width } = Dimensions.get("window");
       const data = await res.json();
       if (data.success) {
         const updated = { ...user, image: data.imageUrl };
-        updateUser(updated);
         await AsyncStorage.setItem("user", JSON.stringify(updated));
         Toast.show({ type: "success", text1: "Image Updated" });
       } else Toast.show({ type: "error", text1: data.message || "Upload Failed" });
@@ -72,7 +71,7 @@ const { width } = Dimensions.get("window");
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en` );
       const data = await response.json();
       return data?.display_name || "Unknown location";
-    } catch (error) { return "Could not fetch address"; }
+    } catch (error) { return "x Could not fetch address"; }
   };
   const getCurrentLocation = async () => {
     const perm = Platform.OS === 'android' ? await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION) : 'granted';
@@ -87,12 +86,11 @@ const { width } = Dimensions.get("window");
         try {
           const response = await fetch(`https://furniro-back-production.up.railway.app/api/auth/users/${user.id}/location`, {
             method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ location: { lat: latitude, lng: longitude, address } } )
+            body: JSON.stringify({ location: address })
           });
           const data = await response.json();
           if (!response.ok) throw new Error(data?.msg || "Failed to update location");
-          const updatedUser = { ...user, location: { lat: latitude, lng: longitude, address } };
-          updateUser(updatedUser);
+          const updatedUser = { ...user, location: address };
           await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
           Toast.show({ type: "success", text1: "Location updated", text2: address });
         } catch (error) { Toast.show({ type: "error", text1: "Update failed", text2: error.message }); }
@@ -155,16 +153,16 @@ const { width } = Dimensions.get("window");
         <Text style={[tw`text-xl font-bold`, { color: theme.black }]}>My Location</Text>
         <TouchableOpacity onPress={closeSidebar}> <Icon name="close" size={24} color={theme.darkGray} /> </TouchableOpacity>
       </View>
-      {isLocationLoading && !user?.location?.address ? (
+      {isLocationLoading && !user?.location ? (
         <View style={tw`flex-1 justify-center items-center`}>
           <ActivityIndicator size="large" color={theme.primary} />
           <Text style={[tw`mt-4`, { color: theme.darkGray }]}>Updating Location...</Text>
         </View>
-      ) : user?.location?.address ? (
+      ) : user?.location ? (
         <View style={tw`items-center justify-center flex-1`}>
           <Icon name="location-on" size={60} color={theme.primary} />
           <Text style={[ tw`text-lg font-bold mt-4 mb-2 text-center`, { color: theme.black } ]}> Current Location Saved </Text>
-          <Text style={[ tw`text-base text-center px-4`, { color: theme.darkGray } ]}> {user.location.address} </Text>
+          <Text style={[ tw`text-base text-center px-4`, { color: theme.darkGray } ]}> {user.location} </Text>
           <TouchableOpacity onPress={getCurrentLocation} disabled={isLocationLoading} style={[ tw`mt-8 py-3 px-6 rounded-lg border flex-row items-center justify-center`, { borderColor: theme.primary } ]} >
             {isLocationLoading ? (
               <ActivityIndicator size="small" color={theme.primary} />) : ( <Text style={[tw`font-semibold`, { color: theme.primary }]} >Update My Location </Text>)}
@@ -219,7 +217,7 @@ const { width } = Dimensions.get("window");
   );
   const menuItems = [ { key: 'favorites', icon: "favorite", title: "Favorites", subtitle: `${favorites.length} items` },
     { key: 'history', icon: "history", title: "Order History", subtitle: `${orders.length} orders` },
-    { key: 'location', icon: "location-on", title: "My Location", subtitle: user?.location?.lat ? "Location Saved" : "Set location" },
+    { key: 'location', icon: "location-on", title: "My Location", subtitle: user?.location ? "Location Saved" : "Set location" },
     { key: 'notifications', icon: "notifications", title: "Notifications", subtitle: `${notifications.filter(n=>!n.read).length} new` },
     { key: 'addresses', icon: "pin-drop", title: "Addresses", subtitle: "Manage delivery" },
     { key: 'payment', icon: "payment", title: "Payment", subtitle: "Manage cards" },

@@ -164,10 +164,6 @@ export const AppProvider = ({ children }) => {
   };
   const toggleFavorite = (id) => {favorites.includes(id)?setFavorites(favorites.filter((fav) => fav !== id)):setFavorites([...favorites, id]);
   };
-  const updateUser = async (updatedUser) => {
-    setUser(updatedUser);
-    await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-  };
   const login = async (email, password) => {
     try {
       const data = await fetchInstance("/auth/signin", {
@@ -324,15 +320,7 @@ export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
-        isDarkMode,
-        isAuthenticated,
-        user,
-        cart,
-        favorites,
-        products,
-        isOffline,
-        theme,
-        toggleTheme,
+        isDarkMode, isAuthenticated, user, cart, favorites, products, isOffline, theme, toggleTheme,
         login,
         register,
         logout,
@@ -340,16 +328,7 @@ export const AppProvider = ({ children }) => {
         removeFromCart,
         updateCartQuantity,
         toggleFavorite,
-        setOfflineStatus: setIsOffline,
-        updateUser,
-        getProducts,
-        setProducts,
-        searchProducts,
-        getImageUrl,
-        clearCartAndUpdateOrsers,
-        refreshUser,
-        GoogleSignup,
-        orders
+        getProducts, setProducts, searchProducts, getImageUrl, clearCartAndUpdateOrsers, refreshUser, GoogleSignup, orders
       }}
     >
       {children}
