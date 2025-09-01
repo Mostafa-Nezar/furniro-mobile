@@ -28,9 +28,8 @@ const TabNavigator = () => {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: { backgroundColor: theme.white, borderTopColor: theme.lightGray, paddingBottom: 5, paddingTop: 5, height: 60}, tabBarActiveTintColor: theme.primary, tabBarInactiveTintColor: theme.darkGray, tabBarLabelStyle: { fontSize: 12, fontFamily: "Poppins-Medium"},
-        tabBarIcon: ({ focused, color, size }) => {
-        const iconMapping = { Home: "home", Shop: "store", Cart: "shopping-cart", Profile: "person"}
-        const iconName = iconMapping[route.name];
+        tabBarIcon: ({ _, color, size }) => {
+        const iconMapping = { Home: "home", Shop: "store", Cart: "shopping-cart", Profile: "person"}, iconName = iconMapping[route.name];
           return (
             <View style={{ position: "relative" }}>
               <Icon name={iconName} size={size} color={color} />
@@ -57,12 +56,7 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer> 
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          cardStyle: { backgroundColor: theme.white },
-        }}
-      >
+      <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: theme.white } }}>
         <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} />
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />

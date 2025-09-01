@@ -39,10 +39,7 @@ const HomeScreen = () => {
   );
 
   const renderCategory = ({ item }) => (
-    <TouchableOpacity
-      onPress={() => navigation.navigate("Shop", { category: item.name })}
-      style={[tw`m-2 rounded-lg overflow-hidden shadow-lg`, { backgroundColor: theme.white, width: (width - 60) / 2, elevation: 3 }]}
-    >
+    <TouchableOpacity onPress={() => navigation.navigate("Shop")} style={[tw`m-2 rounded-lg overflow-hidden shadow-lg`, { backgroundColor: theme.white, width: (width - 60) / 2, elevation: 3 }]}>
       <Image source={getImage(item.image)} style={tw`w-full h-32`} resizeMode="cover" />
       <View style={tw`p-3 items-center`}>
         <Text style={[tw`text-base font-semibold text-center`, { color: theme.black, fontFamily: "Poppins-SemiBold" }]}>{item.name}</Text>

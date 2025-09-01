@@ -7,11 +7,11 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 
 const CartScreen = () => {
   const navigation = useNavigation();
-  const { theme, user, updateCartQuantity, removeFromCart, getImageUrl } = useAppContext();
+  const { theme, user, updateCartQuantity, removeFromCart, getImageUrl, clearCartAndUpdateOrsers } = useAppContext();
   const cart = user?.cart || [];
   const totalItems = cart.reduce((t, i) => t + i.quantity, 0);
   const totalPrice = cart.reduce((t, i) => t + i.price * i.quantity, 0);
-  const shipping = totalPrice >= 100 ? 0 : 10;
+  const shipping = totalPrice >= 100 ? 0 : 0;
 
   const renderItem = ({ item }) => (
     <View style={[tw`flex-row p-4 mb-3 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
@@ -55,12 +55,7 @@ const CartScreen = () => {
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title="Cart" showBack={false} />
-      <FlatList
-        data={cart}
-        renderItem={renderItem}
-        keyExtractor={(item, i) => item.id?.toString() || i.toString()}
-        contentContainerStyle={tw`px-4 py-4`}
-      />
+      <FlatList data={cart} renderItem={renderItem} keyExtractor={(item, i) => item.id?.toString() || i.toString()} contentContainerStyle={tw`px-4 py-4`}/>
       <View style={[tw`p-4 border-t`, { borderTopColor: theme.lightGray }]}>
         {[["Items", totalItems], ["Subtotal", `$${totalPrice.toFixed(2)}`], ["Shipping", shipping === 0 ? "Free" : "$10.00"]].map(([label, val], i) => (
           <View key={i} style={tw`flex-row justify-between mb-2`}>
@@ -72,14 +67,14 @@ const CartScreen = () => {
           <Text style={[tw`text-lg font-bold`, { color: theme.black }]}>Total:</Text>
           <Text style={[tw`text-lg font-bold`, { color: theme.primary }]}>${(totalPrice + shipping).toFixed(2)}</Text>
         </View>
-        <TouchableOpacity
-          onPress={() => {navigation.navigate("Payment")}}
-          style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}
-        >
+        <TouchableOpacity onPress={() => {navigation.navigate("Payment")}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
           <Text style={[tw`text-center text-lg font-semibold text-white`]}>Checkout</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Shop")} style={[tw`py-3 mt-3 border rounded-lg`, { borderColor: theme.primary }]}>
           <Text style={[tw`text-center text-base font-semibold`, { color: theme.primary }]}>Continue Shopping</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={async () => {await clearCartAndUpdateOrsers();}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
+          <Text style={[tw`text-center text-lg font-semibold text-white`]}>cash on delivery</Text>
         </TouchableOpacity>
       </View>
     </View>

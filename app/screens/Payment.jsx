@@ -11,12 +11,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 
 const Payment = () => {
-  const nav = useNavigation(), { theme, user, clearCartAndUpdateOrsers } = useAppContext(), [loading, setLoading] = useState(false), [loadingPayPal, setLoadingPayPal] = useState(false);
-    cart = user?.cart || [], subtotal = cart.reduce((t, i) => t + i.price * i.quantity, 0),
-    shipping = subtotal >= 100 ? 0 : 10, total = subtotal + shipping;
-
-  const formatCardNumber = (v) => (v = v.replace(/\s+/g, "").replace(/[^0-9]/gi, ""), (v.match(/\d{4,16}/g)?.[0] || "").match(/.{1,4}/g)?.join(" ") || v),
-    formatExpiryDate = (v) => (v = v.replace(/\s+/g, "").replace(/[^0-9]/gi, ""), v.length >= 2 ? v.substring(0, 2) + "/" + v.substring(2, 4) : v),
+  const nav = useNavigation(), { theme, user, clearCartAndUpdateOrsers } = useAppContext(), [loading, setLoading] = useState(false), [loadingPayPal, setLoadingPayPal] = useState(false), cart = user?.cart || [], subtotal = cart.reduce((t, i) => t + i.price * i.quantity, 0), shipping = subtotal >= 100 ? 0 : 0, total = subtotal + shipping;
+  const formatCardNumber = (v) => (v = v.replace(/\s+/g, "").replace(/[^0-9]/gi, ""), (v.match(/\d{4,16}/g)?.[0] || "").match(/.{1,4}/g)?.join(" ") || v), formatExpiryDate = (v) => (v = v.replace(/\s+/g, "").replace(/[^0-9]/gi, ""), v.length >= 2 ? v.substring(0, 2) + "/" + v.substring(2, 4) : v);
     validationSchema = Yup.object().shape({
       email: Yup.string().email("Invalid email").required(),
       fullName: Yup.string().required(),
@@ -29,7 +25,6 @@ const Payment = () => {
       cvv: Yup.string().min(3).max(4).required(),
       cardholderName: Yup.string().required(),
     });
-
   const createCheckoutSession = async (v) => {
     setLoading(true);
     try {
@@ -49,7 +44,6 @@ const Payment = () => {
       setLoading(false);
     }
   };
-
   const getCardType = (number) => {
     const clean = number.replace(/\s+/g, "");
     if (/^4/.test(clean)) return "visa";
@@ -57,7 +51,6 @@ const Payment = () => {
     if (/^3[47]/.test(clean)) return "amex";
     return null;
   };
-
   const InputCardField = ({ handleChange, handleBlur, value, placeholder, name }) => {
     const [cardType, setCardType] = useState(null),
       handleInputChange = (t) => {
@@ -101,7 +94,6 @@ const Payment = () => {
       </View>
     );
   };
-
   const handlePayWithPayPal = async () => {
     setLoadingPayPal(true);
     try {
@@ -121,7 +113,6 @@ const Payment = () => {
       setLoadingPayPal(false);
     }
   };
-
   const InputField = ({ handleChange, handleBlur, value, placeholder, keyboardType = "default", maxLength, secureTextEntry = false, name }) => (
     <View style={tw`mb-4`}>
       <TextInput style={[tw`p-4 rounded-lg border`, { borderColor: theme.lightGray, backgroundColor: theme.semiWhite, color: theme.black }]} onChangeText={handleChange(name)} onBlur={handleBlur(name)} value={value} placeholder={placeholder} placeholderTextColor={theme.darkGray} keyboardType={keyboardType} maxLength={maxLength} secureTextEntry={secureTextEntry}/>
@@ -130,12 +121,8 @@ const Payment = () => {
 
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
-      <Header title="Payment" showBack showCart={false} />
-      <Formik
-        initialValues={{ email: user?.email || "", fullName: "", address: "", city: "", state: "", zipCode: "", cardNumber: "", expiryDate: "", cvv: "", cardholderName: "" }}
-        validationSchema={validationSchema}
-        onSubmit={createCheckoutSession}
-      >
+      <Header title="Payment" showBack />
+      <Formik initialValues={{ email: user?.email || "", fullName: "", address: "", city: "", state: "", zipCode: "", cardNumber: "", expiryDate: "", cvv: "", cardholderName: "" }} validationSchema={validationSchema} onSubmit={createCheckoutSession}>
         {({ handleChange, handleBlur, handleSubmit, values }) => (
           <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
             <View style={[tw`p-4 rounded-lg mb-6 mt-4`, { backgroundColor: theme.semiWhite }]}>
