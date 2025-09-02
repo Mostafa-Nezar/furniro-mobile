@@ -36,8 +36,8 @@ export const AppProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [products, setProducts] = useState([]);
-  const [isOffline, setIsOffline] = useState(false);
   const [theme, setTheme] = useState(colors);
+  const [loadingCancel, setLoadingCancel] = useState(null); 
   const [orders,setorders] = useState([]);
   useEffect(() => {
     loadStoredData();
@@ -304,43 +304,30 @@ export const AppProvider = ({ children }) => {
     if (!path) return null;
     if (path.startsWith("http")) return path;
   };
-  const refreshUser = async () => {
-    if (!user?.id) return;
-    try {
-      const data = await fetchInstance(`/auth/user/${user.id}`);
-      updateUser(data);
-      await AsyncStorage.setItem("user", JSON.stringify(data));
-      console.log("✅ User refreshed:", data.name);
-      return true;
-    } catch (err) {
-      console.error("❌ Error refreshing user:", err.message);
-      return false;
-    }
-  };
-  const cancelOrder = async (orderId) => {
-    try {
-      const res = await fetchInstance(`/orders/${orderId}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: "canceled" }), // 👈 ثابتة
-      });
+  const updateUser = async (updatedUser) => { setUser(updatedUser); await AsyncStorage.setItem("user", JSON.stringify(updatedUser)) };
+const cancelOrder = async (orderId) => {
+  try {
+    setLoadingCancel(orderId);
+    const data = await fetchInstance(`/orders/${orderId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: "canceled" }),
+    });
 
-      if (!res.ok) {
-        throw new Error("Failed to cancel order");
-      }
+    console.log("✅ Order canceled:", data);
 
-      const data = await res.json();
-      console.log("✅ Order canceled:", data);
-      return data;
-    } catch (err) {
-      console.error("❌ Error canceling order:", err);
-    }
-  };
+    await fetchOrders(user.id);
+
+    return data;
+  } finally {
+    setLoadingCancel(null);
+  }
+};
 
 
   return (
     <AppContext.Provider
       value={{
-        isDarkMode, isAuthenticated, user, cart, favorites, products, isOffline, theme, toggleTheme,
+        isDarkMode, isAuthenticated, user, cart, favorites, products, theme, toggleTheme,
         login,
         register,
         logout,
@@ -348,7 +335,7 @@ export const AppProvider = ({ children }) => {
         removeFromCart,
         updateCartQuantity,
         toggleFavorite,
-        getProducts, setProducts, searchProducts, getImageUrl, clearCartAndUpdateOrsers, refreshUser, GoogleSignup, orders, cancelOrder,
+        getProducts, setProducts, searchProducts, getImageUrl, clearCartAndUpdateOrsers, GoogleSignup, updateUser, orders, cancelOrder, loadingCancel
       }}
     >
       {children}

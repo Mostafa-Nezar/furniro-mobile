@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, Switch, Animated, Dimensions, Modal, RefreshControl, PermissionsAndroid, Platform, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Image, Switch, Animated, Dimensions, Modal, PermissionsAndroid, Platform, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext";
 import Header from "../components/Header";
@@ -14,22 +14,15 @@ import { useSocket } from "../context/SocketContext";
 const ProfileScreen = () => {
 const { width } = Dimensions.get("window");
   const navigation = useNavigation();
-  const { theme, user, isAuthenticated, logout, isDarkMode, toggleTheme, cart, favorites, products, getImageUrl, toggleFavorite, refreshUser, orders, cancelOrder } = useAppContext();
+  const { theme, user, isAuthenticated, logout, isDarkMode, toggleTheme, cart, favorites, products, getImageUrl, toggleFavorite,  orders, cancelOrder, loadingCancel,updateUser } = useAppContext();
   const [isUploading, setIsUploading] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarContentKey, setSidebarContentKey] = useState(null); 
   const [isLocationLoading, setLocationLoading] = useState(false);
-  const [loadingCancel, setLoadingCancel] = useState(null); // id بتاع الأوردر اللي بيتكنسل
-
   const {notifications, formatDate} = useSocket();
-  const [refreshing, setRefreshing] = useState(false);
   const slideAnim = useRef(new Animated.Value(width)).current;
   const favoriteProducts = products.filter((p) => favorites.includes(p.id));
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refreshUser();
-    setRefreshing(false);
-  };
+
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) return Toast.show({ type: "info", text1: "Permission required" });
@@ -46,7 +39,7 @@ const { width } = Dimensions.get("window");
       const data = await res.json();
       if (data.success) {
         const updated = { ...user, image: data.imageUrl };
-        await AsyncStorage.setItem("user", JSON.stringify(updated));
+        updateUser(updated)
         Toast.show({ type: "success", text1: "Image Updated" });
       } else Toast.show({ type: "error", text1: data.message || "Upload Failed" });
     } catch (err) { Toast.show({ type: "error", text1: "Check Your Connection" }); } 
@@ -73,12 +66,11 @@ const { width } = Dimensions.get("window");
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en` );
       const data = await response.json();
       return data?.display_name || "Unknown location";
-    } catch (error) { return "x Could not fetch address"; }
+    } catch (error) { return "Could not fetch address"; }
   };
   const getCurrentLocation = async () => {
     const perm = Platform.OS === 'android' ? await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION) : 'granted';
     if (perm !== PermissionsAndroid.RESULTS.GRANTED && Platform.OS === 'android') return Toast.show({ type: 'info', text1: 'Location permission denied' });
-    
     setLocationLoading(true);
     Geolocation.getCurrentPosition(
       async (position) => {
@@ -93,9 +85,9 @@ const { width } = Dimensions.get("window");
           const data = await response.json();
           if (!response.ok) throw new Error(data?.msg || "Failed to update location");
           const updatedUser = { ...user, location: address };
-          await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+          updateUser(updatedUser)
           Toast.show({ type: "success", text1: "Location updated", text2: address });
-        } catch (error) { Toast.show({ type: "error", text1: "Update failed", text2: error.message }); }
+        } catch (error) { Toast.show({ type: "error", text1: "Update failed", text2: error.message,position: 'top' }); }
         finally { setLocationLoading(false); }
       },
       (error) => {
@@ -190,11 +182,24 @@ const { width } = Dimensions.get("window");
             <Text style={[tw`text-base font-bold`, {color: theme.black}]}>Order ID: {order._id.slice(-6)}</Text>
             <Text style={[tw`text-sm`, {color: theme.darkGray}]}>Date: {new Date(order.date).toLocaleDateString()}</Text>
             <Text style={[tw`text-sm font-semibold mt-1`, {color: theme.primary}]}>Total: ${order.total}</Text>
-            {(order.status == "pending") ?<TouchableOpacity onPress={() => cancelOrder(order._id)} style={[tw`ms-auto rounded-md w-24 p-2 py-1`, { backgroundColor: theme.red }]}>
-            <Text style={[tw`text-center text-base font-semibold text-white`]}>
-              Cancel
-              </Text>
-            </TouchableOpacity>:null}
+            {order.status === "pending" && (
+              <TouchableOpacity
+                onPress={() => cancelOrder(order._id)}
+                disabled={loadingCancel === order._id}
+                style={[tw`ms-auto rounded-md w-24 p-2 py-1 flex-row justify-center`, { backgroundColor: theme.red }]}
+              >
+                {loadingCancel === order._id ? (
+                  <Text style={[tw`italic text-center text-base font-semibold text-white`]}>Cancelling</Text>
+                ) : (
+                  <Text style={[tw`text-center text-base font-semibold text-white`]}>Cancel</Text>
+                )}
+              </TouchableOpacity>
+            )}
+
+{order.status === "canceled" && (
+  <Text style={[tw`text-sm font-semibold mt-2`, { color: theme.darkGray }]}>Canceled</Text>
+)}
+
           </View>
         )) : <EmptyContent icon="history" title="No Orders Yet" subtitle="Your order history is empty." />}
       </ScrollView>
@@ -247,7 +252,7 @@ const { width } = Dimensions.get("window");
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title="Profile" />
-      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} tintColor={theme.primary}/>}>
+      <ScrollView>
         <View style={[tw`p-6 items-center`, { backgroundColor: theme.lightBeige }]}>
           <TouchableOpacity onPress={pickImage} disabled={isUploading} style={[tw`w-24 h-24 rounded-full items-center justify-center mb-4`, { backgroundColor: theme.primary }]}>
             {user?.image ? <Image source={{ uri: user.image }} style={tw`w-24 h-24 rounded-full`} /> : <Icon name="person" size={40} color={theme.white} />}
