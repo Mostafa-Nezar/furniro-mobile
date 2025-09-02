@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  View, Text, FlatList, TouchableOpacity, TextInput, Modal, ScrollView, RefreshControl,
-} from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, ScrollView, RefreshControl } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
 import Header from '../components/Header';
@@ -12,42 +10,29 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 const ShopScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { theme, getProducts } = useAppContext();
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState('name');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 2000 });
-  const [selectedCategory, setSelectedCategory] = useState(route.params?.category || 'All');
-
+  const { theme, getProducts } = useAppContext(), [products, setProducts] = useState([]), [filteredProducts, setFilteredProducts] = useState([]), [loading, setLoading] = useState(true), [refreshing, setRefreshing] = useState(false), [searchQuery, setSearchQuery] = useState(''), [showFilters, setShowFilters] = useState(false), [sortBy, setSortBy] = useState('name'), [priceRange, setPriceRange] = useState({ min: 0, max: 2000 }), [selectedCategory, setSelectedCategory] = useState(route.params?.category || 'All'), [page, setPage] = useState(1), [pageSize] = useState(10),  [hasMore, setHasMore] = useState(true);
   const categories = ['All', 'Living Room', 'Bedroom', 'Kitchen', 'Lighting'];
-  const sortOptions = [
-    { key: 'name', label: 'Name' },
-    { key: 'price_low', label: 'Price: Low to High' },
-    { key: 'price_high', label: 'Price: High to Low' },
-    { key: 'newest', label: 'Newest' },
-  ];
+  const sortOptions = [ { key: 'name', label: 'Name' }, { key: 'price_low', label: 'Price: Low to High' }, { key: 'price_high', label: 'Price: High to Low' }, { key: 'newest', label: 'Newest' } ];
 
   useEffect(() => { loadProducts(); }, []);
   useEffect(() => { filterAndSortProducts(); }, [products, searchQuery, sortBy, priceRange, selectedCategory]);
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      const productsData = await getProducts();
-      setProducts(productsData);
-    } catch (error) {
-      console.error('Error loading products:', error);
-    } finally {
-      setLoading(false);
-    }
+  const loadProducts = async (nextPage = 1) => {
+  try {
+    if (nextPage === 1) setLoading(true);
+    const productsData = await getProducts();
+    const end = nextPage * pageSize;
+    const newProducts = productsData.slice(0, end);
+    setProducts(newProducts);
+    setHasMore(end < productsData.length);
+    setPage(nextPage);
+  } catch (error) {
+    console.error('Error loading products:', error);
+  } finally {
+    if (nextPage === 1) setLoading(false);
+  }
   };
-
   const onRefresh = async () => { setRefreshing(true); await loadProducts(); setRefreshing(false); };
-
   const filterAndSortProducts = () => {
     let filtered = [...products];
     if (searchQuery) filtered = filtered.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.des.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -60,7 +45,10 @@ const ShopScreen = () => {
     }
     setFilteredProducts(filtered);
   };
-
+  const loadMore = () => {
+  if (!hasMore || loading) return;
+  loadProducts(page + 1);
+  };
   const renderProduct = ({ item }) => (
     <View style={tw`w-1/2 px-1`}>
       <ProductCard product={item} onPress={() => navigation.navigate('ProductDetail', { product: item })} />
@@ -125,20 +113,13 @@ const ShopScreen = () => {
           <Text style={[tw`text-base`, { color: theme.darkGray, fontFamily: 'Poppins-Regular' }]}>Loading...</Text>
         </View>
       ) : (
-        <FlatList
-          data={filteredProducts}
-          renderItem={renderProduct}
-          keyExtractor={item => item.id.toString()}
-          numColumns={2}
-          contentContainerStyle={tw`px-3 pb-6`}
-          showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          ListEmptyComponent={
-            <View style={tw`flex-1 justify-center items-center py-12`}>
-              <Icon name="search-off" size={64} color={theme.darkGray} />
-              <Text style={[tw`text-lg font-semibold mt-4 text-center`, { color: theme.darkGray, fontFamily: 'Poppins-SemiBold' }]}>No products found</Text>
-              <Text style={[tw`text-base mt-2 text-center`, { color: theme.darkGray, fontFamily: 'Poppins-Regular' }]}>Try changing the search or filters</Text>
-            </View>
+        <FlatList  data={filteredProducts} renderItem={renderProduct} keyExtractor={item => item.id.toString()} numColumns={2} contentContainerStyle={tw`px-3 pb-6`} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} onEndReached={loadMore} onEndReachedThreshold={0.5}
+           ListFooterComponent={
+            hasMore ? (
+              <View style={tw`py-4`}>
+                <Text style={{ color: theme.darkGray, textAlign: 'center' }}>Loading more...</Text>
+              </View>
+            ) : null
           }
         />
       )}

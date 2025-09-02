@@ -305,24 +305,23 @@ export const AppProvider = ({ children }) => {
     if (path.startsWith("http")) return path;
   };
   const updateUser = async (updatedUser) => { setUser(updatedUser); await AsyncStorage.setItem("user", JSON.stringify(updatedUser)) };
-const cancelOrder = async (orderId) => {
-  try {
-    setLoadingCancel(orderId);
-    const data = await fetchInstance(`/orders/${orderId}/status`, {
-      method: "PATCH",
-      body: JSON.stringify({ status: "canceled" }),
-    });
+  const cancelOrder = async (orderId) => {
+    try {
+      setLoadingCancel(orderId);
+      const data = await fetchInstance(`/orders/${orderId}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "canceled" }),
+      });
 
-    console.log("✅ Order canceled:", data);
+      console.log("✅ Order canceled:", data);
 
-    await fetchOrders(user.id);
+      await fetchOrders(user.id);
 
-    return data;
-  } finally {
-    setLoadingCancel(null);
-  }
-};
-
+      return data;
+    } finally {
+      setLoadingCancel(null);
+    }
+  };
 
   return (
     <AppContext.Provider
