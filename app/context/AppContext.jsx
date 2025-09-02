@@ -317,6 +317,25 @@ export const AppProvider = ({ children }) => {
       return false;
     }
   };
+  const cancelOrder = async (orderId) => {
+    try {
+      const res = await fetchInstance(`/orders/${orderId}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "canceled" }), // 👈 ثابتة
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to cancel order");
+      }
+
+      const data = await res.json();
+      console.log("✅ Order canceled:", data);
+      return data;
+    } catch (err) {
+      console.error("❌ Error canceling order:", err);
+    }
+  };
+
 
   return (
     <AppContext.Provider
@@ -329,7 +348,7 @@ export const AppProvider = ({ children }) => {
         removeFromCart,
         updateCartQuantity,
         toggleFavorite,
-        getProducts, setProducts, searchProducts, getImageUrl, clearCartAndUpdateOrsers, refreshUser, GoogleSignup, orders
+        getProducts, setProducts, searchProducts, getImageUrl, clearCartAndUpdateOrsers, refreshUser, GoogleSignup, orders, cancelOrder,
       }}
     >
       {children}

@@ -14,11 +14,13 @@ import { useSocket } from "../context/SocketContext";
 const ProfileScreen = () => {
 const { width } = Dimensions.get("window");
   const navigation = useNavigation();
-  const { theme, user, isAuthenticated, logout, isDarkMode, toggleTheme, cart, favorites, products, getImageUrl, toggleFavorite, refreshUser, orders } = useAppContext();
+  const { theme, user, isAuthenticated, logout, isDarkMode, toggleTheme, cart, favorites, products, getImageUrl, toggleFavorite, refreshUser, orders, cancelOrder } = useAppContext();
   const [isUploading, setIsUploading] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarContentKey, setSidebarContentKey] = useState(null); 
   const [isLocationLoading, setLocationLoading] = useState(false);
+  const [loadingCancel, setLoadingCancel] = useState(null); // id بتاع الأوردر اللي بيتكنسل
+
   const {notifications, formatDate} = useSocket();
   const [refreshing, setRefreshing] = useState(false);
   const slideAnim = useRef(new Animated.Value(width)).current;
@@ -188,6 +190,11 @@ const { width } = Dimensions.get("window");
             <Text style={[tw`text-base font-bold`, {color: theme.black}]}>Order ID: {order._id.slice(-6)}</Text>
             <Text style={[tw`text-sm`, {color: theme.darkGray}]}>Date: {new Date(order.date).toLocaleDateString()}</Text>
             <Text style={[tw`text-sm font-semibold mt-1`, {color: theme.primary}]}>Total: ${order.total}</Text>
+            {(order.status == "pending") ?<TouchableOpacity onPress={() => cancelOrder(order._id)} style={[tw`ms-auto rounded-md w-24 p-2 py-1`, { backgroundColor: theme.red }]}>
+            <Text style={[tw`text-center text-base font-semibold text-white`]}>
+              Cancel
+              </Text>
+            </TouchableOpacity>:null}
           </View>
         )) : <EmptyContent icon="history" title="No Orders Yet" subtitle="Your order history is empty." />}
       </ScrollView>
