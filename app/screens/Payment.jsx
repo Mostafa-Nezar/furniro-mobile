@@ -37,7 +37,7 @@ const Payment = () => {
           customerInfo: { email: v.email, name: v.fullName, address: { line1: v.address, city: v.city, state: v.state, postal_code: v.zipCode } },
         }),
       }), data = await res.json();
-      res.ok && data.url ? (Linking.openURL(data.url), await clearCartAndUpdateOrsers()) : Toast.show({ type: "error", text1: "Payment Failure" });
+      res.ok && data.url ? (Linking.openURL(data.url), await clearCartAndUpdateOrsers("done")) : Toast.show({ type: "error", text1: "Payment Failure" });
     } catch {
       Toast.show({ type: "error", text1: "Network Error" });
     } finally {
@@ -105,7 +105,7 @@ const Payment = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ total: total.toFixed(2), userId }),
         }), data = await res.json();
-      res.ok && data.approveUrl ? (Linking.openURL(data.approveUrl), await clearCartAndUpdateOrsers()) : Toast.show({ type: "error", text1: "Payment Failure" });
+      res.ok && data.approveUrl ? (Linking.openURL(data.approveUrl), await clearCartAndUpdateOrsers("done")) : Toast.show({ type: "error", text1: "Payment Failure" });
     } catch (e) {
       console.error("❌ PayPal error:", e);
       Toast.show({ type: "error", text1: "Disconnected" });

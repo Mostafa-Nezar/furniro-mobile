@@ -4,6 +4,7 @@ import { useAppContext } from "../context/AppContext.jsx";
 import Header from "../components/Header.jsx";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import Toast from "react-native-toast-message";
 
 const CartScreen = () => {
   const navigation = useNavigation();
@@ -73,7 +74,7 @@ const CartScreen = () => {
         <TouchableOpacity onPress={() => navigation.navigate("Shop")} style={[tw`py-3 mt-3 border rounded-lg`, { borderColor: theme.primary }]}>
           <Text style={[tw`text-center text-base font-semibold`, { color: theme.primary }]}>Continue Shopping</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={async () => {await clearCartAndUpdateOrsers();}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
+        <TouchableOpacity onPress={async () => {await clearCartAndUpdateOrsers();Toast.show({type:"success",text1:"Order placed"})}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
           <Text style={[tw`text-center text-lg font-semibold text-white`]}>cash on delivery</Text>
         </TouchableOpacity>
       </View>

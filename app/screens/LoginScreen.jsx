@@ -23,11 +23,7 @@ const LoginScreen = () => {
     setLoading(true);
     try {
       const result = await login(email, password);
-      Toast.show({
-        type: result.success ? "success" : "error",
-        text1: result.success ? "Login Successfully" : "Login Error",
-        text2: result.success ? "Welcome" : result.message || "false data",
-      });
+      Toast.show({ type: result.success ? "success" : "error", text1: result.success ? "Login Successfully" : "Login Error", text2: result.success ? "Welcome" : result.message || "false data"});
       if (result.success) navigation.reset({ index: 0, routes: [{ name: "Main" }] });
     } catch (error) {
       Toast.show({ type: "error", text1: "Login Error", text2: error.message || "try again later" });

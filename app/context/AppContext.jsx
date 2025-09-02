@@ -142,7 +142,7 @@ export const AppProvider = ({ children }) => {
       console.error("❌ Error removing from cart:", err);
     }
   };
-  const clearCartAndUpdateOrsers = async () => {
+  const clearCartAndUpdateOrsers = async (paymentMethod = "cash on delivery") => {
     console.log("hi");
     if (!user?.id) return;
     await fetchInstance("/orders", {
@@ -152,6 +152,7 @@ export const AppProvider = ({ children }) => {
         products: user.cart,
         date: new Date().toISOString(),
         total: user.cart.reduce((sum, p) => sum + (p.price * (p.quantity || 1)), 0),
+        payment: paymentMethod,
       }),
     });
     await fetchInstance(`/auth/user/${user.id}`, {
