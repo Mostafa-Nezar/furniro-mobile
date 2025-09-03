@@ -1,5 +1,4 @@
-// src/context/AppContext.js
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useReducer, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors, darkColors } from "../constants/theme.jsx";
 import { fetchInstance } from "./api";
@@ -8,36 +7,90 @@ import { useCart } from "./CartContext";
 
 const AppContext = createContext();
 
+const initialState = {
+  isDarkMode: false,
+  favorites: [],
+  products: [],
+  theme: colors,
+  loadingCancel: null,
+  orders: [],
+};
+
+const appReducer = (state, action) => {
+  switch (action.type) {
+    case "SET_DARK_MODE":
+      return { 
+        ...state, 
+        isDarkMode: action.payload, 
+        theme: action.payload ? darkColors : colors 
+      };
+
+    case "TOGGLE_THEME":
+      const newDarkMode = !state.isDarkMode;
+      return {
+        ...state,
+        isDarkMode: newDarkMode,
+        theme: newDarkMode ? darkColors : colors,
+      };
+
+    case "SET_FAVORITES":
+      return { ...state, favorites: action.payload };
+
+    case "TOGGLE_FAVORITE":
+      return state.favorites.includes(action.payload)
+        ? { ...state, favorites: state.favorites.filter((id) => id !== action.payload) }
+        : { ...state, favorites: [...state.favorites, action.payload] };
+
+    case "SET_PRODUCTS":
+      return { ...state, products: action.payload };
+
+    case "SET_ORDERS":
+      return { ...state, orders: action.payload };
+
+    case "SET_LOADING_CANCEL":
+      return { ...state, loadingCancel: action.payload };
+
+    case "RESET":
+      return { 
+        ...state,
+        favorites: [],
+        orders: [],
+      };
+
+    default:
+      return state;
+  }
+};
+
 export const AppProvider = ({ children }) => {
-  const { user, setUser, isAuthenticated, setIsAuthenticated, updateUser } = useAuth();
+  const { user, isAuthenticated, updateUser, dispatch: authDispatch } = useAuth();
   const { clearCartAndUpdateOrsers } = useCart();
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [favorites, setFavorites] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [theme, setTheme] = useState(colors);
-  const [loadingCancel, setLoadingCancel] = useState(null);
-  const [orders, setOrders] = useState([]);
+  const [state, dispatch] = useReducer(appReducer, initialState);
 
-  useEffect(() => { loadStoredData(); }, []);
+  useEffect(() => {
+    loadStoredData();
+  }, []);
 
   useEffect(() => {
     saveDataToStorage();
-  }, [isDarkMode, favorites, user, isAuthenticated]);
+  }, [state.isDarkMode, state.favorites, user, isAuthenticated]);
 
   useEffect(() => {
     if (user && user.id) {
       fetchOrders(user.id);
     } else {
-      setOrders([]); // Clear orders on logout
+      dispatch({ type: "SET_ORDERS", payload: [] });
     }
   }, [user]);
 
   const fetchOrders = async (userId) => {
-    const response = await fetch(`https://furniro-back-production.up.railway.app/api/orders/user/${userId}` );
-    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+    const response = await fetch(
+      `https://furniro-back-production.up.railway.app/api/orders/user/${userId}`
+    );
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
-    setOrders(data);
+    dispatch({ type: "SET_ORDERS", payload: data });
     return data;
   };
 
@@ -48,20 +101,22 @@ export const AppProvider = ({ children }) => {
       const appData = appDataRaw ? JSON.parse(appDataRaw) : {};
       const storedUser = userRaw ? JSON.parse(userRaw) : null;
 
-      setIsDarkMode(appData.isDarkMode || false);
-      setFavorites(appData.favorites || []);
-      
-      setIsAuthenticated(!!storedUser); // More robust check
-      setUser(storedUser);
+      dispatch({ type: "SET_DARK_MODE", payload: appData.isDarkMode || false });
+      dispatch({ type: "SET_FAVORITES", payload: appData.favorites || [] });
 
-      setTheme(appData.isDarkMode ? darkColors : colors);
+      authDispatch({ type: "SET_USER", payload: storedUser });
+      authDispatch({ type: "SET_AUTH", payload: !!storedUser });
     } catch (error) {
       console.error("Error loading stored data:", error);
     }
   };
 
   const saveDataToStorage = async () => {
-    const appData = { isDarkMode, favorites, isAuthenticated };
+    const appData = { 
+      isDarkMode: state.isDarkMode, 
+      favorites: state.favorites, 
+      isAuthenticated 
+    };
     await AsyncStorage.setItem("appData", JSON.stringify(appData));
     if (user) {
       await AsyncStorage.setItem("user", JSON.stringify(user));
@@ -71,35 +126,30 @@ export const AppProvider = ({ children }) => {
   const logout = async () => {
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("user");
-    setUser(null);
-    setIsAuthenticated(false);
-    setFavorites([]);
+    authDispatch({ type: "LOGOUT" });
+    dispatch({ type: "RESET" });
     return true;
   };
 
   const toggleTheme = () => {
-    const newTheme = !isDarkMode;
-    setIsDarkMode(newTheme);
-    setTheme(newTheme ? darkColors : colors);
+    dispatch({ type: "TOGGLE_THEME" });
   };
 
   const toggleFavorite = (id) => {
-    favorites.includes(id)
-      ? setFavorites(favorites.filter((fav) => fav !== id))
-      : setFavorites([...favorites, id]);
+    dispatch({ type: "TOGGLE_FAVORITE", payload: id });
   };
 
   const getProducts = async () => {
     try {
       const data = await fetchInstance("/products/db");
-      setProducts(data);
+      dispatch({ type: "SET_PRODUCTS", payload: data });
       await AsyncStorage.setItem("products", JSON.stringify(data));
       return data;
     } catch {
       const cached = await AsyncStorage.getItem("products");
       if (cached) {
         const parsed = JSON.parse(cached);
-        setProducts(parsed);
+        dispatch({ type: "SET_PRODUCTS", payload: parsed });
         return parsed;
       }
       return [];
@@ -108,8 +158,7 @@ export const AppProvider = ({ children }) => {
 
   const searchProducts = async (q) => {
     try {
-      const data = await fetchInstance(`/products/db/search?q=${q}`);
-      return data;
+      return await fetchInstance(`/products/db/search?q=${q}`);
     } catch {
       const cached = await AsyncStorage.getItem("products");
       if (cached) {
@@ -126,32 +175,40 @@ export const AppProvider = ({ children }) => {
 
   const getImageUrl = (path) => {
     if (!path) return null;
-    if (path.startsWith("http" )) return path;
+    if (path.startsWith("http")) return path;
+    return path;
   };
 
   const cancelOrder = async (orderId) => {
     try {
-      setLoadingCancel(orderId);
+      dispatch({ type: "SET_LOADING_CANCEL", payload: orderId });
       const data = await fetchInstance(`/orders/${orderId}/status`, {
         method: "PATCH",
         body: JSON.stringify({ status: "canceled" }),
       });
       console.log("✅ Order canceled:", data);
-      await fetchOrders(user.id); 
+      await fetchOrders(user.id);
       return data;
     } finally {
-      setLoadingCancel(null);
+      dispatch({ type: "SET_LOADING_CANCEL", payload: null });
     }
   };
 
   return (
     <AppContext.Provider
       value={{
-        isDarkMode, favorites, products, theme, toggleTheme,
-        toggleFavorite, getProducts, setProducts, searchProducts, getImageUrl,
-        orders, cancelOrder, loadingCancel,
+        ...state,
+        toggleTheme,
+        toggleFavorite,
+        getProducts,
+        searchProducts,
+        getImageUrl,
+        cancelOrder,
         logout,
-        user, isAuthenticated, updateUser, clearCartAndUpdateOrsers
+        user,
+        isAuthenticated,
+        updateUser,
+        clearCartAndUpdateOrsers,
       }}
     >
       {children}
