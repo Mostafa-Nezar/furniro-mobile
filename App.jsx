@@ -6,6 +6,8 @@ import { SocketProvider } from "./app/context/SocketContext";
 import AppNavigator from "./app/navigation/AppNavigator";
 import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 import tw from "twrnc";
+import { AuthProvider } from "./app/context/AuthContext";
+import { CartProvider } from "./app/context/CartContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -33,10 +35,14 @@ const InnerApp = () => {
 
 export default function App() {
   return (
+    <AuthProvider>
+      <CartProvider>
     <AppProvider>
       <SocketProvider>
         <InnerApp />
       </SocketProvider>
     </AppProvider>
+      </CartProvider>
+    </AuthProvider>
   );
 }

@@ -9,9 +9,10 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const Payment = () => {
-  const nav = useNavigation(), { theme, user, clearCartAndUpdateOrsers } = useAppContext(), [loading, setLoading] = useState(false), [loadingPayPal, setLoadingPayPal] = useState(false), cart = user?.cart || [], subtotal = cart.reduce((t, i) => t + i.price * i.quantity, 0), shipping = subtotal >= 100 ? 0 : 0, total = subtotal + shipping;
+  const nav = useNavigation(), { theme,  clearCartAndUpdateOrsers } = useAppContext(),{user}=useAuth(), [loading, setLoading] = useState(false), [loadingPayPal, setLoadingPayPal] = useState(false), cart = user?.cart || [], subtotal = cart.reduce((t, i) => t + i.price * i.quantity, 0), shipping = subtotal >= 100 ? 0 : 0, total = subtotal + shipping;
   const formatCardNumber = (v) => (v = v.replace(/\s+/g, "").replace(/[^0-9]/gi, ""), (v.match(/\d{4,16}/g)?.[0] || "").match(/.{1,4}/g)?.join(" ") || v), formatExpiryDate = (v) => (v = v.replace(/\s+/g, "").replace(/[^0-9]/gi, ""), v.length >= 2 ? v.substring(0, 2) + "/" + v.substring(2, 4) : v);
     validationSchema = Yup.object().shape({
       email: Yup.string().email("Invalid email").required(),

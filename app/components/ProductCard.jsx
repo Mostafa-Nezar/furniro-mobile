@@ -3,9 +3,10 @@ import { useAppContext } from "../context/AppContext.jsx";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Toast from "react-native-toast-message";
+import { useCart } from "../context/CartContext.jsx";
 
 const ProductCard = ({ product, onPress }) => {
-  const { theme, addToCart, toggleFavorite, favorites, getImageUrl } = useAppContext();
+  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), { addToCart } = useCart();
   const isFavorite = favorites.includes(product.id);
   const hasDiscount = product.oldprice && product.oldprice > product.price;
   const discountPercentage = hasDiscount ? Math.round(((product.oldprice - product.price) / product.oldprice) * 100) : 0;

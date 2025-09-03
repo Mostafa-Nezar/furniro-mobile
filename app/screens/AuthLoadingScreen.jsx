@@ -2,12 +2,12 @@ import { useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import { useAppContext } from "../context/AppContext";
+import { useAuth } from "../context/AuthContext";
 import tw from "twrnc";
 
 const AuthLoadingScreen = () => {
   const navigation = useNavigation();
-  const { login } = useAppContext();
+  const { login } = useAuth();
 
   useEffect(() => {
     const checkAuth = async () => {

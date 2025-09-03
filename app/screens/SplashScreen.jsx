@@ -1,12 +1,13 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { View, Text, Image, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
 import tw from 'twrnc';
+import { useAuth } from '../context/AuthContext';
 
 const SplashScreen = () => {
   const navigation = useNavigation();
-  const { theme, user } = useAppContext();
+  const { theme } = useAppContext(), { user } = useAuth();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
@@ -29,7 +30,6 @@ const SplashScreen = () => {
         <Text style={textStyle('text-4xl font-bold mb-2', 'Poppins-Bold')}>Furniro</Text>
         <Text style={textStyle('text-lg', 'Poppins-Regular')}>Modern & Elegant Furniture</Text>
       </Animated.View>
-
       <Animated.View style={[tw`absolute bottom-12`, { opacity: fadeAnim }]}>
         <Text style={textStyle('text-sm', 'Poppins-Regular')}>Loading...</Text>
       </Animated.View>

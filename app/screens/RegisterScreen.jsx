@@ -8,9 +8,10 @@ import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FAIcon from 'react-native-vector-icons/FontAwesome';
 import Toast from "react-native-toast-message";
+import { useAuth } from '../context/AuthContext';
 const RegisterScreen=()=>{ 
   const navigation=useNavigation();
-  const {theme,login,register,GoogleSignup}=useAppContext();
+  const {theme}=useAppContext(),{login,register,GoogleSignup} = useAuth()
   const [showPassword,setShowPassword]=useState(false);
   const [showConfirmPassword,setShowConfirmPassword]=useState(false);
   const validationSchema=Yup.object({

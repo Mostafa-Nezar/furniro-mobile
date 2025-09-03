@@ -8,13 +8,12 @@ import FAIcon from "react-native-vector-icons/FontAwesome";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import Toast from "react-native-toast-message";
+import { useAuth } from "../context/AuthContext";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
-  const { theme, login, GoogleSignup } = useAppContext();
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
+  const { theme } = useAppContext(), {  login, GoogleSignup } = useAuth();
+  const [loading, setLoading] = useState(false), [showPassword, setShowPassword] = useState(false);
   const validationSchema = Yup.object().shape({
     email: Yup.string().email("Invalid Email").required("Email Required"),
     password: Yup.string().required("PassWord Required"),

@@ -10,11 +10,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 import Geolocation from "react-native-geolocation-service";
 import { useSocket } from "../context/SocketContext";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 
 const ProfileScreen = () => {
 const { width } = Dimensions.get("window");
   const navigation = useNavigation();
-  const { theme, user, isAuthenticated, logout, isDarkMode, toggleTheme, cart, favorites, products, getImageUrl, toggleFavorite,  orders, cancelOrder, loadingCancel,updateUser } = useAppContext();
+  const { theme, logout, isDarkMode, toggleTheme, favorites, products, getImageUrl, toggleFavorite,  orders, cancelOrder, loadingCancel,updateUser } = useAppContext();
+  const { user, isAuthenticated } =useAuth();
+  const { cart } =useCart();
   const [isUploading, setIsUploading] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarContentKey, setSidebarContentKey] = useState(null); 

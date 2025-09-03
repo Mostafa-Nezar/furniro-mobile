@@ -6,6 +6,8 @@ import Header from "../components/Header";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Toast from "react-native-toast-message";
+import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const { width } = Dimensions.get("window");
 const SpecificationRow = ({ label, value, theme }) => (
@@ -16,7 +18,7 @@ const SpecificationRow = ({ label, value, theme }) => (
 );
 
 const ProductDetailScreen = () => {
-  const { user, theme, addToCart, toggleFavorite, favorites, getImageUrl, updateCartQuantity,removeFromCart } = useAppContext();
+  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), { addToCart, updateCartQuantity, removeFromCart }=useCart(),{ user }=useAuth();
   const { product } = useRoute().params;
   const [selectedImage, setSelectedImage] = useState(product.image);
   const [rating, setRating] = useState(0);

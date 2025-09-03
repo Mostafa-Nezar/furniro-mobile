@@ -13,7 +13,7 @@ const getImage = (name) =>({"Image-living room.png": require("../../assets/image
 const features = [{ icon: "local-shipping", title: "Free Shipping", desc: "For orders over $100" }, { icon: "support-agent", title: "24/7 Support", desc: "Excellent customer service" }, { icon: "verified", title: "Quality Guarantee", desc: "High quality products" }, { icon: "payment", title: "Secure Payment", desc: "Multiple payment methods" }, ];
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const { theme, setProducts, isOffline, getProducts } = useAppContext();
+  const { theme, setProducts,  getProducts } = useAppContext();
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -67,19 +67,10 @@ const HomeScreen = () => {
             </View>
           </View>
         </View>
-
-        {isOffline && (
-          <View style={[tw`mx-4 mt-4 p-3 rounded-lg flex-row items-center`, { backgroundColor: theme.red }]}>
-            <Icon name="wifi-off" size={20} color={theme.white} />
-            <Text style={[tw`ml-2 font-medium`, { color: theme.white, fontFamily: "Poppins-Medium" }]}>You are browsing offline</Text>
-          </View>
-        )}
-
         <View style={tw`mt-6`}>
           <Text style={[tw`text-xl font-bold mx-4 mb-4`, { color: theme.black, fontFamily: "Poppins-Bold" }]}>Shop by Category</Text>
           <FlatList data={categories} renderItem={renderCategory} keyExtractor={(item) => item.id.toString()} numColumns={2} contentContainerStyle={tw`px-2`} scrollEnabled={false} />
         </View>
-
         <View style={tw`mt-6`}>
           <View style={tw`flex-row justify-between items-center mx-4 mb-4`}>
             <Text style={[tw`text-xl font-bold`, { color: theme.black, fontFamily: "Poppins-Bold" }]}>Featured Products</Text>
