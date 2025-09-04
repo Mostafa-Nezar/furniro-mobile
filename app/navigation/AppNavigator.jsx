@@ -35,7 +35,7 @@ const TabNavigator = () => {
               <Icon name={iconName} size={size} color={color} />
               {route.name === "Cart" && cartItemsCount > 0 && (
                 <View style={{ position: "absolute", top: -5, right: -10, backgroundColor: theme.red, borderRadius: 10, width: 20, height: 20, justifyContent: "center", alignItems: "center"}}>
-                  <Text style={{ color: theme.white, fontSize: 10, fontWeight: "bold"}}> {cartItemsCount > 9 ? "9+" : cartItemsCount}</Text>
+                  <Text style={{ color: theme.white, fontSize: 10, fontWeight: "bold", paddingEnd:"2"}}> {cartItemsCount > 9 ? "9+" : cartItemsCount}</Text>
                 </View>
               )}
             </View>
@@ -67,6 +67,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Payment" component={Payment} />
         <Stack.Screen name="NotificationsList" component={NotificationsList} />
         <Stack.Screen name="GetStarted" component={GetStarted} />
+        <Stack.Screen name="Cart" component={CartScreen} />
       </Stack.Navigator>
       </NavigationContainer>
   );

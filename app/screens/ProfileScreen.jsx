@@ -178,36 +178,34 @@ const { width } = Dimensions.get("window");
     </View>
   );
   const SidebarHistoryContent = () => (
-    <View style={tw`flex-1 p-4`}>
-      <SidebarHeader title="Orders History" />
-      <ScrollView>
-        {orders && orders.length > 0 ? orders.map((order) => (
-          <View key={order._id} style={[tw`p-4 mb-3 rounded-lg`, {backgroundColor: theme.semiWhite}]}>
-            <Text style={[tw`text-base font-bold`, {color: theme.black}]}>Order ID: {order._id.slice(-6)}</Text>
-            <Text style={[tw`text-sm`, {color: theme.darkGray}]}>Date: {new Date(order.date).toLocaleDateString()}</Text>
-            <Text style={[tw`text-sm font-semibold mt-1`, {color: theme.primary}]}>Total: ${order.total}</Text>
-            {order.status === "pending" && (
-              <TouchableOpacity
-                onPress={() => cancelOrder(order._id)}
-                disabled={loadingCancel === order._id}
-                style={[tw`ms-auto rounded-md w-24 p-2 py-1 flex-row justify-center`, { backgroundColor: theme.red }]}
-              >
-                {loadingCancel === order._id ? (
-                  <Text style={[tw`italic text-center text-base font-semibold text-white`]}>Cancelling</Text>
-                ) : (
-                  <Text style={[tw`text-center text-base font-semibold text-white`]}>Cancel</Text>
-                )}
-              </TouchableOpacity>
-            )}
-
-{order.status === "canceled" && (
-  <Text style={[tw`text-sm font-semibold mt-2`, { color: theme.darkGray }]}>Canceled</Text>
-)}
-
+  <View style={tw`flex-1 p-4`}>
+    <SidebarHeader title="Orders History" />
+    <ScrollView>
+      {orders?.length ? [...orders].sort((a, b) => new Date(b.date) - new Date(a.date)).map((o) => (
+        <View key={o._id} style={[tw`p-4 mb-3 rounded-lg flex-row justify-between items-center`, { backgroundColor: theme.semiWhite }]}>
+          <View style={tw`flex-1`}>
+            <Text style={[tw`text-base font-bold`, { color: theme.black }]}>Order ID: {o._id.slice(-6)}</Text>
+            <Text style={[tw`text-sm`, { color: theme.darkGray }]}>Date: {new Date(o.date).toLocaleDateString()}</Text>
+            <Text style={[tw`text-sm font-semibold mt-1`, { color: theme.primary }]}>Total: ${o.total}</Text>
+            <Text style={[tw`text-sm font-semibold mt-2`, { color: o.status==="pending"?theme.yellow:o.status==="delivered"?theme.green:(o.status==="canceled"||o.status==="refused")?theme.red:theme.darkGray }]}>
+              {o.status[0].toUpperCase() + o.status.slice(1)}
+            </Text>
           </View>
-        )) : <EmptyContent icon="history" title="No Orders Yet" subtitle="Your order history is empty." />}
-      </ScrollView>
-    </View>
+          {o.status==="pending" && (
+            loadingCancel===o._id ? (
+              <View style={[tw`px-3 py-1 rounded-md`, { backgroundColor: theme.semiWhite }]}>
+                <Text style={[tw`text-base font-semibold italic`, { color: theme.red }]}>Cancelling...</Text>
+              </View>
+            ) : (
+              <TouchableOpacity onPress={() => cancelOrder(o._id)} style={[tw`rounded-md w-24 p-2 py-1 flex-row justify-center`, { backgroundColor: theme.red }]}>
+                <Text style={tw`text-center text-base font-semibold text-white`}>Cancel</Text>
+              </TouchableOpacity>
+            )
+          )}
+        </View>
+      )) : <EmptyContent icon="history" title="No Orders Yet" subtitle="Your order history is empty." />}
+    </ScrollView>
+  </View>
   );
   const SidebarNotificationsContent = () => (
     <View style={tw`flex-1 p-4`}>

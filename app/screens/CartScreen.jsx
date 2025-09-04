@@ -9,7 +9,7 @@ import { useCart } from "../context/CartContext.jsx";
 
 const CartScreen = () => {
   const navigation = useNavigation();
-  const { theme, user,  getImageUrl, clearCartAndUpdateOrsers } = useAppContext(), {updateCartQuantity, removeFromCart } = useCart();
+  const { theme, user,  getImageUrl } = useAppContext(), {updateCartQuantity, clearCartAndUpdateOrsers, removeFromCart } = useCart();
   const cart = user?.cart || [];
   const totalItems = cart.reduce((t, i) => t + i.quantity, 0);
   const totalPrice = cart.reduce((t, i) => t + i.price * i.quantity, 0);

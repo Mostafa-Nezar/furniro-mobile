@@ -1,15 +1,11 @@
-import { createContext, useContext, useReducer } from "react";
+import { createContext, useContext, useReducer, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "./AuthContext";
 import { fetchInstance } from "./api";
 
 const CartContext = createContext();
 
-const initialState = {
-  cart: [],
-  loading: false,
-  error: null,
-};
+const initialState = { cart: [], loading: false, error: null };
 
 const cartReducer = (state, action) => {
   switch (action.type) {
@@ -40,8 +36,6 @@ const cartReducer = (state, action) => {
 export const CartProvider = ({ children }) => {
   const { user, updateUser } = useAuth();
   const [state, dispatch] = useReducer(cartReducer, initialState);
-
-  // ✅ sync with user.cart
   const syncCart = (cart) => {
     dispatch({ type: "SET_CART", payload: cart });
     updateUser({ cart });
@@ -96,7 +90,7 @@ export const CartProvider = ({ children }) => {
     syncCart(updatedCart);
   };
 
-  const clearCartAndUpdateOrders = async (paymentMethod = "cash on delivery") => {
+  const clearCartAndUpdateOrsers = async (paymentMethod = "cash on delivery") => {
     if (!user?.id) return;
     await fetchInstance("/orders", {
       method: "POST",
@@ -114,7 +108,11 @@ export const CartProvider = ({ children }) => {
     });
     syncCart([]);
   };
-
+    useEffect(() => {
+    if (user?.cart) {
+      dispatch({ type: "SET_CART", payload: user.cart });
+    }
+  }, [user]);
   return (
     <CartContext.Provider
       value={{
@@ -122,7 +120,7 @@ export const CartProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         updateCartQuantity,
-        clearCartAndUpdateOrders,
+        clearCartAndUpdateOrsers,
       }}
     >
       {children}
