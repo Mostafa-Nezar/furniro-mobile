@@ -57,8 +57,8 @@ const AppNavigator = () => {
   return (
     <NavigationContainer> 
       <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: theme.white } }}>
-        <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} />
         <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Main" component={TabNavigator} />
