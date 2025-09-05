@@ -6,6 +6,7 @@ import Header from "../components/Header.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import NetInfo from "@react-native-community/netinfo";
 
 const { width } = Dimensions.get("window");
 const categories = [{ id: 1, name: "Living Room", icon: "chair", image: "Image-living room.png" }, { id: 2, name: "Bedroom", icon: "bed", image: "bedroom.png" }, { id: 3, name: "Kitchen", icon: "kitchen", image: "kit.png" }, { id: 4, name: "Lighting", icon: "lightbulb", image: "lamp.png" }, ];
@@ -17,6 +18,8 @@ const HomeScreen = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [isoffline, setisoffline] = useState(false);
+  const [showBackOnline, setShowBackOnline] = useState(false);
 
 const loadProducts = async () => {
   try {
@@ -30,6 +33,22 @@ const loadProducts = async () => {
 
 
   useEffect(() => { loadProducts(); }, []);
+  useEffect(() => {
+  const unsubscribe = NetInfo.addEventListener((state) => {
+    if (!state.isConnected) {
+      setisoffline(true);
+    } else {
+      if (isoffline) { 
+        setShowBackOnline(true);
+        setTimeout(() => setShowBackOnline(false), 500);
+      }
+      setisoffline(false);
+    }
+  });
+
+  return () => unsubscribe();
+}, [isoffline]);
+
   const onRefresh = async () => { setRefreshing(true); await loadProducts(); setRefreshing(false); };
 
   const renderProduct = ({ item }) => (
@@ -68,13 +87,20 @@ const loadProducts = async () => {
           </View>
         </View>
 
-        {false && (
+        {isoffline && (
           <View style={[tw`mx-4 mt-4 p-3 rounded-lg flex-row items-center`, { backgroundColor: theme.red }]}>
             <Icon name="wifi-off" size={20} color={theme.white} />
             <Text style={[tw`ml-2 font-medium`, { color: theme.white, fontFamily: "Poppins-Medium" }]}>You are browsing offline</Text>
           </View>
         )}
-
+        {showBackOnline && (
+  <View style={[tw`mx-4 mt-4 p-3 rounded-lg flex-row items-center`, { backgroundColor: theme.green }]}>
+    <Icon name="wifi" size={20} color={theme.white} />
+    <Text style={[tw`ml-2 font-medium`, { color: theme.white, fontFamily: "Poppins-Medium" }]}>
+      Back online
+    </Text>
+  </View>
+)}
         <View style={tw`mt-6`}>
           <Text style={[tw`text-xl font-bold mx-4 mb-4`, { color: theme.black, fontFamily: "Poppins-Bold" }]}>Shop by Category</Text>
           <FlatList data={categories} renderItem={renderCategory} keyExtractor={(item) => item.id.toString()} numColumns={2} contentContainerStyle={tw`px-2`} scrollEnabled={false} />

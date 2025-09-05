@@ -91,16 +91,17 @@ export const AppProvider = ({ children }) => {
   };
   const searchProducts = async (q) => {
     try {
-      return await fetchInstance(`/products/db/search?q=${q}`);
+      return await fetchInstance(`/products/db/${q}`);
     } catch {
       const cached = await AsyncStorage.getItem("products");
       if (cached) {
         const list = JSON.parse(cached);
         return list.filter(
           (p) =>
-            p.name.toLowerCase().includes(q.toLowerCase()) ||
-            p.des.toLowerCase().includes(q.toLowerCase())
+            (p.name && p.name.toLowerCase().includes(q.toLowerCase())) ||
+            (p.des && p.des.toLowerCase().includes(q.toLowerCase()))
         );
+
       }
       return [];
     }
