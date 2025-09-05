@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "furniro-mobile",
-    "slug": "furniro-mobile",
+    "name": "furniro",
+    "slug": "furniro",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/myicon.png",
