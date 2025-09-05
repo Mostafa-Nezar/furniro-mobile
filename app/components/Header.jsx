@@ -30,11 +30,11 @@ const Header = ({ showBack = false, showCart = true, showSearch = true, showNoti
         </View>
         <View style={tw`flex-row items-center`}>
           {showNotification && <NotificationBell navigation={navigation} />}
-          <TouchableOpacity onPress={toggleTheme} style={tw`p-2 mr-2`}>
+          <TouchableOpacity onPress={toggleTheme} style={tw`p-2`}>
             <Icon name={isDarkMode ? "light-mode" : "dark-mode"} size={24} color={theme.black}/>
           </TouchableOpacity>
           {showSearch && (
-            <TouchableOpacity onPress={() => navigation.navigate("Search")} style={tw`p-2 mr-2`}>
+            <TouchableOpacity onPress={() => navigation.navigate("Search")} style={tw`p-2`}>
               <Icon name="search" size={24} color={theme.black} />
             </TouchableOpacity>
           )}

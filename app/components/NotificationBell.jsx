@@ -8,7 +8,7 @@ const NotificationBell = ({ navigation }) => {
   const { unreadCount, connected } = useSocket();
   const { theme } = useAppContext();
   return (
-    <TouchableOpacity onPress={()=>navigation.navigate('NotificationsList')} style={tw`relative mr-4`}>
+    <TouchableOpacity onPress={()=>navigation.navigate('NotificationsList')} style={tw`relative mr-2`}>
       <Ionicons name="notifications-outline" size={24} color={theme.black} />
       {unreadCount > 0 && (
         <View style={[ tw`absolute items-center justify-center -top-1 -right-1 rounded-full min-w-[20px] h-[20px] px-1`,{ backgroundColor: theme.red }]}>

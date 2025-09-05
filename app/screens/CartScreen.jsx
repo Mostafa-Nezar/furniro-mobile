@@ -42,7 +42,7 @@ const CartScreen = () => {
 
   if (!cart.length)
     return (
-      <View style={[tw`flex-1 justify-center px-6`, { backgroundColor: theme.white }]}>
+      <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
         <Header title="Cart" showBack={false} />
       <View style={[tw`flex-1 items-center justify-center px-6`, { backgroundColor: theme.white }]}>
         <Icon name="shopping-cart" size={80} color={theme.darkGray} />
