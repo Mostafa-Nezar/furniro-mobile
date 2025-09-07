@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, Switch, Animated, Dimensions, Modal, PermissionsAndroid, Platform, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Image, Switch, Animated, Dimensions, Modal, PermissionsAndroid, Platform, ActivityIndicator, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext";
 import Header from "../components/Header";
@@ -101,6 +101,14 @@ const { width } = Dimensions.get("window");
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
     );
   };
+  const updatePhone = async (userId, newPhone) => {
+    const res = await fetch(`https://furniro-back-production.up.railway.app/api/auth/users/${userId}/phone`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phoneNumber: newPhone }) });
+    const data = await res.json();
+    if (res.ok) {
+      const updatedUser = { ...user, phoneNumber: data.phoneNumber };
+      updateUser(updatedUser);
+    } else { Toast.show({ type: "error", text1: data?.msg || "Failed to update phone" }) }
+  };
   const renderSidebarContent = () => { 
     switch (sidebarContentKey) {
       case 'favorites': return <SidebarFavoritesContent />;
@@ -110,6 +118,7 @@ const { width } = Dimensions.get("window");
       case 'addresses': return <SidebarGenericContent title="Addresses" icon="location-on" />;
       case 'payment': return <SidebarGenericContent title="Payment Methods" icon="payment" />;
       case 'help': return <SidebarGenericContent title="Help & Support" icon="help" />;
+      case 'phone': return <SidebarPhoneContent />;
       default: return null;
     }
   };
@@ -222,20 +231,64 @@ const { width } = Dimensions.get("window");
         )):<EmptyContent icon="notifications-off" title="No Notifications" subtitle="You have no new notifications."/>}
       </ScrollView>
     </View>
-      );
+  );
   const SidebarGenericContent = ({ title, icon }) => (
     <View style={tw`flex-1 p-4`}>
       <SidebarHeader title={title} />
       <EmptyContent icon={icon} title="Coming Soon" subtitle="This feature is under development." />
     </View>
   );
+  const SidebarPhoneContent = () => {
+  const [phone, setPhone] = useState(user?.phoneNumber || "");
+  const [loading, setLoading] = useState(false);
+  const handleSavePhone = async () => {
+    if (!/^0\d{9,11}$/.test(phone)) { return Toast.show({ type: "error", text1: "Invalid Phone Number" }) }
+    setLoading(true);
+    try {
+      await updatePhone(user.id, phone);
+      Toast.show({type: "success", text1: user?.phoneNumber ? "Phone updated" : "Phone added", text2: phone });
+      closeSidebar();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <View style={tw`flex-1 p-4`}>
+      <SidebarHeader title={user?.phoneNumber ? "Update Phone" : "Add Phone"} />
+      <View style={tw`mt-8`}>
+        <TextInput
+          style={[tw`border p-3 rounded-lg mb-4`, { borderColor: theme.primary, color: theme.black }]}
+          keyboardType="phone-pad"
+          placeholder="Enter phone number"
+          placeholderTextColor={theme.darkGray}
+          value={phone}
+          onChangeText={setPhone}
+        />
+        <TouchableOpacity
+          onPress={handleSavePhone}
+          disabled={loading}
+          style={[tw`py-3 px-6 rounded-lg flex-row items-center justify-center`, { backgroundColor: theme.primary }]}
+        >
+          {loading 
+            ? <ActivityIndicator color="#fff" /> 
+            : <Text style={tw`text-white font-semibold`}>
+                {user?.phoneNumber ? "Update Phone" : "Save Phone"}
+              </Text>}
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
   const menuItems = [ { key: 'favorites', icon: "favorite", title: "Favorites", subtitle: `${favorites.length} items` },
     { key: 'history', icon: "history", title: "Order History", subtitle: `${orders.length} orders` },
     { key: 'location', icon: "location-on", title: "My Location", subtitle: user?.location ? "Location Saved" : "Set location" },
     { key: 'notifications', icon: "notifications", title: "Notifications", subtitle: `${notifications.filter(n=>!n.read).length} new` },
+    { key: 'phone', icon: "phone", title: "My Phone", subtitle: user?.phoneNumber || "Set phone" },
     { key: 'addresses', icon: "pin-drop", title: "Addresses", subtitle: "Manage delivery" },
     { key: 'payment', icon: "payment", title: "Payment", subtitle: "Manage cards" },
-    { key: 'help', icon: "help", title: "Help & Support", subtitle: "FAQs" },
+    { key: 'help', icon: "help", title: "Help & Support", subtitle: "FAQs" }
   ];
   if (!isAuthenticated) {
     return (
