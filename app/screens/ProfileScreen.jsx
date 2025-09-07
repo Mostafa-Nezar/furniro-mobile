@@ -279,8 +279,7 @@ const { width } = Dimensions.get("window");
       </View>
     </View>
   );
-};
-
+  };
   const menuItems = [ { key: 'favorites', icon: "favorite", title: "Favorites", subtitle: `${favorites.length} items` },
     { key: 'history', icon: "history", title: "Order History", subtitle: `${orders.length} orders` },
     { key: 'location', icon: "location-on", title: "My Location", subtitle: user?.location ? "Location Saved" : "Set location" },
