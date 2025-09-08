@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 const API_BASE_URL = "https://furniro-back-production.up.railway.app/api";
 
 export const fetchInstance = async (endpoint, options = {} ) => {
