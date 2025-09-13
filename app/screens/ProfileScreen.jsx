@@ -8,7 +8,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useState, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
-import Geolocation from "react-native-geolocation-service";
+import * as Location from "expo-location";
 import { useSocket } from "../context/SocketContext";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -66,40 +66,42 @@ const { width } = Dimensions.get("window");
     });
   };
   const getAddressFromCoords = async (lat, lng) => {
-    try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en` );
-      const data = await response.json();
-      return data?.display_name || "Unknown location";
-    } catch (error) { return "Could not fetch address"; }
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`,
+      { headers: { "User-Agent": "furniro-app/1.0" } }
+    );
+    const data = await res.json();
+    return data?.display_name || "Unknown location";
+  } catch {
+    return "Could not fetch address";
+  }
   };
   const getCurrentLocation = async () => {
-    const perm = Platform.OS === 'android' ? await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION) : 'granted';
-    if (perm !== PermissionsAndroid.RESULTS.GRANTED && Platform.OS === 'android') return Toast.show({ type: 'info', text1: 'Location permission denied' });
-    setLocationLoading(true);
-    Geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        const address = await getAddressFromCoords(latitude, longitude);
-        const token = await AsyncStorage.getItem("token");
-        try {
-          const response = await fetch(`https://furniro-back-production.up.railway.app/api/auth/users/${user.id}/location`, {
-            method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ location: address })
-          });
-          const data = await response.json();
-          if (!response.ok) throw new Error(data?.msg || "Failed to update location");
-          const updatedUser = { ...user, location: address };
-          updateUser(updatedUser)
-          Toast.show({ type: "success", text1: "Location updated", text2: address });
-        } catch (error) { Toast.show({ type: "error", text1: "Update failed", text2: error.message,position: 'top' }); }
-        finally { setLocationLoading(false); }
-      },
-      (error) => {
-        Toast.show({ type: "error", text1: "Location error", text2: error.message });
-        setLocationLoading(false);
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-    );
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") return Toast.show({ type: "info", text1: "Location permission denied" });
+
+      setLocationLoading(true);
+      const { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+      const address = await getAddressFromCoords(coords.latitude, coords.longitude);
+
+      const token = await AsyncStorage.getItem("token");
+      const res = await fetch(`https://furniro-back-production.up.railway.app/api/auth/users/${user.id}/location`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ location: address }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.msg || "Failed to update location");
+
+      updateUser({ ...user, location: address });
+      Toast.show({ type: "success", text1: "Location updated", text2: address });
+    } catch (e) {
+      Toast.show({ type: "error", text1: "Update failed", text2: e.message, position: "top" });
+    } finally {
+      setLocationLoading(false);
+    }
   };
   const updatePhone = async (userId, newPhone) => {
     const res = await fetch(`https://furniro-back-production.up.railway.app/api/auth/users/${userId}/phone`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phoneNumber: newPhone }) });
