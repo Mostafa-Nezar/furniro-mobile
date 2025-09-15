@@ -108,6 +108,15 @@ export const CartProvider = ({ children }) => {
     });
     syncCart([]);
   };
+    const clearCart = async () => {
+    if (!user?.id) return;
+    await fetchInstance(`/auth/user/${user.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ cart: [] }),
+    });
+    syncCart([]); 
+  };
+  
     useEffect(() => {
     if (user?.cart) {
       dispatch({ type: "SET_CART", payload: user.cart });
@@ -121,6 +130,7 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         updateCartQuantity,
         clearCartAndUpdateOrsers,
+        clearCart
       }}
     >
       {children}

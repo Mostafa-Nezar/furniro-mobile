@@ -78,6 +78,12 @@ const CartScreen = () => {
         <TouchableOpacity onPress={async () => {await clearCartAndUpdateOrsers();Toast.show({type:"success",text1:"Order placed"})}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
           <Text style={[tw`text-center text-lg font-semibold text-white`]}>cash on delivery</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => {navigation.navigate("Payment2")}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
+          <Text style={[tw`text-center text-lg font-semibold text-white`]}>Checkout 2</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => {navigation.navigate("Payment3")}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
+          <Text style={[tw`text-center text-lg font-semibold text-white`]}>Checkout 3</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

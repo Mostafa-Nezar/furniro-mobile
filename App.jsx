@@ -8,7 +8,7 @@ import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 import tw from "twrnc";
 import { AuthProvider } from "./app/context/AuthContext";
 import { CartProvider } from "./app/context/CartContext";
-
+import { StripeProvider } from '@stripe/stripe-react-native';
 SplashScreen.preventAutoHideAsync();
 
 const InnerApp = () => {
@@ -35,6 +35,7 @@ const InnerApp = () => {
 
 export default function App() {
   return (
+  <StripeProvider publishableKey="pk_test_51RfzAo4hpzh6swtTe5XoqvV6DcUlufkptuTb7Q4DKfuVgnDDH76ICrTlrw8pXwKGpHscUSZCr9vwniO6e0zc0VT900tEcvmgjR">
     <AuthProvider>
       <CartProvider>
     <AppProvider>
@@ -44,5 +45,6 @@ export default function App() {
     </AppProvider>
       </CartProvider>
     </AuthProvider>
+  </StripeProvider>
   );
 }
