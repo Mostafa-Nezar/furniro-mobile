@@ -10,11 +10,8 @@ import * as Yup from "yup";
 import Toast from "react-native-toast-message";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useCart } from "../context/CartContext.jsx";
-
-// --- استيراد الأدوات اللازمة من Stripe ---
 import { useStripe, CardField } from '@stripe/stripe-react-native';
 
-// مكون إدخال نصي معاد استخدامه
 const InputField = ({ theme, handleChange, handleBlur, value, placeholder, keyboardType = "default", name }) => (
   <View style={tw`mb-4`}>
     <TextInput
@@ -30,21 +27,17 @@ const InputField = ({ theme, handleChange, handleBlur, value, placeholder, keybo
 );
 
 const Payment3 = () => {
-  // --- 1. إعداد الـ Hooks والسياقات ---
   const nav = useNavigation();
   const { theme } = useAppContext();
   const { user } = useAuth();
   const { clearCartAndUpdateOrsers } = useCart();
-  const { confirmPayment, loading: stripeLoading } = useStripe(); // Hook Stripe
+  const { confirmPayment, loading: stripeLoading } = useStripe();
 
   const [loading, setLoading] = useState(false);
   const cart = user?.cart || [];
   const subtotal = cart.reduce((t, i) => t + i.price * i.quantity, 0);
   const shipping = subtotal >= 100 ? 0 : 0;
   const total = subtotal + shipping;
-
-  // --- 2. مخطط التحقق من صحة البيانات (Yup) ---
-  // تم تبسيطه ليشمل فقط البيانات التي نحتاجها الآن
   const validationSchema = Yup.object().shape({
     email: Yup.string().email("Invalid email").required("Email is required"),
     fullName: Yup.string().required("Full name is required"),
@@ -54,7 +47,6 @@ const Payment3 = () => {
     zipCode: Yup.string().required("ZIP Code is required"),
   });
 
-  // --- 3. الدالة النهائية والشاملة للدفع ---
   const handlePaymentSubmit = async (formValues) => {
     if (cart.length === 0) {
       Toast.show({ type: 'info', text1: 'Your cart is empty' });
@@ -62,13 +54,20 @@ const Payment3 = () => {
     }
     setLoading(true);
 
-    // --- الخطوة أ: طلب 'clientSecret' من الخادم ---
     let clientSecret;
     try {
-      const response = await fetch("https://furniro-back-production.up.railway.app/api/payment/create-payment-intent", {
+      const response = await fetch("https://furniro-back-production.up.railway.app/api/payment2/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ total: total } ), // نرسل المبلغ الإجمالي فقط
+            body: JSON.stringify({
+          total: total,
+          userId: user.id,
+          products: cart,
+          customerInfo: {
+            name: formValues.fullName,
+            email: formValues.email
+          }
+        } ),
       });
       const data = await response.json();
       if (data.error || !data.clientSecret) {
@@ -82,10 +81,9 @@ const Payment3 = () => {
       return;
     }
 
-    // --- الخطوة ب: تأكيد الدفع في الواجهة الأمامية باستخدام Stripe ---
     try {
       const { error, paymentIntent } = await confirmPayment(clientSecret, {
-        type: 'Card',
+        paymentMethodType: 'Card',
         billingDetails: {
           email: formValues.email,
           name: formValues.fullName,
@@ -94,25 +92,19 @@ const Payment3 = () => {
             city: formValues.city,
             state: formValues.state,
             postalCode: formValues.zipCode,
-            country: 'US', // يمكنك جعل هذا الحقل ديناميكيًا
+            country: 'US',
           },
         },
       });
 
       if (error) {
-        // إذا فشل الدفع (بطاقة مرفوضة، خطأ في البيانات، إلخ)
         throw new Error(error.message);
       }
 
-      // --- الخطوة ج: الدفع نجح! ---
       console.log("✅ Payment successful! Payment Intent ID:", paymentIntent.id);
       Toast.show({ type: 'success', text1: 'Payment Successful!' });
-
-      // الآن نقوم بمسح سلة التسوق وتحديث الطلبات
       await clearCartAndUpdateOrsers("done");
-      
-      // يمكنك الانتقال إلى صفحة نجاح الطلب
-      // nav.navigate('OrderSuccessScreen');
+      nav.navigate('Ordersuccessscreen');
 
     } catch (paymentError) {
       console.error("❌ Stripe Payment Error:", paymentError);
@@ -178,11 +170,10 @@ const Payment3 = () => {
               {errors.zipCode && touched.zipCode && <Text style={tw`text-red-500 mb-2`}>{errors.zipCode}</Text>}
             </View>
 
-            {/* --- 4. مكون Stripe الآمن لبيانات البطاقة --- */}
             <View style={tw`mb-6`}>
               <Text style={[tw`text-lg font-bold mb-3`, { color: theme.black }]}>Payment Details</Text>
               <CardField
-                postalCodeEnabled={false} // قمنا بتعطيله لأننا نجمعه في حقل منفصل
+                postalCodeEnabled={false} 
                 style={[tw`w-full h-14`, { color: theme.black }]}
                 cardStyle={{
                   backgroundColor: theme.semiWhite,
@@ -194,7 +185,6 @@ const Payment3 = () => {
               />
             </View>
 
-            {/* --- زر الدفع النهائي --- */}
             <View style={[tw`p-4 border-t`, { borderTopColor: theme.lightGray }]}>
               <TouchableOpacity
                 onPress={handleSubmit}

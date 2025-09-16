@@ -2,16 +2,32 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import * as WebBrowser from "expo-web-browser"; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../context/AuthContext.jsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useCart } from "../context/CartContext.jsx";
+import * as Linking from "expo-linking";
 
 const Payment2 = () => {
   const { user } = useAuth();
   const { cart,clearCart } = useCart();
+  useEffect(() => {
+  const handleDeepLink = (event) => {
+    const url = event.url;
+    if (url.includes("https://furniro-react-jade.vercel.app")) {
+      clearCart();
+    }
+  };
+
+  const subscription = Linking.addEventListener("url", handleDeepLink);
+
+  return () => {
+    subscription.remove(); 
+  };
+}, []);
 
 
-  const x = useNavigation()
+
+  const x = useNavigation();
   const [customerInfo, setCustomerInfo] = useState({
     fullName: "x",
     email: user.email,
@@ -67,7 +83,6 @@ const Payment2 = () => {
 
       if (response.ok && data.url) {
         await WebBrowser.openBrowserAsync(data.url);
-        await clearCart();
       } else {
         console.log("Response status:", response.status);
         console.log("Response body:", data);

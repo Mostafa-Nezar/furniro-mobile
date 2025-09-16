@@ -99,7 +99,7 @@ export const CartProvider = ({ children }) => {
         products: state.cart,
         date: new Date().toISOString(),
         total: state.cart.reduce((sum, p) => sum + (p.price * (p.quantity || 1)), 0),
-        payment: paymentMethod,
+        paymentdone:paymentMethod
       }),
     });
     await fetchInstance(`/auth/user/${user.id}`, {
