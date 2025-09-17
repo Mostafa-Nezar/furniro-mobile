@@ -58,24 +58,23 @@ const Payment2 = () => {
             ...(token && { Authorization: `Bearer ${token}` }),
           },
           body: JSON.stringify({
-            userId: user?.id,
-            products: cart.map((i) => ({
-              id: i.id,
-              name: i.name,
-              price: i.price,
-              quantity: i.quantity,
-            })),
-            customerInfo: {
-              email: customerInfo.email,
-              name: customerInfo.fullName,
-              address: {
-                line1: customerInfo.address,
-                city: customerInfo.city,
-                state: customerInfo.state,
-                postal_code: customerInfo.zipCode,
-              },
-            },
-          }),
+  userId: user?.id,
+  products: cart.map((i) => ({
+    id: i.id,
+    name: i.name,
+    price: i.price,
+    quantity: i.quantity,
+  })),
+  customerInfo: {
+    fullName: customerInfo.fullName,
+    email: customerInfo.email,
+    address: customerInfo.address,
+    city: customerInfo.city,
+    state: customerInfo.state,
+    zipCode: customerInfo.zipCode,
+  },
+}),
+
         }
       );
 

@@ -30,7 +30,6 @@ const Payment3 = () => {
   const nav = useNavigation();
   const { theme } = useAppContext();
   const { user } = useAuth();
-  const { clearCartAndUpdateOrsers } = useCart();
   const { confirmPayment, loading: stripeLoading } = useStripe();
 
   const [loading, setLoading] = useState(false);
@@ -59,15 +58,19 @@ const Payment3 = () => {
       const response = await fetch("https://furniro-back-production.up.railway.app/api/payment2/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-          total: total,
-          userId: user.id,
-          products: cart,
-          customerInfo: {
-            name: formValues.fullName,
-            email: formValues.email
-          }
-        } ),
+body: JSON.stringify({
+  total: total,
+  userId: user.id,
+  products: cart,
+   customerInfo: {
+  fullName: formValues.fullName,
+  email: formValues.email,
+  address: formValues.address,
+  city: formValues.city,
+  state: formValues.state,
+  zipCode: formValues.zipCode}
+})
+
       });
       const data = await response.json();
       if (data.error || !data.clientSecret) {
@@ -103,7 +106,7 @@ const Payment3 = () => {
 
       console.log("✅ Payment successful! Payment Intent ID:", paymentIntent.id);
       Toast.show({ type: 'success', text1: 'Payment Successful!' });
-      await clearCartAndUpdateOrsers("done");
+
       nav.navigate('Ordersuccessscreen');
 
     } catch (paymentError) {
