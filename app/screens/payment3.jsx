@@ -126,7 +126,7 @@ const Payment3 = () => {
       >
         {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
           <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
-            <View style={[tw`p-4 rounded-lg mb-6 mt-4`, { backgroundColor: theme.semiWhite }]}>
+                        <View style={[tw`p-4 rounded-lg mb-6 mt-4`, { backgroundColor: theme.semiWhite }]}>
               <Text style={[tw`text-lg font-bold mb-3`, { color: theme.black }]}>Order Summary</Text>
               {cart.map((item, i) => (
                 <View key={i} style={tw`flex-row justify-between mb-2`}>
@@ -135,18 +135,22 @@ const Payment3 = () => {
                 </View>
               ))}
               <View style={[tw`border-t pt-3 mt-3`, { borderTopColor: theme.lightGray }]}>
-                <View style={tw`flex-row justify-between mb-2`}>
+                <View style={tw`flex-row justify-between mb-1`}>
                   <Text style={{ color: theme.darkGray }}>Subtotal:</Text>
                   <Text style={{ color: theme.black }}>${subtotal.toFixed(2)}</Text>
                 </View>
-                <View style={tw`flex-row justify-between`}>
-                  <Text style={{ color: theme.darkGray }}>Total:</Text>
+                <View style={tw`flex-row justify-between mb-1`}>
+                  <Text style={{ color: theme.darkGray }}>Shipping:</Text>
+                  <Text style={{ color: shipping === 0 ? theme.green : theme.black }}>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</Text>
+                </View>
+                <View style={tw`flex-row justify-between mt-2 pt-2 border-t border-gray-200`}>
+                  <Text style={[tw`text-lg font-bold`, { color: theme.black }]}>Total:</Text>
                   <Text style={[tw`text-lg font-bold`, { color: theme.primary }]}>${total.toFixed(2)}</Text>
                 </View>
               </View>
             </View>
-
             <View style={tw`mb-6`}>
+            <Text style={[tw`text-lg font-bold mb-3`, { color: theme.black }]}>Payment Details</Text>
               <InputField theme={theme} name="email" value={values.email} handleChange={handleChange} handleBlur={handleBlur} placeholder="Email Address" keyboardType="email-address" />
               {errors.email && touched.email && <Text style={tw`text-red-500 mb-2`}>{errors.email}</Text>}
               
@@ -168,23 +172,15 @@ const Payment3 = () => {
               </View>
               <InputField theme={theme} name="zipCode" value={values.zipCode} handleChange={handleChange} handleBlur={handleBlur} placeholder="ZIP Code" keyboardType="numeric" />
               {errors.zipCode && touched.zipCode && <Text style={tw`text-red-500 mb-2`}>{errors.zipCode}</Text>}
+            <CardField postalCodeEnabled={false} style={[tw`w-full h-14`, { color: theme.black }]} cardStyle={{ backgroundColor: theme.semiWhite, textColor: theme.black, borderColor: theme.lightGray, borderWidth: 1, borderRadius: 8 }}/>
             </View>
-
-            <View style={tw`mb-6`}>
-              <Text style={[tw`text-lg font-bold mb-3`, { color: theme.black }]}>Payment Details</Text>
-              <CardField
-                postalCodeEnabled={false} 
-                style={[tw`w-full h-14`, { color: theme.black }]}
-                cardStyle={{
-                  backgroundColor: theme.semiWhite,
-                  textColor: theme.black,
-                  borderColor: theme.lightGray,
-                  borderWidth: 1,
-                  borderRadius: 8,
-                }}
-              />
+              <View style={[tw`p-4 rounded-lg mb-6 flex-row`, { backgroundColor: theme.lightBeige }]}>
+              <Icon name="security" size={20} color={theme.primary} style={tw`mr-3 mt-1`} />
+              <View style={tw`flex-1`}>
+                <Text style={[tw`text-sm font-medium`, { color: theme.black }]}>Secure Payment</Text>
+                <Text style={[tw`text-xs mt-1`, { color: theme.darkGray }]}>Your payment information is encrypted and secure. We use Stripe for payment processing.</Text>
+              </View>
             </View>
-
             <View style={[tw`p-4 border-t`, { borderTopColor: theme.lightGray }]}>
               <TouchableOpacity
                 onPress={handleSubmit}

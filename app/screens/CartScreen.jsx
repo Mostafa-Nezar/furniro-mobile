@@ -69,7 +69,7 @@ const CartScreen = () => {
           <Text style={[tw`text-lg font-bold`, { color: theme.black }]}>Total:</Text>
           <Text style={[tw`text-lg font-bold`, { color: theme.primary }]}>${(totalPrice + shipping).toFixed(2)}</Text>
         </View>
-        <TouchableOpacity onPress={() => {navigation.navigate("Payment")}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
+        <TouchableOpacity onPress={() => {navigation.navigate("Payment3")}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
           <Text style={[tw`text-center text-lg font-semibold text-white`]}>Checkout</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Shop")} style={[tw`py-3 mt-3 border rounded-lg`, { borderColor: theme.primary }]}>
@@ -77,12 +77,6 @@ const CartScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity onPress={async () => {await clearCartAndUpdateOrsers();Toast.show({type:"success",text1:"Order placed"})}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
           <Text style={[tw`text-center text-lg font-semibold text-white`]}>cash on delivery</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => {navigation.navigate("Payment2")}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
-          <Text style={[tw`text-center text-lg font-semibold text-white`]}>Checkout 2</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => {navigation.navigate("Payment3")}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
-          <Text style={[tw`text-center text-lg font-semibold text-white`]}>Checkout 3</Text>
         </TouchableOpacity>
       </View>
     </View>
