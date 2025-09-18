@@ -9,7 +9,6 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import Toast from "react-native-toast-message";
 import { useAuth } from "../context/AuthContext.jsx";
-import { useCart } from "../context/CartContext.jsx";
 import { useStripe, CardField } from '@stripe/stripe-react-native';
 
 const InputField = ({ theme, handleChange, handleBlur, value, placeholder, keyboardType = "default", name }) => (
@@ -48,7 +47,7 @@ const Payment3 = () => {
 
   const handlePaymentSubmit = async (formValues) => {
     if (cart.length === 0) {
-      Toast.show({ type: 'info', text1: 'Your cart is empty' });
+      Toast.show({ type: 'success', text1: 'Your cart is empty' });
       return;
     }
     setLoading(true);
@@ -58,17 +57,17 @@ const Payment3 = () => {
       const response = await fetch("https://furniro-back-production.up.railway.app/api/payment2/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-  total: total,
-  userId: user.id,
-  products: cart,
-   customerInfo: {
-  fullName: formValues.fullName,
-  email: formValues.email,
-  address: formValues.address,
-  city: formValues.city,
-  state: formValues.state,
-  zipCode: formValues.zipCode}
+        body: JSON.stringify({
+          total: total,
+          userId: user.id,
+          products: cart,
+          customerInfo: {
+          fullName: formValues.fullName,
+          email: formValues.email,
+          address: formValues.address,
+          city: formValues.city,
+          state: formValues.state,
+          zipCode: formValues.zipCode}
 })
 
       });
@@ -121,13 +120,12 @@ body: JSON.stringify({
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title="Payment" showBack />
       <Formik
-        initialValues={{ email: user?.email || "", fullName: "", address: "", city: "", state: "", zipCode: "" }}
+        initialValues={{ email: user?.email || "", fullName: user?.name || "", address: user?.location || "", city: "", state: "", zipCode: "" }}
         validationSchema={validationSchema}
         onSubmit={handlePaymentSubmit}
       >
         {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
           <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
-            {/* --- ملخص الطلب (Order Summary) --- */}
             <View style={[tw`p-4 rounded-lg mb-6 mt-4`, { backgroundColor: theme.semiWhite }]}>
               <Text style={[tw`text-lg font-bold mb-3`, { color: theme.black }]}>Order Summary</Text>
               {cart.map((item, i) => (
@@ -148,7 +146,6 @@ body: JSON.stringify({
               </View>
             </View>
 
-            {/* --- معلومات الشحن (Shipping Information) --- */}
             <View style={tw`mb-6`}>
               <InputField theme={theme} name="email" value={values.email} handleChange={handleChange} handleBlur={handleBlur} placeholder="Email Address" keyboardType="email-address" />
               {errors.email && touched.email && <Text style={tw`text-red-500 mb-2`}>{errors.email}</Text>}
