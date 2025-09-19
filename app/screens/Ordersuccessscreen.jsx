@@ -13,7 +13,7 @@ export default function Ordersuccessscreen() {
  useEffect(()=>{clearCart()},[])
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
-      <Header title="Success"/>
+      <Header title="Success" showBack={true}/>
       <View style={tw`flex-1 justify-center items-center px-5`}>
         <View style={tw`mb-5`}>
           <Ionicons name="checkmark-circle" size={100} color={theme.green} />
@@ -25,7 +25,7 @@ export default function Ordersuccessscreen() {
           Thank you for shopping with us. We’ll contact you soon to confirm
           your order.
         </Text>
-        <TouchableOpacity style={[tw`w-4/5 py-3 rounded-xl items-center`, { backgroundColor: theme.primary }]} onPress={() => navigation.navigate("Cart")}>
+        <TouchableOpacity style={[tw`w-4/5 py-3 rounded-xl items-center`, { backgroundColor: theme.primary }]} onPress={() => navigation.popToTop({ animationEnabled: false })}>
           <Text style={[tw`text-base font-semibold`, { color: theme.white }]}>
             Back to Cart
           </Text>

@@ -81,6 +81,9 @@ const LoginScreen = () => {
           <TouchableOpacity onPress={() => navigation.navigate("Register")}>
             <Text style={[tw`text-base font-semibold`, { color: theme.primary }]}>Sign Up</Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("Register2")}>
+            <Text style={[tw`text-base font-semibold`, { color: theme.primary }]}>Sign Up</Text>
+          </TouchableOpacity>
         </View>
         <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: "Main" }] })} style={tw`mt-6`}>
           <Text style={[tw`text-center text-base`, { color: theme.darkGray }]}>Skip login</Text>

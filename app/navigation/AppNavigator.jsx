@@ -20,6 +20,7 @@ import GetStarted from "../screens/GetStarted.jsx";
 import Payment2 from "../screens/Payment2.jsx";
 import Payment3 from "../screens/payment3.jsx";
 import Ordersuccessscreen from "../screens/Ordersuccessscreen.jsx";
+import RegisterScreen2 from "../screens/RegisterScreen2.jsx";
 
 const Stack = createStackNavigator(), Tab = createBottomTabNavigator();
 
@@ -63,6 +64,7 @@ const AppNavigator = () => {
         <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="Register2" component={RegisterScreen2} />
         <Stack.Screen name="Main" component={TabNavigator} />
         <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
