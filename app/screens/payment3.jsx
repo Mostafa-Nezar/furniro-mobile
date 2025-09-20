@@ -10,6 +10,7 @@ import * as Yup from "yup";
 import Toast from "react-native-toast-message";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useStripe, CardField } from '@stripe/stripe-react-native';
+import { useCart } from "../context/CartContext.jsx";
 
 const InputField = ({ theme, handleChange, handleBlur, value, placeholder, keyboardType = "default", name }) => (
   <View style={tw`mb-4`}>
@@ -27,12 +28,9 @@ const InputField = ({ theme, handleChange, handleBlur, value, placeholder, keybo
 
 const Payment3 = () => {
   const nav = useNavigation();
-  const { theme } = useAppContext();
-  const { user } = useAuth();
+  const { theme } = useAppContext(), { user } = useAuth(), { cart } = useCart();
   const { confirmPayment, loading: stripeLoading } = useStripe();
-
   const [loading, setLoading] = useState(false);
-  const cart = user?.cart || [];
   const subtotal = cart.reduce((t, i) => t + i.price * i.quantity, 0);
   const shipping = subtotal >= 100 ? 0 : 0;
   const total = subtotal + shipping;

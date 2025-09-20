@@ -21,12 +21,13 @@ import Payment2 from "../screens/Payment2.jsx";
 import Payment3 from "../screens/payment3.jsx";
 import Ordersuccessscreen from "../screens/Ordersuccessscreen.jsx";
 import RegisterScreen2 from "../screens/RegisterScreen2.jsx";
+import { useCart } from "../context/CartContext.jsx";
 
 const Stack = createStackNavigator(), Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
-  const { theme, user } = useAppContext();
-  const cartItemsCount = user?.cart?.reduce((t, i) => t + i.quantity, 0) || 0;
+  const { theme } = useAppContext(), { cart } = useCart();
+  const cartItemsCount = cart.reduce((t, i) => t + i.quantity, 0) || 0;
   return (
     <Tab.Navigator screenOptions={({ route }) => ({
       headerShown: false,

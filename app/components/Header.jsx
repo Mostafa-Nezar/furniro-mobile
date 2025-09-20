@@ -4,11 +4,12 @@ import { useAppContext } from "../context/AppContext.jsx";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import NotificationBell from "./NotificationBell";
+import { useCart } from "../context/CartContext.jsx";
 
 const Header = ({ showBack = false, showCart = true, showSearch = true, showNotification = true }) => {
   const navigation = useNavigation();
-  const { theme, user, toggleTheme, isDarkMode } = useAppContext();
-  const cartItemsCount = user?.cart?.reduce((total, item) => total + item.quantity, 0) || 0;
+  const { theme, toggleTheme, isDarkMode } = useAppContext(), { cart } =useCart();
+  const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0) || 0;
 
   return (
     <SafeAreaView style={{ backgroundColor: theme.white }}>

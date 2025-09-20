@@ -34,16 +34,15 @@ const cartReducer = (state, action) => {
 };
 
 export const CartProvider = ({ children }) => {
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const [state, dispatch] = useReducer(cartReducer, initialState);
+
   const syncCart = (cart) => {
     dispatch({ type: "SET_CART", payload: cart });
-    updateUser({ cart });
-    AsyncStorage.setItem("user", JSON.stringify({ ...user, cart }));
+    AsyncStorage.setItem("cart", JSON.stringify(cart));
   };
 
   const addToCart = async (product) => {
-    if (!user?.id) return;
     const existingItem = state.cart.find((item) => item.id === product.id);
     let updatedCart;
     if (existingItem) {
@@ -56,10 +55,6 @@ export const CartProvider = ({ children }) => {
         { id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 },
       ];
     }
-    await fetchInstance(`/auth/user/${user.id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ cart: updatedCart }),
-    });
     syncCart(updatedCart);
   };
 
@@ -74,7 +69,6 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateCartQuantity = async (productId, newQuantity) => {
-    if (!user?.id) return;
     let updatedCart;
     if (newQuantity < 1) {
       updatedCart = state.cart.filter((item) => item.id !== productId);
@@ -83,10 +77,6 @@ export const CartProvider = ({ children }) => {
         item.id === productId ? { ...item, quantity: newQuantity } : item
       );
     }
-    await fetchInstance(`/auth/user/${user.id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ cart: updatedCart }),
-    });
     syncCart(updatedCart);
   };
 
@@ -99,7 +89,7 @@ export const CartProvider = ({ children }) => {
         products: state.cart,
         date: new Date().toISOString(),
         total: state.cart.reduce((sum, p) => sum + (p.price * (p.quantity || 1)), 0),
-        paymentdone:paymentMethod
+        paymentdone: paymentMethod,
       }),
     });
     await fetchInstance(`/auth/user/${user.id}`, {
@@ -108,20 +98,24 @@ export const CartProvider = ({ children }) => {
     });
     syncCart([]);
   };
-    const clearCart = async () => {
-    if (!user?.id) return;
-    await fetchInstance(`/auth/user/${user.id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ cart: [] }),
-    });
-    syncCart([]); 
+
+  const clearCart = async () => {
+    syncCart([]);
   };
-  
-    useEffect(() => {
-    if (user?.cart) {
-      dispatch({ type: "SET_CART", payload: user.cart });
-    }
-  }, [user]);
+
+  // تحميل الكارت عند فتح التطبيق
+  useEffect(() => {
+    const loadCart = async () => {
+      const savedCart = await AsyncStorage.getItem("cart");
+      if (savedCart) {
+        dispatch({ type: "SET_CART", payload: JSON.parse(savedCart) });
+      } else if (user?.cart) {
+        dispatch({ type: "SET_CART", payload: user.cart });
+      }
+    };
+    loadCart();
+  }, [user?.cart]);
+
   return (
     <CartContext.Provider
       value={{
@@ -130,7 +124,7 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         updateCartQuantity,
         clearCartAndUpdateOrsers,
-        clearCart
+        clearCart,
       }}
     >
       {children}
