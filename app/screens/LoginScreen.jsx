@@ -4,7 +4,6 @@ import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import FAIcon from "react-native-vector-icons/FontAwesome";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import Toast from "react-native-toast-message";
@@ -69,19 +68,12 @@ const LoginScreen = () => {
           <View style={[tw`flex-1 h-px`, { backgroundColor: theme.lightGray }]} />
         </View>
         <TouchableOpacity onPress={GoogleSignup} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`, { borderColor: theme.lightGray, backgroundColor: theme.white }]}>
-          <FAIcon name="google" size={20} color="#DB4437" />
+          <Image source={require("../../assets/g.png")} style={{ width: 20, height: 20 }} resizeMode="contain"/>
           <Text style={[tw`ml-3 text-base font-medium`, { color: theme.black }]}>Sign in with Google</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => Toast.show({ type: "info", text1: "Soon", text2: "" })} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-6 border`, { borderColor: theme.lightGray, backgroundColor: theme.white }]}>
-          <FAIcon name="facebook" size={20} color="#4267B2" />
-          <Text style={[tw`ml-3 text-base font-medium`, { color: theme.black }]}>Sign in with Facebook</Text>
         </TouchableOpacity>
         <View style={tw`flex-row justify-center`}>
           <Text style={[tw`text-base`, { color: theme.darkGray }]}>Don't have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-            <Text style={[tw`text-base font-semibold`, { color: theme.primary }]}>Sign Up</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("Register2")}>
             <Text style={[tw`text-base font-semibold`, { color: theme.primary }]}>Sign Up</Text>
           </TouchableOpacity>
         </View>

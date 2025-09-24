@@ -6,7 +6,6 @@ import {Formik} from 'formik';
 import * as Yup from 'yup';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import FAIcon from 'react-native-vector-icons/FontAwesome';
 import Toast from "react-native-toast-message";
 import { useAuth } from '../context/AuthContext';
 const RegisterScreen=()=>{ 
@@ -77,12 +76,8 @@ const RegisterScreen=()=>{
           <View style={[tw`flex-1 h-px`,{backgroundColor:theme.lightGray}]}/>
         </View>
         <TouchableOpacity onPress={handleGoogleSignup} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,{borderColor:theme.lightGray,backgroundColor:theme.white}]}>
-          <FAIcon name="google" size={20} color="#DB4437"/>
+          <Image source={require("../../assets/g.png")} style={{ width: 20, height: 20 }} resizeMode="contain"/>
           <Text style={[tw`ml-3 text-base font-medium`,{color:theme.black}]}>Sign up with Google</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={()=>Toast.show({type: 'success', text1: 'Soon'})} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,{borderColor:theme.lightGray,backgroundColor:theme.white}]}>
-          <FAIcon name="facebook" size={20} color="#4267B2"/>
-          <Text style={[tw`ml-3 text-base font-medium`,{color:theme.black}]}>Sign up with Facebook</Text>
         </TouchableOpacity>
         <View style={tw`flex-row justify-center mt-2`}>
           <Text style={[tw`text-base`,{color:theme.darkGray}]}>Already have an account? </Text>

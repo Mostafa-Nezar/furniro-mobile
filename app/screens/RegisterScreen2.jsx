@@ -1,81 +1,76 @@
-import { View, Text, TouchableOpacity } from 'react-native'
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from 'react';
-import Toast from "react-native-toast-message";
-import tw from "twrnc";
+// import React, { useEffect, useState } from "react";
+// import { View, Text, TouchableOpacity } from "react-native";
+// import * as WebBrowser from "expo-web-browser";
+// import * as Google from "expo-auth-session/providers/google";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import Toast from "react-native-toast-message";
+// import tw from "twrnc";
 
-export default function RegisterScreen2() {
-  const [myuser, setmyuser] = useState(null); 
+// WebBrowser.maybeCompleteAuthSession();
 
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: '866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh.apps.googleusercontent.com',
-      offlineAccess: true
-    })
-  }, []);
+// export default function RegisterScreen2() {
+//   const [myuser, setMyuser] = useState(null);
 
-  const GoogleSignup = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      const token = userInfo.idToken;
+//   // إعداد Google Login
+//   const [request, response, promptAsync] = Google.useAuthRequest({
+//     androidClientId:
+//       "553617187733-fvjjbctuaa91408osoccn5ggrhj1qesj.apps.googleusercontent.com", // Android client ID
+//     webClientId:
+//       "553617187733-oa524rs9rb0bt5efmmpr4gr3em8gic9r.apps.googleusercontent.com", // Web client ID
+//   });
 
-      const res = await fetch('https://furniro-back-production.up.railway.app/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token })
-      });
+//   // لما يحصل Response من Google
+//   useEffect(() => {
+//     if (response?.type === "success") {
+//       const { authentication } = response;
 
-      const data = await res.json();
+//       // إرسال الـ token للسيرفر بتاعك
+//       fetch("https://furniro-back-production.up.railway.app/api/auth/google", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ token: authentication.idToken }),
+//       })
+//         .then((res) => res.json())
+//         .then(async (data) => {
+//           if (data.user && data.token) {
+//             await AsyncStorage.setItem("token", data.token);
+//             await AsyncStorage.setItem("user", JSON.stringify(data.user));
 
-      if (data.user && data.token) {
-        await AsyncStorage.setItem('token', data.token);
-        await AsyncStorage.setItem('user', JSON.stringify(data.user));
+//             setMyuser(data.user);
+//             Toast.show({ type: "success", text1: "Google account created!" });
+//           } else {
+//             Toast.show({
+//               type: "error",
+//               text1: data.msg || "Google sign-up error",
+//             });
+//           }
+//         })
+//         .catch((err) => {
+//           Toast.show({ type: "error", text1: "Login failed", text2: err.message });
+//         });
+//     }
+//   }, [response]);
 
-        setmyuser(data.user);
+//   return (
+//     <View style={tw`p-4`}>
+//       <TouchableOpacity
+//         disabled={!request}
+//         onPress={() => promptAsync()}
+//         style={[
+//           tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,
+//           { borderColor: "#ccc", backgroundColor: "#fff" },
+//         ]}
+//       >
+//         <Text style={[tw`ml-3 text-base font-medium`, { color: "#000" }]}>
+//           Sign up with Google
+//         </Text>
+//       </TouchableOpacity>
 
-        return { success: true, user: data.user };
-      } else {
-        return { success: false, message: data.msg || 'Google sign-up error' };
-      }
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
-  };
-
-  const handleGoogleSignup = async () => {
-    const result = await GoogleSignup();
-    if (result.success) {
-      Toast.show({ type: 'success', text1: 'Google account created!' });
-    } else {
-      Toast.show({
-        type: 'error',
-        text1: 'Registration Error',
-        text2: result.message || 'Something went wrong',
-      });
-    }
-  };
-
-  return (
-    <View>
-      <TouchableOpacity
-        onPress={handleGoogleSignup}
-        style={[
-          tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,
-          { borderColor: "#ccc", backgroundColor: "#fff" }
-        ]}
-      >
-        <Text style={[tw`ml-3 text-base font-medium`, { color: "#000" }]}>
-          Sign up with Google
-        </Text>
-      </TouchableOpacity>
-
-      {myuser && (
-        <Text style={{ marginTop: 10, color: "green" }}>
-          Logged in as {user.fullName || user.email}
-        </Text>
-      )}
-    </View>
-  );
-}
+//       {myuser && (
+//         <Text style={{ marginTop: 10, color: "green" }}>
+//           Logged in as {myuser.fullName || myuser.email}
+//         </Text>
+//       )}
+//     </View>
+//   );
+// }
