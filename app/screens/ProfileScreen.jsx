@@ -216,6 +216,9 @@ const { width } = Dimensions.get("window");
         </View>
       )) : <EmptyContent icon="history" title="No Orders Yet" subtitle="Your order history is empty." />}
     </ScrollView>
+    <TouchableOpacity onPress={() => navigation.navigate("Orders")} style={[tw`rounded-md w-24 p-2 py-1 flex-row justify-center`, { backgroundColor: theme.primary }]}>
+      <Text style={tw`text-center text-base font-semibold text-white`}>View All</Text>
+    </TouchableOpacity>
   </View>
   );
   const SidebarNotificationsContent = () => (

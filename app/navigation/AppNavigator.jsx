@@ -21,6 +21,8 @@ import Payment2 from "../screens/Payment2.jsx";
 import Payment3 from "../screens/payment3.jsx";
 import Ordersuccessscreen from "../screens/Ordersuccessscreen.jsx";
 import { useCart } from "../context/CartContext.jsx";
+import OrdersScreen from "../screens/OrdersScreen.jsx";
+import OrderDetailsScreen from "../screens/OrderDetailsScreen.jsx";
 
 const Stack = createStackNavigator(), Tab = createBottomTabNavigator();
 
@@ -74,6 +76,8 @@ const AppNavigator = () => {
         <Stack.Screen name="NotificationsList" component={NotificationsList} />
         <Stack.Screen name="GetStarted" component={GetStarted} />
         <Stack.Screen name="Cart" component={CartScreen} />
+        <Stack.Screen name="Orders" component={OrdersScreen} />
+        <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
