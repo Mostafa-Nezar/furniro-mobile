@@ -10,7 +10,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Ordersuccessscreen() {
   const navigation = useNavigation();
-  const { theme,fetchOrders } = useAppContext(),{ clearCart } =useCart(),{user}=useAuth();
+  const { theme, fetchOrders } = useAppContext(),{ clearCart } =useCart(),{user}=useAuth();
  useEffect(()=>{clearCart(),fetchOrders(user.id)},[])
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>

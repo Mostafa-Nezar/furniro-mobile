@@ -133,7 +133,7 @@ export const AppProvider = ({ children }) => {
 
 
   return (
-    <AppContext.Provider value={{ ...state, toggleTheme, toggleFavorite, getProducts, searchProducts, getImageUrl, cancelOrder, logout, user, isAuthenticated, updateUser, clearCartAndUpdateOrsers }} >
+    <AppContext.Provider value={{ ...state, toggleTheme, toggleFavorite, getProducts, searchProducts, getImageUrl, cancelOrder, logout, user, isAuthenticated, updateUser, clearCartAndUpdateOrsers,fetchOrders }} >
       {children}
     </AppContext.Provider>
   );
