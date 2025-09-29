@@ -11,6 +11,8 @@ import Toast from "react-native-toast-message";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useStripe, CardField } from '@stripe/stripe-react-native';
 import { useCart } from "../context/CartContext.jsx";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+
 
 const InputField = ({ theme, handleChange, handleBlur, value, placeholder, keyboardType = "default", name }) => (
   <View style={tw`mb-4`}>
@@ -123,8 +125,8 @@ const Payment3 = () => {
         onSubmit={handlePaymentSubmit}
       >
         {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-          <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
-                        <View style={[tw`p-4 rounded-lg mb-6 mt-4`, { backgroundColor: theme.semiWhite }]}>
+          <KeyboardAwareScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false} enableOnAndroid={true} extraScrollHeight={20} >
+            <View style={[tw`p-4 rounded-lg mb-6 mt-4`, { backgroundColor: theme.semiWhite }]}>
               <Text style={[tw`text-lg font-bold mb-3`, { color: theme.black }]}>Order Summary</Text>
               {cart.map((item, i) => (
                 <View key={i} style={tw`flex-row justify-between mb-2`}>
@@ -191,7 +193,7 @@ const Payment3 = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-          </ScrollView>
+         </KeyboardAwareScrollView>
         )}
       </Formik>
     </View>

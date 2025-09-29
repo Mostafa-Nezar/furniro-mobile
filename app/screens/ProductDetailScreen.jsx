@@ -18,11 +18,11 @@ const SpecificationRow = ({ label, value, theme }) => (
 );
 
 const ProductDetailScreen = () => {
-  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), { addToCart, updateCartQuantity, removeFromCart }=useCart(),{ user }=useAuth();
+  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), {cart, addToCart, updateCartQuantity, removeFromCart }=useCart(),{ user }=useAuth();
   const { product } = useRoute().params;
   const [selectedImage, setSelectedImage] = useState(product.image);
   const [rating, setRating] = useState(0);
-  const itemInCart = user?.cart?.find((item) => item.id === product.id);
+  const itemInCart = cart?.find((item) => item.id === product.id);
   const quantity = itemInCart?.quantity ?? 0;
   const isFavorite = favorites.includes(product.id);
   const hasDiscount = product.oldprice && product.oldprice > product.price;
