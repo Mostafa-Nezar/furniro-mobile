@@ -9,8 +9,8 @@ const OrdersScreen = () => {
   const { theme, orders } = useAppContext();
   return (
     <>
-    <View style={tw`flex-1 px-4 mb-4`}>
     <Header showBack={true} showSearch={false}/>
+    <View style={tw`flex-1 px-4 mb-4`}>
     <Text style={[tw`text-xl font-bold p-4`, { color: theme.black }]}>My Orders</Text>
       <FlatList
         data={orders}

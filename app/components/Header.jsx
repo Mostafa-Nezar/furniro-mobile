@@ -43,7 +43,7 @@ const Header = ({ showBack = false, showCart = true, showSearch = true, showNoti
             <TouchableOpacity onPress={() => navigation.navigate("Cart")} style={tw`p-2 relative`}>
               <Icon name="shopping-cart" size={24} color={theme.black} />
               {cartItemsCount > 0 && (
-                <View style={[tw`absolute -top-1 -right-1 w-5 h-5 rounded-full items-center justify-center`,{ backgroundColor: theme.red }]}>
+                <View style={[tw`absolute -right-1 w-5 h-5 rounded-full items-center justify-center`,{ backgroundColor: theme.red }]}>
                   <Text style={[tw`text-xs font-bold`, { color: theme.white }]}>
                     {cartItemsCount > 100 ? "100+" : cartItemsCount}
                   </Text>
