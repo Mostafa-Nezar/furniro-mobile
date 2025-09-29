@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, FlatList, TouchableOpacity, Image, Dimensions, RefreshControl, } from "react-native";
+import { View, Text, ScrollView, FlatList, TouchableOpacity, Image, Dimensions, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext.jsx";
 import Header from "../components/Header.jsx";

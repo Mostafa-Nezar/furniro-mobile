@@ -7,7 +7,6 @@ import { useCart } from "./CartContext";
 
 const AppContext = createContext();
 const initialState = { isDarkMode: false, favorites: [], products: [], theme: colors, loadingCancel: null, orders: [] };
-
 const appReducer = (state, action) => {
   switch (action.type) {
     case "SET_DARK_MODE": return { ...state, isDarkMode: action.payload, theme: action.payload ? darkColors : colors };
@@ -67,6 +66,7 @@ export const AppProvider = ({ children }) => {
   const logout = async () => {
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("user");
+    await AsyncStorage.removeItem("cart");
     authDispatch({ type: "LOGOUT" });
     dispatch({ type: "RESET" });
     return true;
