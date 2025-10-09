@@ -64,9 +64,11 @@ const OrderDetailsScreen = ({ route }) => {
           <>
             <Text style={[tw`text-lg font-bold mb-1`, { color: theme.text }]}>Products</Text>
             {order.products.map((p,i) => (
-              <View key={p._id||i} style={tw`mb-2`}>
+              <View key={p._id||i} style={tw`mb-10`}>
                 {p.name && <Text style={[tw`text-base mb-1`, { color: theme.text }]}>Name: {p.name}</Text>}
                 {p.quantity && <Text style={[tw`text-base mb-1`, { color: theme.gray }]}>Quantity: {p.quantity}</Text>}
+                {p.size && <Text style={[tw`text-base mb-1`, { color: theme.gray }]}>size: {p.size}</Text>}
+                {p.color && <Text style={[tw`text-base mb-2`, { color: theme.gray }]}>color: {p.color}</Text>}
               </View>
             ))}
           </>
