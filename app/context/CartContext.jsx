@@ -103,7 +103,6 @@ export const CartProvider = ({ children }) => {
     syncCart([]);
   };
 
-  // تحميل الكارت عند فتح التطبيق
   useEffect(() => {
     const loadCart = async () => {
       const savedCart = await AsyncStorage.getItem("cart");
@@ -125,6 +124,7 @@ export const CartProvider = ({ children }) => {
         updateCartQuantity,
         clearCartAndUpdateOrsers,
         clearCart,
+        syncCart
       }}
     >
       {children}
