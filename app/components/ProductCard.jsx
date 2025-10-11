@@ -13,6 +13,10 @@ const ProductCard = ({ product, onPress }) => {
   const imageUrl = getImageUrl(product.image);
 
   const handleAddToCart = async () => {
+        if(product.quantity <= 0){
+        Toast.show({ type: "error", text1: product.name, text2:"Not in stock"  });
+          return
+        };
     await addToCart(product);
     Toast.show({ type: "success", text1: "Order Placed", text2: product.name });
   };

@@ -80,6 +80,10 @@ function SelectOrColor(productId, key, value) {
     Toast.show({ type: isFavorite ? "error" : "success", text1: isFavorite ? "Removed from Favorites" : "Added to Favorites", text2: `${product.name}` });
   };
   const modifyCartQuantity = (type) => {
+    if (!product.quantity) {
+      Toast.show({ type: "success", text1: "Not in stock" });
+      return;
+    };
     if (!itemInCart) {
       if (type === "increase") {
         addToCart(product);
