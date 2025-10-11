@@ -41,7 +41,6 @@ export const CartProvider = ({ children }) => {
     dispatch({ type: "SET_CART", payload: cart });
     AsyncStorage.setItem("cart", JSON.stringify(cart));
   };
-
   const addToCart = async (product) => {
     const existingItem = state.cart.find((item) => item.id === product.id);
     let updatedCart;
@@ -57,7 +56,6 @@ export const CartProvider = ({ children }) => {
     }
     syncCart(updatedCart);
   };
-
   const removeFromCart = async (productId) => {
     if (!user?.id) return;
     const updatedCart = state.cart.filter((item) => item.id !== productId);
@@ -67,7 +65,6 @@ export const CartProvider = ({ children }) => {
     });
     syncCart(updatedCart);
   };
-
   const updateCartQuantity = async (productId, newQuantity) => {
     let updatedCart;
     if (newQuantity < 1) {
@@ -79,26 +76,43 @@ export const CartProvider = ({ children }) => {
     }
     syncCart(updatedCart);
   };
-
   const clearCartAndUpdateOrsers = async (paymentMethod = "cash on delivery") => {
-    if (!user?.id) return;
-    await fetchInstance("/orders", {
-      method: "POST",
-      body: JSON.stringify({
+      if (!user?.id) return;
+
+      const total = state.cart.reduce((sum, p) => sum + (p.price * (p.quantity || 1)),0);
+
+      const orderData = {
         userId: user.id,
         products: state.cart,
         date: new Date().toISOString(),
-        total: state.cart.reduce((sum, p) => sum + (p.price * (p.quantity || 1)), 0),
-        paymentdone: paymentMethod,
-      }),
-    });
-    await fetchInstance(`/auth/user/${user.id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ cart: [] }),
-    });
-    syncCart([]);
-  };
+        total,
+        payment: { method: paymentMethod, status: "pending" },
+        customerInfo: {
+          fullName: user.name || "",
+          email: user.email || "",
+          address: user.location || "",
+        },
+        paymentdone:"cash on delivery" ,
+        status: "pending",
+        userlocation: user.location || "",
+      };
 
+      try {
+        await fetchInstance("/orders", {
+          method: "POST",
+          body: JSON.stringify(orderData),
+        });
+
+        await fetchInstance(`/auth/user/${user.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ cart: [] }),
+        });
+
+        syncCart([]);
+      } catch (error) {
+        console.error("❌ Error while saving order or clearing cart:", error);
+      }
+  };
   const clearCart = async () => {
     syncCart([]);
   };
