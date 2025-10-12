@@ -25,8 +25,6 @@ const ProductDetailScreen = () => {
   const itemInCart = cart?.find((item) => item.id === product.id);
   const quantity = itemInCart?.quantity ?? 0;
   const isFavorite = favorites.includes(product.id);
-  const hasDiscount = product.oldprice && product.oldprice > product.price;
-  const discountPercentage = hasDiscount ? Math.round(((product.oldprice - product.price) / product.oldprice) * 100) : 0;
   const productImages = [product.image, product.image1, product.image2, product.image3, product.image4].filter(Boolean);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -81,26 +79,39 @@ function SelectOrColor(productId, key, value) {
   };
   const modifyCartQuantity = (type) => {
     if (!product.quantity) {
-      Toast.show({ type: "success", text1: "Not in stock" });
-      return;
-    };
-    if (!itemInCart) {
-      if (type === "increase") {
-        addToCart(product);
-        Toast.show({ type: "success", text1: "Added to cart", text2: `${product.name} has been added.` });
-      } else {
-        Toast.show({ type: "info", text1: "Product not in cart", text2: "Please add the product first." });
-      }
+      Toast.show({ type: "error", text1: "Not in stock" });
       return;
     }
-    const newQuantity = type === "increase" ? itemInCart.quantity + 1 : itemInCart.quantity - 1;
-    if (newQuantity < 1) {
-      removeFromCart(product.id);
-      Toast.show({ type: "info", text1: "Removed from cart", text2: `${product.name} has been removed.` });
-      return;
+    const currentQty = itemInCart ? itemInCart.quantity : 0;
+    let newQuantity = currentQty;
+    if (type === "increase") {
+      if (currentQty >= product.quantity) {
+        Toast.show({ type: "error", text1: `Only ${product.quantity} in stock` });
+        return;
+      }
+      if (currentQty >= 10) {
+        Toast.show({ type: "error", text1: "Maximum 10 items allowed" });
+        return;
+      }
+      newQuantity = currentQty + 1;
+
+      if (!itemInCart) {
+        addToCart(product);
+        Toast.show({ type: "success", text1: "Added to cart", text2: product.name });
+        return;
+      }
+    } else {
+      newQuantity = currentQty - 1;
+
+      if (newQuantity < 1) {
+        removeFromCart(product.id);
+        Toast.show({ type: "info", text1: "Removed from cart", text2: product.name });
+        return;
+      }
     }
     updateCartQuantity(product.id, newQuantity);
   };
+
 
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
@@ -108,10 +119,13 @@ function SelectOrColor(productId, key, value) {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={tw`relative`}>
           <Image source={{ uri: getImageUrl(selectedImage) }} style={[tw`w-full`, { height: width * 0.6 }]} resizeMode="contain" />
-          <View style={tw`absolute top-4 right-4 flex-row`}>
-            {hasDiscount && <View style={[tw`px-3 py-1 rounded-full mr-2`, { backgroundColor: theme.red }]}><Text style={[tw`text-sm font-bold`, { color: theme.white }]}>-{discountPercentage}%</Text></View>}
-            {product.new && <View style={[tw`px-3 py-1 rounded-full`, { backgroundColor: theme.green }]}><Text style={[tw`text-sm font-bold`, { color: theme.white }]}>New</Text></View>}
-          </View>
+            {(product.date && ((new Date() - new Date(product.date)) / (1000 * 60 * 60 * 24) < 30)) || product.sale ? (
+              <View style={[ tw`absolute top-2 left-2 px-2 py-1 rounded-full`, { backgroundColor: product.date && ((new Date() - new Date(product.date)) / (1000 * 60 * 60 * 24) < 30) ? theme.green : theme.red }]}>
+                <Text style={[tw`text-xs font-bold`, { color: theme.white }]}>
+                  {product.date && ((new Date() - new Date(product.date)) / (1000 * 60 * 60 * 24) < 30) ? "New" : `${product.sale}%`}
+                </Text>
+              </View>
+            ) : null}
           <TouchableOpacity onPress={handleToggleFavorite} style={[tw`absolute bottom-4 right-4 p-3 rounded-full`, { backgroundColor: theme.white }]}>
             <Icon name={isFavorite ? "favorite" : "favorite-border"} size={24} color={isFavorite ? theme.red : theme.darkGray} />
           </TouchableOpacity>
@@ -133,7 +147,7 @@ function SelectOrColor(productId, key, value) {
 
           <View style={tw`flex-row items-center mb-6`}>
             <Text style={[tw`text-2xl font-bold`, { color: theme.primary, fontFamily: "Poppins-Bold" }]}>${product.price}</Text>
-            {hasDiscount && <Text style={[tw`text-lg ml-3 line-through`, { color: theme.darkGray, fontFamily: "Poppins-Regular" }]}>${product.oldprice}</Text>}
+            {product.sale && <Text style={[tw`text-lg ml-3 line-through`, { color: theme.darkGray, fontFamily: "Poppins-Regular" }]}>${product?.oldprice}</Text>}
           </View>
 
           <View style={tw`flex-row items-center mb-6`}>

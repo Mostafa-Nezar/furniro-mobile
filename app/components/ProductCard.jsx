@@ -6,18 +6,22 @@ import Toast from "react-native-toast-message";
 import { useCart } from "../context/CartContext.jsx";
 
 const ProductCard = ({ product, onPress }) => {
-  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), { addToCart } = useCart();
+  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), {cart, addToCart } = useCart();
   const isFavorite = favorites.includes(product.id);
- const imageUrl = getImageUrl(product.image);
-
+  const imageUrl = getImageUrl(product.image);
+  const cartItem = cart.find((item) => item.id === product.id);
+  const cartQuantity = cartItem ? cartItem.quantity : 0;
   const handleAddToCart = async () => {
-        if(product.quantity <= 0){
-        Toast.show({ type: "error", text1: product.name, text2:"Not in stock"  });
-          return
-        };
+    if (product.quantity <= 0)
+      return Toast.show({ type: "error", text1: product.name, text2: "Out of stock" });
+    if (cartQuantity >= product.quantity)
+      return Toast.show({ type: "error", text1: product.name, text2: `Only ${product.quantity} in stock` });
+    if (cartQuantity >= 10)
+      return Toast.show({ type: "error", text1: product.name, text2: "You can only 10 items" });
     await addToCart(product);
     Toast.show({ type: "success", text1: "Order Placed", text2: product.name });
   };
+
 
   const handleToggleFavorite = () => {
     toggleFavorite(product.id);
@@ -29,12 +33,7 @@ const ProductCard = ({ product, onPress }) => {
       <View style={tw`relative`}>
         <Image source={{ uri: imageUrl }} style={tw`w-full h-48`} resizeMode="cover" />
           {(product.date && ((new Date() - new Date(product.date)) / (1000 * 60 * 60 * 24) < 30)) || product.sale ? (
-            <View
-              style={[
-                tw`absolute top-2 left-2 px-2 py-1 rounded-full`,
-                { backgroundColor: product.date && ((new Date() - new Date(product.date)) / (1000 * 60 * 60 * 24) < 30) ? theme.green : theme.red }
-              ]}
-            >
+            <View style={[ tw`absolute top-2 left-2 px-2 py-1 rounded-full`, { backgroundColor: product.date && ((new Date() - new Date(product.date)) / (1000 * 60 * 60 * 24) < 30) ? theme.green : theme.red }]}>
               <Text style={[tw`text-xs font-bold`, { color: theme.white }]}>
                 {product.date && ((new Date() - new Date(product.date)) / (1000 * 60 * 60 * 24) < 30) ? "New" : `${product.sale}%`}
               </Text>
