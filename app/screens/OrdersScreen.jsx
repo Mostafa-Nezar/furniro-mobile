@@ -13,7 +13,7 @@ const OrdersScreen = () => {
     <View style={tw`flex-1 px-4 mb-4`}>
     <Text style={[tw`text-xl font-bold p-4`, { color: theme.black }]}>My Orders</Text>
       <FlatList
-        data={orders}
+        data={[...orders].sort((a, b) => new Date(b.date) - new Date(a.date))}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <TouchableOpacity
