@@ -13,6 +13,7 @@ const CartScreen = () => {
   const totalItems = cart.reduce((t, i) => t + i.quantity, 0);
   const totalPrice = cart.reduce((t, i) => t + i.price * i.quantity, 0);
   const shipping = totalPrice >= 100 ? 0 : 0;
+  const { user } = useAppContext();
 
   const renderItem = ({ item }) => (
     <View style={[tw`flex-row p-4 mb-3 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
@@ -71,7 +72,7 @@ const CartScreen = () => {
         <TouchableOpacity onPress={() => {navigation.navigate("Payment3")}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
           <Text style={[tw`text-center text-lg font-semibold text-white`]}>Checkout</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={async () => {await clearCartAndUpdateOrsers();Toast.show({type:"success",text1:"Order placed"})}} style={[tw`py-3 mt-3 border rounded-lg`, { borderColor: theme.primary }]}>
+        <TouchableOpacity onPress={async () => {await clearCartAndUpdateOrsers();await new Promise(res => setTimeout(res, 2000));await fetchOrders(user.id);Toast.show({type:"success",text1:"Order placed"})}} style={[tw`py-3 mt-3 border rounded-lg`, { borderColor: theme.primary }]}>
           <Text style={[tw`text-center text-base font-semibold`, { color: theme.primary }]}>Cash On Delivery</Text>
         </TouchableOpacity>
       </View>
