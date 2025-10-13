@@ -3,10 +3,12 @@ import { useNavigation } from "@react-navigation/native";
 import tw from "twrnc";
 import { useAppContext } from "../context/AppContext";
 import Header from "../components/Header";
+import { useEffect } from "react";
 
 const OrdersScreen = () => {
   const navigation = useNavigation();
-  const { theme, orders } = useAppContext();
+  const { theme, orders, fetchOrders } = useAppContext();
+  useEffect(()=>{fetchOrders()},[])
   return (
     <>
     <Header showBack={true} showSearch={false}/>
