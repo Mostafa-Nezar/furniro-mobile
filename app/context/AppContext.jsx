@@ -29,10 +29,10 @@ export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
   useEffect(() => { loadStoredData();  }, []);
   useEffect(() => { saveDataToStorage(); }, [state.isDarkMode, state.favorites, user, isAuthenticated]);
-  useEffect(() => { (user && user.id) ? fetchOrders(user.id):dispatch({ type: "SET_ORDERS", payload: [] }) }, [user]);
+  useEffect(() => { (user && user.id) ? fetchOrders():dispatch({ type: "SET_ORDERS", payload: [] }) }, [user]);
 
-  const fetchOrders = async (userId) => {
-    const data = await fetchInstance(`/orders/user/${userId}`);
+  const fetchOrders = async () => {
+    const data = await fetchInstance(`/orders/user/${user.id}`);
     dispatch({ type: "SET_ORDERS", payload: data });
     return data;
   };

@@ -6,12 +6,11 @@ import Header from "../components/Header.jsx";
 import { useAppContext } from "../context/AppContext.jsx";
 import { useEffect } from "react";
 import { useCart } from "../context/CartContext.jsx";
-import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Ordersuccessscreen() {
   const navigation = useNavigation();
-  const { theme, fetchOrders } = useAppContext(),{ clearCart } =useCart(),{user}=useAuth();
- useEffect(()=>{clearCart(),fetchOrders(user.id)},[])
+  const { theme, fetchOrders } = useAppContext(),{ clearCart } =useCart();
+ useEffect(()=>{clearCart(),fetchOrders()},[])
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title="Success" showBack={true}/>
