@@ -19,7 +19,7 @@ const ProductCard = ({ product, onPress }) => {
     if (cartQuantity >= 10)
       return Toast.show({ type: "error", text1: product.name, text2: "You can only 10 items" });
     await addToCart(product);
-    Toast.show({ type: "success", text1: "Order Placed", text2: product.name });
+    Toast.show({ type: "success", text1: "Added To Cart !", text2: product.name });
   };
 
 

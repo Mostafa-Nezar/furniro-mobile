@@ -10,7 +10,7 @@ import { useState } from "react";
 
 const CartScreen = () => {
   const navigation = useNavigation();
-  const { theme,  getImageUrl } = useAppContext(), {updateCartQuantity, clearCartAndUpdateOrsers, removeFromCart, cart, clearCart} = useCart();
+  const { theme, products, getImageUrl } = useAppContext(), {updateCartQuantity, clearCartAndUpdateOrsers, removeFromCart, cart, clearCart} = useCart();
   const [loadingPayPal, setLoadingPayPal] = useState(false);
   const totalItems = cart.reduce((t, i) => t + i.quantity, 0);
   const totalPrice = cart.reduce((t, i) => t + i.price * i.quantity, 0);
@@ -51,8 +51,18 @@ const CartScreen = () => {
     }
   };
 
-  const renderItem = ({ item }) => (
-    <View style={[tw`flex-row p-4 mb-3 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
+  const renderItem = ({ item }) => {
+      const originalProduct = products.find(p => p.id === item.id);
+      const handleIncrease = () => {
+        if (!originalProduct) return;
+        if (item.quantity >= originalProduct.quantity)
+          return Toast.show({ type: "error", text1: item.name, text2: `Only ${originalProduct.quantity} in stock` });
+        if (item.quantity >= 10)
+          return Toast.show({ type: "error", text1: item.name, text2: "You can only 10 items" });
+        updateCartQuantity(item.id, item.quantity + 1);
+      };
+
+    return(<View style={[tw`flex-row p-4 mb-3 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
       <Image source={{ uri: getImageUrl(item.image) }} style={tw`w-20 h-20 rounded-lg`} />
       <View style={tw`flex-1 ml-4`}>
         <Text style={[tw`text-lg font-semibold`, { color: theme.black }]}>{item.name}</Text>
@@ -64,7 +74,7 @@ const CartScreen = () => {
               <Icon name="remove" size={16} color={theme.black} />
             </TouchableOpacity>
             <Text style={[tw`mx-3`, { color: theme.black }]}>{item.quantity}</Text>
-            <TouchableOpacity onPress={() => updateCartQuantity(item.id, item.quantity + 1)} style={[tw`w-8 h-8 rounded-full items-center justify-center`, { backgroundColor: theme.primary }]}>
+            <TouchableOpacity onPress={handleIncrease} style={[tw`w-8 h-8 rounded-full items-center justify-center`, { backgroundColor: theme.primary }]}>
               <Icon name="add" size={16} color={theme.white} />
             </TouchableOpacity>
           </View>
@@ -73,8 +83,9 @@ const CartScreen = () => {
       <TouchableOpacity onPress={() => removeFromCart(item.id)} style={tw`ml-2 p-2`}>
         <Icon name="delete" size={20} color={theme.red} />
       </TouchableOpacity>
-    </View>
-  );
+    </View>)
+    
+  };
 
   if (!cart.length)
     return (
@@ -108,7 +119,7 @@ const CartScreen = () => {
         <TouchableOpacity onPress={() => {navigation.navigate("Payment3")}} style={[tw`py-4 rounded-lg mt-4`, { backgroundColor: theme.primary }]}>
           <Text style={[tw`text-center text-lg font-semibold text-white`]}>Checkout</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={async () => {await clearCartAndUpdateOrsers();await new Promise(res => setTimeout(res, 2000));await fetchOrders(user.id);Toast.show({type:"success",text1:"Order placed"})}} style={[tw`py-3 mt-3 border rounded-lg`, { borderColor: theme.primary }]}>
+        <TouchableOpacity onPress={async () => {await clearCartAndUpdateOrsers();Toast.show({type:"success",text1:"Order placed"});await new Promise(res => setTimeout(res, 2000));await fetchOrders(user.id)}} style={[tw`py-3 mt-3 border rounded-lg`, { borderColor: theme.primary }]}>
           <Text style={[tw`text-center text-base font-semibold`, { color: theme.primary }]}>Cash On Delivery</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handlePayPal} disabled={loadingPayPal} style={[tw`py-4 rounded-lg flex-row items-center justify-center mt-3`, { backgroundColor: theme.black }]}>
