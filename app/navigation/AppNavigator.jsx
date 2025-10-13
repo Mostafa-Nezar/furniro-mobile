@@ -23,6 +23,7 @@ import Ordersuccessscreen from "../screens/Ordersuccessscreen.jsx";
 import { useCart } from "../context/CartContext.jsx";
 import OrdersScreen from "../screens/OrdersScreen.jsx";
 import OrderDetailsScreen from "../screens/OrderDetailsScreen.jsx";
+import Paypal from "../screens/Paypal.jsx";
 
 const Stack = createStackNavigator(), Tab = createBottomTabNavigator();
 
@@ -73,6 +74,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Payment" component={Payment} />
         <Stack.Screen name="Payment2" component={Payment2} />
         <Stack.Screen name="Payment3" component={Payment3} />
+        <Stack.Screen name="Paypal" component={Paypal} />
         <Stack.Screen name="NotificationsList" component={NotificationsList} />
         <Stack.Screen name="GetStarted" component={GetStarted} />
         <Stack.Screen name="Cart" component={CartScreen} />

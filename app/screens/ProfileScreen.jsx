@@ -94,7 +94,7 @@ const { width } = Dimensions.get("window");
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.msg || "Failed to update location");
-
+      closeSidebar();
       updateUser({ ...user, location: address });
       Toast.show({ type: "success", text1: "Location updated", text2: address });
     } catch (e) {

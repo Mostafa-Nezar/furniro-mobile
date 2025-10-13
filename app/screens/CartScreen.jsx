@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../context/AppContext.jsx";
 import Header from "../components/Header.jsx";
@@ -6,14 +6,50 @@ import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Toast from "react-native-toast-message";
 import { useCart } from "../context/CartContext.jsx";
+import { useState } from "react";
 
 const CartScreen = () => {
   const navigation = useNavigation();
-  const { theme,  getImageUrl } = useAppContext(), {updateCartQuantity, clearCartAndUpdateOrsers, removeFromCart,cart } = useCart();
+  const { theme,  getImageUrl } = useAppContext(), {updateCartQuantity, clearCartAndUpdateOrsers, removeFromCart, cart, clearCart} = useCart();
+  const [loadingPayPal, setLoadingPayPal] = useState(false);
   const totalItems = cart.reduce((t, i) => t + i.quantity, 0);
   const totalPrice = cart.reduce((t, i) => t + i.price * i.quantity, 0);
   const shipping = totalPrice >= 100 ? 0 : 0;
   const { user } = useAppContext();
+  const handlePayPal = async () => {
+    try {
+      setLoadingPayPal(true);
+      const res = await fetch("https://furniro-back-production.up.railway.app/api/paypal2/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          total:totalPrice,
+          userId: user.id,
+          products: cart,
+          customerInfo: {
+            fullName: user.name,
+            email: user.email,
+            address: user.address || "",
+            city: user.city || "",
+            state: user.state || "",
+            zipCode: user.zipCode || ""
+          }
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Failed to create order");
+      const approveLink = data.links.find(l => l.rel === "approve")?.href;
+      if (!approveLink) throw new Error("No approval link found");
+      navigation.navigate("Paypal", { approveLink });
+      setLoadingPayPal(false);
+    } catch (err) {
+      console.error(err);
+      togglePopup(err.message || "Payment failed");
+      setLoadingPayPal(false);
+    }
+  };
 
   const renderItem = ({ item }) => (
     <View style={[tw`flex-row p-4 mb-3 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
@@ -74,6 +110,10 @@ const CartScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity onPress={async () => {await clearCartAndUpdateOrsers();await new Promise(res => setTimeout(res, 2000));await fetchOrders(user.id);Toast.show({type:"success",text1:"Order placed"})}} style={[tw`py-3 mt-3 border rounded-lg`, { borderColor: theme.primary }]}>
           <Text style={[tw`text-center text-base font-semibold`, { color: theme.primary }]}>Cash On Delivery</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handlePayPal} disabled={loadingPayPal} style={[tw`py-4 rounded-lg flex-row items-center justify-center mt-3`, { backgroundColor: theme.black }]}>
+          {loadingPayPal ? <ActivityIndicator color={theme.white} style={tw`mr-2`} /> : <Icon name="account-balance-wallet" size={20} color={theme.white} style={tw`mr-2`} />}
+          <Text style={[tw`text-lg font-semibold`,{color:theme.white}]}>Pay with PayPal</Text>
         </TouchableOpacity>
       </View>
     </View>
