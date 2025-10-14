@@ -4,6 +4,8 @@ import { colors, darkColors } from "../constants/theme.jsx";
 import { fetchInstance } from "./api";
 import { useAuth } from "./AuthContext"; 
 import { useCart } from "./CartContext"; 
+import io from "socket.io-client";
+import { useRef } from "react";
 
 const AppContext = createContext();
 const initialState = { isDarkMode: false, favorites: [], products: [], theme: colors, loadingCancel: null, orders: [] };
@@ -30,6 +32,15 @@ export const AppProvider = ({ children }) => {
   useEffect(() => { loadStoredData();  }, []);
   useEffect(() => { saveDataToStorage(); }, [state.isDarkMode, state.favorites, user, isAuthenticated]);
   useEffect(() => { (user && user.id) ? fetchOrders():dispatch({ type: "SET_ORDERS", payload: [] }) }, [user]);
+  const socketRef = useRef(null);
+    useEffect(() => {
+      socketRef.current = io("https://furniro-back-production.up.railway.app");
+      socketRef.current.on("connect", () => { console.log("✅ Socket products connected:", socketRef.current.id)});
+      socketRef.current.on("productsChanged", () => { console.log("Reload products📦"); getProducts()});
+      socketRef.current.on("disconnect", () => { console.log("❌ Socket disconnected") });
+
+      return () => {socketRef.current.disconnect()};
+    }, []);
 
   const fetchOrders = async () => {
     const data = await fetchInstance(`/orders/user/${user.id}`);
@@ -74,6 +85,7 @@ export const AppProvider = ({ children }) => {
   const toggleTheme = () => { dispatch({ type: "TOGGLE_THEME" }) };
   const toggleFavorite = (id) => { dispatch({ type: "TOGGLE_FAVORITE", payload: id })};
   const getProducts = async () => {
+    console.log("x");
     try {
       const data = await fetchInstance("/products/db");
       dispatch({ type: "SET_PRODUCTS", payload: data });
