@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
 import Header from '../components/Header';
@@ -117,7 +117,7 @@ const ShopScreen = () => {
            ListFooterComponent={
             hasMore ? (
               <View style={tw`py-4`}>
-                <Text style={{ color: theme.darkGray, textAlign: 'center' }}>Loading more...</Text>
+                <ActivityIndicator color={theme.primary} size="large" style={tw`flex-1 justify-center items-center mt-10`} />
               </View>
             ) : null
           }

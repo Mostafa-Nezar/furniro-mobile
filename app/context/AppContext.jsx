@@ -85,7 +85,6 @@ export const AppProvider = ({ children }) => {
   const toggleTheme = () => { dispatch({ type: "TOGGLE_THEME" }) };
   const toggleFavorite = (id) => { dispatch({ type: "TOGGLE_FAVORITE", payload: id })};
   const getProducts = async () => {
-    console.log("x");
     try {
       const data = await fetchInstance("/products/db");
       dispatch({ type: "SET_PRODUCTS", payload: data });
@@ -123,7 +122,7 @@ export const AppProvider = ({ children }) => {
     if (path.startsWith("http")) return path;
     return path;
   };
- const cancelOrder = async (orderId) => {
+  const cancelOrder = async (orderId) => {
   try {
     dispatch({ type: "SET_LOADING_CANCEL", payload: orderId });
     const data = await fetchInstance(`/orders/${orderId}/status`, {
@@ -141,8 +140,6 @@ export const AppProvider = ({ children }) => {
     dispatch({ type: "SET_LOADING_CANCEL", payload: null });
   }
   };
-
-
 
   return (
     <AppContext.Provider value={{ ...state, toggleTheme, toggleFavorite, getProducts, searchProducts, getImageUrl, cancelOrder, logout, user, isAuthenticated, updateUser, clearCartAndUpdateOrsers, fetchOrders }} >
