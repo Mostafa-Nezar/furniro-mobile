@@ -14,7 +14,7 @@ const getImage = (name) =>({"Image-living room.png": require("../../assets/image
 const features = [{ icon: "local-shipping", title: "Free Shipping", desc: "For orders over $100" }, { icon: "support-agent", title: "24/7 Support", desc: "Excellent customer service" }, { icon: "verified", title: "Quality Guarantee", desc: "High quality products" }, { icon: "payment", title: "Secure Payment", desc: "Multiple payment methods" }, ];
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const { theme, getProducts } = useAppContext();
+  const { theme,products: contextProducts, getProducts } = useAppContext();
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -29,7 +29,9 @@ const HomeScreen = () => {
       setLoading(false);
     }
   };
-
+  useEffect(() => {
+  setFeaturedProducts(contextProducts.slice(0, 8));
+}, [contextProducts]);
   useEffect(() => { loadProducts(); }, []);
   useEffect(() => {
   const unsubscribe = NetInfo.addEventListener((state) => {
