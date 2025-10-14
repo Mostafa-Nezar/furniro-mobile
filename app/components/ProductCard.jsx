@@ -6,22 +6,9 @@ import Toast from "react-native-toast-message";
 import { useCart } from "../context/CartContext.jsx";
 
 const ProductCard = ({ product, onPress }) => {
-  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), {cart, addToCart } = useCart();
+  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), { addToCart } = useCart();
   const isFavorite = favorites.includes(product.id);
   const imageUrl = getImageUrl(product.image);
-  const cartItem = cart.find((item) => item.id === product.id);
-  const cartQuantity = cartItem ? cartItem.quantity : 0;
-  const handleAddToCart = async () => {
-    if (product.quantity <= 0)
-      return Toast.show({ type: "error", text1: product.name, text2: "Out of stock" });
-    if (cartQuantity >= product.quantity)
-      return Toast.show({ type: "error", text1: product.name, text2: `Only ${product.quantity} in stock` });
-    if (cartQuantity >= 10)
-      return Toast.show({ type: "error", text1: product.name, text2: "You can only 10 items" });
-    await addToCart(product);
-    Toast.show({ type: "success", text1: "Added To Cart !", text2: product.name });
-  };
-
 
   const handleToggleFavorite = () => {
     toggleFavorite(product.id);
@@ -47,7 +34,7 @@ const ProductCard = ({ product, onPress }) => {
       <View style={tw`p-4`}>
         <Text style={[tw`text-lg font-semibold mb-1`, { color: theme.black, fontFamily: "Poppins-SemiBold" }]}>{product.name}</Text>
         <Text style={[tw`text-sm mb-3`, { color: theme.darkGray, fontFamily: "Poppins-Regular" }]}>{product.des}</Text>
-        <TouchableOpacity onPress={handleAddToCart} style={[tw`py-3 px-4 rounded-lg flex-row items-center justify-center`, { backgroundColor: theme.primary }]}>
+        <TouchableOpacity onPress={()=>addToCart(product)} style={[tw`py-3 px-4 rounded-lg flex-row items-center justify-center`, { backgroundColor: theme.primary }]}>
           <Icon name="add-shopping-cart" size={20} color={theme.white} />
           <Text style={[tw`ml-2 font-semibold`, { color: theme.white, fontFamily: "Poppins-SemiBold" }]}>Add to Cart</Text>
         </TouchableOpacity>

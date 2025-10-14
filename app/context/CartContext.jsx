@@ -2,6 +2,7 @@ import { createContext, useContext, useReducer, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "./AuthContext";
 import { fetchInstance } from "./api";
+import Toast from "react-native-toast-message";
 
 const CartContext = createContext();
 
@@ -36,45 +37,41 @@ const cartReducer = (state, action) => {
 export const CartProvider = ({ children }) => {
   const { user } = useAuth();
   const [state, dispatch] = useReducer(cartReducer, initialState);
-
   const syncCart = (cart) => {
     dispatch({ type: "SET_CART", payload: cart });
     AsyncStorage.setItem("cart", JSON.stringify(cart));
   };
-  const addToCart = async (product) => {
+  const addToCart = (product) => {
     const existingItem = state.cart.find((item) => item.id === product.id);
-    let updatedCart;
-    if (existingItem) {
-      updatedCart = state.cart.map((item) =>
-        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-      );
-    } else {
-      updatedCart = [
-        ...state.cart,
-        { id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 ,size:"l",color:"#B88E2F"},
-      ];
-    }
+    const cartQuantity = existingItem ? existingItem.quantity : 0;
+
+    if (product.quantity <= 0)
+      return Toast.show({ type: "error", text1: product.name, text2: "Out of stock" });
+
+    if (cartQuantity >= product.quantity)
+      return Toast.show({ type: "error", text1: product.name, text2: `Only ${product.quantity} in stock` });
+
+    if (cartQuantity >= 10)
+      return Toast.show({ type: "error", text1: product.name, text2: "You can only 10 items" });
+
+    const updatedCart = existingItem
+      ? state.cart.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        )
+      : [
+          ...state.cart,
+          { id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1, size: "l", color: "#B88E2F" },
+        ];
+
     syncCart(updatedCart);
+    Toast.show({ type: "success", text1: "Added To Cart !", text2: product.name });
   };
-  const removeFromCart = async (productId) => {
-    if (!user?.id) return;
-    const updatedCart = state.cart.filter((item) => item.id !== productId);
-    await fetchInstance(`/auth/user/${user.id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ cart: updatedCart }),
-    });
-    syncCart(updatedCart);
-  };
-  const updateCartQuantity = async (productId, newQuantity) => {
-    let updatedCart;
-    if (newQuantity < 1) {
-      updatedCart = state.cart.filter((item) => item.id !== productId);
-    } else {
-      updatedCart = state.cart.map((item) =>
-        item.id === productId ? { ...item, quantity: newQuantity } : item
-      );
-    }
-    syncCart(updatedCart);
+  const decreaseCartQuantity = (product) => {
+    const existingItem = state.cart.find((item) => item.id === product.id);
+    if (!existingItem)
+      return Toast.show({ type: "error", text1: product.name, text2: "Not In your Cart" });
+      const updatedCart = state.cart.map((item) =>item.id === product.id ? { ...item, quantity: item.quantity - 1 } : item).filter((item) => item.quantity > 0);
+      syncCart(updatedCart);
   };
   const clearCartAndUpdateOrsers = async (paymentMethod = "cash on delivery") => {
       if (!user?.id) return;
@@ -116,7 +113,10 @@ export const CartProvider = ({ children }) => {
   const clearCart = async () => {
     syncCart([]);
   };
-
+  const removeFromCart = async (product) => {
+    const updatedCart = state.cart.filter((item) => item.id !== product.id);
+    syncCart(updatedCart);
+  };
   useEffect(() => {
     const loadCart = async () => {
       const savedCart = await AsyncStorage.getItem("cart");
@@ -135,7 +135,7 @@ export const CartProvider = ({ children }) => {
         ...state,
         addToCart,
         removeFromCart,
-        updateCartQuantity,
+        decreaseCartQuantity,
         clearCartAndUpdateOrsers,
         clearCart,
         syncCart

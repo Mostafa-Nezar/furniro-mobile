@@ -18,7 +18,7 @@ const SpecificationRow = ({ label, value, theme }) => (
 );
 
 const ProductDetailScreen = () => {
-  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), {cart, addToCart, updateCartQuantity, removeFromCart, syncCart }=useCart(),{ user }=useAuth();
+  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), {cart, addToCart, decreaseCartQuantity, syncCart }=useCart(),{ user }=useAuth();
   const { product } = useRoute().params;
   const [selectedImage, setSelectedImage] = useState(product.image);
   const [rating, setRating] = useState(0);
@@ -77,41 +77,6 @@ function SelectOrColor(productId, key, value) {
     toggleFavorite(product.id);
     Toast.show({ type: isFavorite ? "error" : "success", text1: isFavorite ? "Removed from Favorites" : "Added to Favorites", text2: `${product.name}` });
   };
-  const modifyCartQuantity = (type) => {
-    if (!product.quantity) {
-      Toast.show({ type: "error", text1: "Not in stock" });
-      return;
-    }
-    const currentQty = itemInCart ? itemInCart.quantity : 0;
-    let newQuantity = currentQty;
-    if (type === "increase") {
-      if (currentQty >= product.quantity) {
-        Toast.show({ type: "error", text1: `Only ${product.quantity} in stock` });
-        return;
-      }
-      if (currentQty >= 10) {
-        Toast.show({ type: "error", text1: "Maximum 10 items allowed" });
-        return;
-      }
-      newQuantity = currentQty + 1;
-
-      if (!itemInCart) {
-        addToCart(product);
-        Toast.show({ type: "success", text1: "Added to cart", text2: product.name });
-        return;
-      }
-    } else {
-      newQuantity = currentQty - 1;
-
-      if (newQuantity < 1) {
-        removeFromCart(product.id);
-        Toast.show({ type: "info", text1: "Removed from cart", text2: product.name });
-        return;
-      }
-    }
-    updateCartQuantity(product.id, newQuantity);
-  };
-
 
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
@@ -153,11 +118,11 @@ function SelectOrColor(productId, key, value) {
           <View style={tw`flex-row items-center mb-6`}>
             <Text style={[tw`text-base font-semibold mr-4`, { color: theme.black, fontFamily: "Poppins-SemiBold" }]}>Quantity:</Text>
             <View style={tw`flex-row items-center`}>
-              <TouchableOpacity onPress={() => modifyCartQuantity("decrease")} style={[tw`w-10 h-10 rounded-full items-center justify-center`, { backgroundColor: theme.lightGray }]}>
+              <TouchableOpacity onPress={() => decreaseCartQuantity(product)} style={[tw`w-10 h-10 rounded-full items-center justify-center`, { backgroundColor: theme.lightGray }]}>
                 <Icon name="remove" size={20} color={theme.black} />
               </TouchableOpacity>
               <Text style={[tw`mx-4 text-lg font-semibold`, { color: theme.black, fontFamily: "Poppins-SemiBold" }]}>{quantity}</Text>
-              <TouchableOpacity onPress={() => modifyCartQuantity("increase")} style={[tw`w-10 h-10 rounded-full items-center justify-center`, { backgroundColor: theme.primary }]}>
+              <TouchableOpacity onPress={() => addToCart(product)} style={[tw`w-10 h-10 rounded-full items-center justify-center`, { backgroundColor: theme.primary }]}>
                 <Icon name="add" size={20} color={theme.white} />
               </TouchableOpacity>
             </View>
@@ -174,7 +139,7 @@ function SelectOrColor(productId, key, value) {
               </Text>
             </View>
           </View>
-          <TouchableOpacity onPress={() => modifyCartQuantity("increase")} style={[tw`py-4 rounded-lg mb-6`, { backgroundColor: theme.primary }]}>
+          <TouchableOpacity onPress={() => addToCart(product)} style={[tw`py-4 rounded-lg mb-6`, { backgroundColor: theme.primary }]}>
             <Text style={[tw`text-center text-lg font-semibold`, { color: theme.white }]}>
               Add to cart {(product.price * quantity).toFixed()} $
             </Text>

@@ -128,7 +128,7 @@ export const AppProvider = ({ children }) => {
   } finally {
     dispatch({ type: "SET_LOADING_CANCEL", payload: null });
   }
-};
+  };
 
 
 

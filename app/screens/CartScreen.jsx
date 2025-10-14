@@ -10,7 +10,7 @@ import { useState } from "react";
 
 const CartScreen = () => {
   const navigation = useNavigation();
-  const { theme, products, getImageUrl } = useAppContext(), {updateCartQuantity, clearCartAndUpdateOrsers, removeFromCart, cart, clearCart} = useCart();
+  const { theme, products, getImageUrl } = useAppContext(), { addToCart, decreaseCartQuantity, clearCartAndUpdateOrsers, removeFromCart, cart } = useCart();
   const [loadingPayPal, setLoadingPayPal] = useState(false);
   const totalItems = cart.reduce((t, i) => t + i.quantity, 0);
   const totalPrice = cart.reduce((t, i) => t + i.price * i.quantity, 0);
@@ -53,16 +53,8 @@ const CartScreen = () => {
 
   const renderItem = ({ item }) => {
       const originalProduct = products.find(p => p.id === item.id);
-      const handleIncrease = () => {
-        if (!originalProduct) return;
-        if (item.quantity >= originalProduct.quantity)
-          return Toast.show({ type: "error", text1: item.name, text2: `Only ${originalProduct.quantity} in stock` });
-        if (item.quantity >= 10)
-          return Toast.show({ type: "error", text1: item.name, text2: "You can only 10 items" });
-        updateCartQuantity(item.id, item.quantity + 1);
-      };
 
-    return(<View style={[tw`flex-row p-4 mb-3 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
+    return( <View style={[tw`flex-row p-4 mb-3 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
       <Image source={{ uri: getImageUrl(item.image) }} style={tw`w-20 h-20 rounded-lg`} />
       <View style={tw`flex-1 ml-4`}>
         <Text style={[tw`text-lg font-semibold`, { color: theme.black }]}>{item.name}</Text>
@@ -70,22 +62,22 @@ const CartScreen = () => {
         <View style={tw`flex-row justify-between items-center mt-2`}>
           <Text style={[tw`text-lg font-bold`, { color: theme.primary }]}>${(item.price * item.quantity).toFixed(2)}</Text>
           <View style={tw`flex-row items-center`}>
-            <TouchableOpacity onPress={() => updateCartQuantity(item.id, item.quantity - 1)} style={[tw`w-8 h-8 rounded-full items-center justify-center`, { backgroundColor: theme.lightGray }]}>
+            <TouchableOpacity onPress={() => decreaseCartQuantity(item) } style={[tw`w-8 h-8 rounded-full items-center justify-center`, { backgroundColor: theme.lightGray }]}>
               <Icon name="remove" size={16} color={theme.black} />
             </TouchableOpacity>
             <Text style={[tw`mx-3`, { color: theme.black }]}>{item.quantity}</Text>
-            <TouchableOpacity onPress={handleIncrease} style={[tw`w-8 h-8 rounded-full items-center justify-center`, { backgroundColor: theme.primary }]}>
+            <TouchableOpacity onPress={()=>addToCart(originalProduct)} style={[tw`w-8 h-8 rounded-full items-center justify-center`, { backgroundColor: theme.primary }]}>
               <Icon name="add" size={16} color={theme.white} />
             </TouchableOpacity>
           </View>
         </View>
       </View>
-      <TouchableOpacity onPress={() => removeFromCart(item.id)} style={tw`ml-2 p-2`}>
+      <TouchableOpacity onPress={() => removeFromCart(item)} style={tw`ml-2 p-2`}>
         <Icon name="delete" size={20} color={theme.red} />
       </TouchableOpacity>
-    </View>)
-    
+    </View>)  
   };
+    
 
   if (!cart.length)
     return (

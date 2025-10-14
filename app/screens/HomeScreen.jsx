@@ -20,17 +20,15 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [isoffline, setisoffline] = useState(false);
   const [showBackOnline, setShowBackOnline] = useState(false);
-
-const loadProducts = async () => {
-  try {
-    setLoading(true);
-    const data = await getProducts(); 
-    setFeaturedProducts(data.slice(0, 8));
-  } finally {
-    setLoading(false);
-  }
-};
-
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await getProducts(); 
+      setFeaturedProducts(data.slice(0, 8));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => { loadProducts(); }, []);
   useEffect(() => {
@@ -50,13 +48,11 @@ const loadProducts = async () => {
 }, [isoffline]);
 
   const onRefresh = async () => { setRefreshing(true); await loadProducts(); setRefreshing(false); };
-
   const renderProduct = ({ item }) => (
     <View style={tw`w-64 mr-4`}>
       <ProductCard product={item} onPress={() => navigation.navigate("ProductDetail", { product: item })} />
     </View>
   );
-
   const renderCategory = ({ item }) => (
     <TouchableOpacity onPress={() => navigation.navigate("Shop")} style={[tw`m-2 rounded-lg overflow-hidden shadow-lg`, { backgroundColor: theme.white, width: (width - 60) / 2, elevation: 3 }]}>
       <Image source={getImage(item.image)} style={tw`w-full h-32`} resizeMode="cover" />
@@ -86,7 +82,6 @@ const loadProducts = async () => {
             </View>
           </View>
         </View>
-
         {isoffline && (
           <View style={[tw`mx-4 mt-4 p-3 rounded-lg flex-row items-center`, { backgroundColor: theme.red }]}>
             <Icon name="wifi-off" size={20} color={theme.white} />
@@ -94,18 +89,17 @@ const loadProducts = async () => {
           </View>
         )}
         {showBackOnline && (
-  <View style={[tw`mx-4 mt-4 p-3 rounded-lg flex-row items-center`, { backgroundColor: theme.green }]}>
-    <Icon name="wifi" size={20} color={theme.white} />
-    <Text style={[tw`ml-2 font-medium`, { color: theme.white, fontFamily: "Poppins-Medium" }]}>
-      Back online
-    </Text>
-  </View>
-)}
-        <View style={tw`mt-6`}>
-          <Text style={[tw`text-xl font-bold mx-4 mb-4`, { color: theme.black, fontFamily: "Poppins-Bold" }]}>Shop by Category</Text>
+          <View style={[tw`mx-4 mt-4 p-3 rounded-lg flex-row items-center`, { backgroundColor: theme.green }]}>
+            <Icon name="wifi" size={20} color={theme.white} />
+            <Text style={[tw`ml-2 font-medium`, { color: theme.white, fontFamily: "Poppins-Medium" }]}>
+              Back online
+            </Text>
+          </View>
+        )}
+        <View style={tw`mt-6 mx-auto`}>
+          <Text style={[tw`text-xl font-bold mb-4`, { color: theme.black, fontFamily: "Poppins-Bold" }]}>Shop by Category</Text>
           <FlatList data={categories} renderItem={renderCategory} keyExtractor={(item) => item.id.toString()} numColumns={2} contentContainerStyle={tw`px-2`} scrollEnabled={false} />
         </View>
-
         <View style={tw`mt-6`}>
           <View style={tw`flex-row justify-between items-center mx-4 mb-4`}>
             <Text style={[tw`text-xl font-bold`, { color: theme.black, fontFamily: "Poppins-Bold" }]}>Featured Products</Text>
@@ -113,7 +107,6 @@ const loadProducts = async () => {
               <Text style={[tw`text-base font-medium`, { color: theme.primary, fontFamily: "Poppins-Medium" }]}>View All</Text>
             </TouchableOpacity>
           </View>
-
           {loading ? (
             <View style={tw`flex-1 justify-center items-center py-8`}>
               <Text style={[tw`text-base`, { color: theme.darkGray, fontFamily: "Poppins-Regular" }]}>Loading...</Text>
