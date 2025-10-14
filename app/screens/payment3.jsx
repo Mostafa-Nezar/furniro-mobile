@@ -55,21 +55,22 @@ const Payment3 = () => {
     let clientSecret;
     try {
       const response = await fetch("https://furniro-back-production.up.railway.app/api/payment2/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          total: total,
-          userId: user.id,
-          products: cart,
-          customerInfo: {
-          fullName: formValues.fullName,
-          email: formValues.email,
-          address: formValues.address,
-          city: formValues.city,
-          state: formValues.state,
-          zipCode: formValues.zipCode}
-})
-
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              total: total,
+              userId: user.id,
+              products: cart,
+              customerInfo: {
+                fullName: formValues.fullName,
+                email: formValues.email,
+                address: formValues.address,
+                city: formValues.city,
+                state: formValues.state,
+                zipCode: formValues.zipCode,
+                phoneNumber: user.phoneNumber || null
+            }
+        })
       });
       const data = await response.json();
       if (data.error || !data.clientSecret) {
@@ -152,14 +153,11 @@ const Payment3 = () => {
             <View style={tw`mb-6`}>
             <Text style={[tw`text-lg font-bold mb-3`, { color: theme.black }]}>Payment Details</Text>
               <InputField theme={theme} name="email" value={values.email} handleChange={handleChange} handleBlur={handleBlur} placeholder="Email Address" keyboardType="email-address" />
-              {errors.email && touched.email && <Text style={tw`text-red-500 mb-2`}>{errors.email}</Text>}
-              
+              {errors.email && touched.email && <Text style={tw`text-red-500 mb-2`}>{errors.email}</Text>}    
               <InputField theme={theme} name="fullName" value={values.fullName} handleChange={handleChange} handleBlur={handleBlur} placeholder="Full Name" />
               {errors.fullName && touched.fullName && <Text style={tw`text-red-500 mb-2`}>{errors.fullName}</Text>}
-
               <InputField theme={theme} name="address" value={values.address} handleChange={handleChange} handleBlur={handleBlur} placeholder="Address" />
               {errors.address && touched.address && <Text style={tw`text-red-500 mb-2`}>{errors.address}</Text>}
-
               <View style={tw`flex-row gap-3`}>
                 <View style={tw`flex-1`}>
                   <InputField theme={theme} name="city" value={values.city} handleChange={handleChange} handleBlur={handleBlur} placeholder="City" />
