@@ -88,6 +88,7 @@ export const CartProvider = ({ children }) => {
           fullName: user.name || "",
           email: user.email || "",
           address: user.location || "",
+          phoneNumber: user.phoneNumber || null
         },
         paymentdone:"cash on delivery" ,
         status: "pending",
@@ -122,12 +123,10 @@ export const CartProvider = ({ children }) => {
       const savedCart = await AsyncStorage.getItem("cart");
       if (savedCart) {
         dispatch({ type: "SET_CART", payload: JSON.parse(savedCart) });
-      } else if (user?.cart) {
-        dispatch({ type: "SET_CART", payload: user.cart });
       }
     };
     loadCart();
-  }, [user?.cart]);
+  }, []);
 
   return (
     <CartContext.Provider
