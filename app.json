@@ -47,8 +47,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "e8948e70-f5fa-4e9e-b7d6-c6ca06ce1f6d"
+        "projectId": "0e9217d9-ef7b-48af-a80e-848d3090bb27"
       }
-    }
+    },
+    "owner": "mostafa-nezar"
   }
 }
