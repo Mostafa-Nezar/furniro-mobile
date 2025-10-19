@@ -27,7 +27,7 @@ const appReducer = (state, action) => {
 
 export const AppProvider = ({ children }) => {
   const { user, isAuthenticated, updateUser, dispatch: authDispatch } = useAuth();
-  const { clearCartAndUpdateOrsers } = useCart();
+  const { clearCart, clearCartAndUpdateOrsers } = useCart();
   const [state, dispatch] = useReducer(appReducer, initialState);
   useEffect(() => { loadStoredData();  }, []);
   useEffect(() => { saveDataToStorage(); }, [state.isDarkMode, state.favorites, user, isAuthenticated]);
@@ -80,6 +80,7 @@ export const AppProvider = ({ children }) => {
     await AsyncStorage.removeItem("cart");
     authDispatch({ type: "LOGOUT" });
     dispatch({ type: "RESET" });
+    clearCart();
     return true;
   };
   const toggleTheme = () => { dispatch({ type: "TOGGLE_THEME" }) };

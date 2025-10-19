@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
+import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 
 const SplashScreen = () => {
@@ -26,7 +27,7 @@ const SplashScreen = () => {
         if (user && user.id) login(user);
         setTimeout(() => {
           navigation.replace(user && user.id ? 'Main' : 'GetStarted');
-        }, 1500);
+        }, 2000);
       } catch (e) {
         console.log(e);
         navigation.replace('GetStarted');
@@ -42,11 +43,7 @@ const SplashScreen = () => {
     <View style={[tw`flex-1 justify-center items-center`, { backgroundColor: theme.primary }]}>
       <Animated.View
         style={[tw`items-center rounded-lg`, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
-        <Image
-          source={require('../../assets/myicon.png')}
-          style={tw`w-32 h-32 mb-6 rounded-lg`}
-          resizeMode="contain"
-        />
+        <Image source={require('../../assets/myicon.png')} style={tw`w-32 h-32 mb-6 rounded-lg`} resizeMode="contain"/>
         <Text style={textStyle('text-4xl font-bold mb-2', 'Poppins-Bold')}>Furniro</Text>
         <Text style={textStyle('text-lg', 'Poppins-Regular')}>Modern & Elegant Furniture</Text>
       </Animated.View>

@@ -9,6 +9,10 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+    "bundleIdentifier": "com.mostafanezar.furniromobile",
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification"]
+      },
       "supportsTablet": true
     },
     "android": {
@@ -16,6 +20,7 @@
         "foregroundImage": "./assets/images/myicon.png",
         "backgroundColor": "#ffffff"
       },
+      "useNextNotificationsApi": true,
       "edgeToEdgeEnabled": true,
       "package": "com.mostafanezar.furniromobile"
     },
@@ -31,7 +36,7 @@
           "image": "./assets/images/myicon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#B88E2F"
         }
       ],
       [
