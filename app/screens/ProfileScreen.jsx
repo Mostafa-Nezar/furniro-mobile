@@ -341,7 +341,7 @@ const { width } = Dimensions.get("window");
         <View style={tw`px-4 mt-2`}>
           {menuItems.map((item) => (
             <TouchableOpacity key={item.key} onPress={() => openSidebar(item.key)} style={[tw`flex-row items-center p-4 mb-2 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
-              <Icon name={item.icon} size={24} color={theme.primary} />
+              <Icon name={item.icon} size={24} color={item.key =='favorites' ? theme.red :theme.primary} />
               <View style={tw`flex-1 ml-3`}>
                 <Text style={[tw`text-base font-semibold`, { color: theme.black }]}>{item.title}</Text>
                 <Text style={[tw`text-sm`, { color: theme.darkGray }]}>{item.subtitle}</Text>
