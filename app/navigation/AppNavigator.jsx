@@ -13,7 +13,6 @@ import ProductDetailScreen from "../screens/ProductDetailScreen.jsx";
 import ProfileScreen from "../screens/ProfileScreen.jsx";
 import SearchScreen from "../screens/SearchScreen.jsx";
 import SplashScreen from "../screens/SplashScreen.jsx";
-import AuthLoadingScreen from "../screens/AuthLoadingScreen.jsx";
 import Payment from "../screens/Payment.jsx";
 import NotificationsList from "../components/NotificationsList.jsx";
 import GetStarted from "../screens/GetStarted.jsx";
@@ -64,7 +63,6 @@ const AppNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: theme.white } }}>
         <Stack.Screen name="Splash" component={SplashScreen} />
-        <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Main" component={TabNavigator} />
