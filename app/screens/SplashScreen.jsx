@@ -4,7 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 
 const SplashScreen = () => {
