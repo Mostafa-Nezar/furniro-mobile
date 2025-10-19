@@ -13,7 +13,7 @@ const OrdersScreen = () => {
   return (
     <>
     <Header showBack={true} showSearch={false}/>
-    <View style={[tw`flex-1 px-4 mb-4`,{backgroundColor:theme.primary}]}>
+    <View style={[tw`flex-1 px-4 mb-4`,{backgroundColor:theme.white}]}>
     <Text style={[tw`text-xl font-bold p-4`, { color: theme.black }]}>My Orders</Text>
       <FlatList
         data={[...orders].sort((a, b) => new Date(b.date) - new Date(a.date))}
