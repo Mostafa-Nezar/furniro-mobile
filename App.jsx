@@ -49,7 +49,7 @@ useEffect(() => {
 
   return (<>
           <View style={[tw`p-3`, { backgroundColor: theme.primary }]} />
-          <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"}/>
+          <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={ isDark ? theme.red : theme.red } />
           <AppNavigator />
           <Toast config={toastConfig} />
         </>);
