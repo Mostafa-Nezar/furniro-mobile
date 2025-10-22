@@ -6,6 +6,37 @@ import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Svg, { Rect, Polygon, Line, Path } from 'react-native-svg';
+
+ function SvgComponent(props) {
+  return (
+    <Svg height="50%" width="50%" viewBox="0 0 100 100" {...props}>
+      <Polygon points="50,15 90,50 10,50" fill="black" />
+      <Rect x="25" y="50" width="50" height="35" fill="#ffc107" stroke="#333" strokeWidth="2" />
+      <Rect x="45" y="65" width="10" height="20" fill="red" />
+      <Line x1="10" y1="50" x2="90" y2="50" stroke="#333" strokeWidth="2" />
+    </Svg>
+  );
+}
+
+
+function SvgComponent2(props) {
+  return (
+    <Svg height="50px" width="50px" viewBox="0 0 100 100" {...props}>
+      {/* أيقونة هوم باستخدام Path */}
+      <Path
+        d="M10 50 L50 15 L90 50 V85 H65 V65 H35 V85 H10 Z"
+        fill="black"
+        stroke="#333"
+        strokeWidth="2"
+      />
+    </Svg>
+  );
+}
+
+
+
+
 
 const ShopScreen = () => {
   const navigation = useNavigation();
@@ -82,10 +113,22 @@ const ShopScreen = () => {
       </View>
     </Modal>
   );
-
+   function SvgComponent3(props) {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24" {...props}>
+      <Path
+        fill={theme.primary}
+        d="m11.05 17l4.15-2.65q.45-.3.45-.85t-.45-.85L11.05 10q-.5-.325-1.025-.05t-.525.875v5.35q0 .6.525.875T11.05 17M4 21q-.825 0-1.412-.587T2 19V7q0-.425.288-.712T3 6h5V4q0-.825.588-1.412T10 2h4q.825 0 1.413.588T16 4v2h5q.425 0 .713.288T22 7v12q0 .825-.587 1.413T20 21zm6-15h4V4h-4z"
+      />
+    </Svg>
+  );
+}
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title="Shop" showBack={false} />
+      <SvgComponent/>
+      <SvgComponent3/>
+      <SvgComponent2/>
       <View style={tw`px-4 py-3`}>
         <View style={[tw`flex-row items-center border rounded-lg px-4 py-3`, { borderColor: theme.lightGray, backgroundColor: theme.semiWhite }]}>
           <Icon name="search" size={20} color={theme.darkGray} />
