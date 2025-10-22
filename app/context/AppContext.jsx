@@ -6,6 +6,7 @@ import { useAuth } from "./AuthContext";
 import { useCart } from "./CartContext"; 
 import io from "socket.io-client";
 import { useRef } from "react";
+import { useColorScheme } from "react-native";
 
 const AppContext = createContext();
 const initialState = { isDarkMode: false, favorites: [], products: [], theme: colors, loadingCancel: null, orders: [] };
@@ -26,9 +27,12 @@ const appReducer = (state, action) => {
 };
 
 export const AppProvider = ({ children }) => {
+  const systemColorScheme = useColorScheme();
+  console.log(systemColorScheme,"hellooooooooo");
+  
   const { user, isAuthenticated, updateUser, dispatch: authDispatch } = useAuth();
   const { clearCart, clearCartAndUpdateOrsers } = useCart();
-  const [state, dispatch] = useReducer(appReducer, initialState);
+  const [state, dispatch] = useReducer(appReducer, {...initialState,   isDarkMode: systemColorScheme === "dark", theme: systemColorScheme === "dark" ? darkColors : colors});
   useEffect(() => { loadStoredData();  }, []);
   useEffect(() => { saveDataToStorage(); }, [state.isDarkMode, state.favorites, user, isAuthenticated]);
   useEffect(() => { (user && user.id) ? fetchOrders():dispatch({ type: "SET_ORDERS", payload: [] }) }, [user]);

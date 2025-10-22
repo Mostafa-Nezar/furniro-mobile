@@ -11,13 +11,12 @@ import tw from "twrnc";
 import { AuthProvider } from "./app/context/AuthContext";
 import { CartProvider } from "./app/context/CartContext";
 import { StripeProvider } from '@stripe/stripe-react-native';
-import { useColorScheme, View } from "react-native";
+import { View } from "react-native";
 SplashScreen.preventAutoHideAsync();
 
 
 const InnerApp = () => {
-  const isDark = useColorScheme() === "dark";
-  console.log(isDark, "xxxxxxxxxxx");
+
   const { theme, isDarkMode } = useAppContext();
   const { unreadCount } = useSocket();
   const toastConfig = {
@@ -48,8 +47,8 @@ useEffect(() => {
 
 
   return (<>
-          <View style={[tw`p-3`, { backgroundColor: theme.primary }]} />
-          <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={ isDark ? theme.red : theme.red } />
+          <View style={[tw`p-3`, { backgroundColor: isDarkMode ? theme.red : theme.primary }]} />
+          <StatusBar style={isDarkMode ? "dark" : "light"} backgroundColor={ isDarkMode ? theme.red : theme.red } />
           <AppNavigator />
           <Toast config={toastConfig} />
         </>);

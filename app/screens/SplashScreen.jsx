@@ -36,7 +36,7 @@ const SplashScreen = () => {
     checkAuth();
   }, []);
 
-  const textStyle = (size, font) => [tw`${size}`, { color: theme.white, fontFamily: font }];
+  const textStyle = (size, font) => [tw`${size}`, { color: "white", fontFamily: font }];
 
   return (
     <View style={[tw`flex-1 justify-center items-center`, { backgroundColor: theme.primary }]}>
@@ -48,7 +48,7 @@ const SplashScreen = () => {
       </Animated.View>
 
       <Animated.View style={[tw`absolute bottom-12`, { opacity: fadeAnim }]}>
-        <ActivityIndicator size="small" color={theme.white} />
+        <ActivityIndicator size="small" color={"white"} />
         <Text style={textStyle('text-sm mt-2', 'Poppins-Regular')}>Loading...</Text>
       </Animated.View>
     </View>
