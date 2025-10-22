@@ -6,140 +6,132 @@ import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Svg, { Rect, Polygon, Line, Path, G } from 'react-native-svg';
-import Animated, {useSharedValue, useAnimatedProps, withTiming, withDelay, withRepeat, Easing,} from "react-native-reanimated";
+import Svg, { Path } from 'react-native-svg';
+// import Svg, { Rect, Polygon, Line, Path, G } from 'react-native-svg';
+// import Animated, {useSharedValue, useAnimatedProps, withTiming, withDelay, withRepeat, Easing,} from "react-native-reanimated";
+// const AnimatedPath = Animated.createAnimatedComponent(Path);
+// const AnimatedG = Animated.createAnimatedComponent(G);
+// function AnimatedLoader({ size = 40, stroke = 2, color = "#000" }) {
+//   const dash1 = useSharedValue(4);
+//   const dash2 = useSharedValue(28);
+//   const dash3 = useSharedValue(8);
 
-const AnimatedPath = Animated.createAnimatedComponent(Path);
-const AnimatedG = Animated.createAnimatedComponent(G);
+//   const rot2 = useSharedValue(0); 
+//   const rot3 = useSharedValue(0);
 
- function AnimatedLoader({ size = 40, stroke = 2, color = "#000" }) {
-  const dash1 = useSharedValue(4);
-  const dash2 = useSharedValue(28);
-  const dash3 = useSharedValue(8);
+//   useEffect(() => {
+//     dash1.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
+//     dash2.value = withDelay(
+//       200,
+//       withTiming(0, { duration: 400, easing: Easing.out(Easing.cubic) })
+//     );
+//     dash3.value = withDelay(
+//       600,
+//       withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) })
+//     );
 
-  const rot2 = useSharedValue(0); 
-  const rot3 = useSharedValue(0);
+//     rot2.value = withDelay(
+//       900,
+//       withRepeat(
+//         withTiming(0, { duration: 6000, easing: Easing.linear }),
+//         -1,
+//         false
+//       )
+//     );
+//     rot3.value = withDelay(
+//       1100,
+//       withRepeat(
+//         withTiming(0, { duration: 6000, easing: Easing.linear }),
+//         -1,
+//         false
+//       )
+//     );
+//   }, []);
 
-  useEffect(() => {
-    dash1.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
-    dash2.value = withDelay(
-      200,
-      withTiming(0, { duration: 400, easing: Easing.out(Easing.cubic) })
-    );
-    dash3.value = withDelay(
-      600,
-      withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) })
-    );
+//   const animatedProps1 = useAnimatedProps(() => ({
+//     strokeDashoffset: dash1.value,
+//   }));
 
-    rot2.value = withDelay(
-      900,
-      withRepeat(
-        withTiming(0, { duration: 6000, easing: Easing.linear }),
-        -1,
-        false
-      )
-    );
-    rot3.value = withDelay(
-      1100,
-      withRepeat(
-        withTiming(0, { duration: 6000, easing: Easing.linear }),
-        -1,
-        false
-      )
-    );
-  }, []);
+//   const animatedProps2 = useAnimatedProps(() => ({
+//     strokeDashoffset: dash2.value,
+//   }));
 
-  const animatedProps1 = useAnimatedProps(() => ({
-    strokeDashoffset: dash1.value,
-  }));
+//   const animatedProps3 = useAnimatedProps(() => ({
+//     strokeDashoffset: dash3.value,
+//   }));
 
-  const animatedProps2 = useAnimatedProps(() => ({
-    strokeDashoffset: dash2.value,
-  }));
+//   const animatedGroupProps = useAnimatedProps(() => {
+//     return {
+//       transform: `rotate(0 12 3)`,
+//     };
+//   });
 
-  const animatedProps3 = useAnimatedProps(() => ({
-    strokeDashoffset: dash3.value,
-  }));
+//   return (
+//     <View style={[tw`p-10`,{ width: size, height: size }]}>
+//       <Svg width={size} height={size} viewBox="0 0 24 24">
+//         <AnimatedG 
+//           animatedProps={animatedGroupProps}
+//           stroke="none"
+//         >
+//           <AnimatedPath
+//             d="M12 3v2"
+//             stroke={color}
+//             strokeLinecap="round"
+//             strokeLinejoin="round"
+//             strokeWidth={stroke}
+//             strokeDasharray="4"
+//             animatedProps={animatedProps1}
+//             fill="none"
+//           />
 
-  const animatedGroupProps = useAnimatedProps(() => {
-    return {
-      transform: `rotate(0 12 3)`,
-    };
-  });
+//           <AnimatedPath
+//             d="M12 5c-3.31 0 -6 2.69 -6 6l0 6c-1 0 -2 1 -2 2h8M12 5c3.31 0 6 2.69 6 6l0 6c1 0 2 1 2 2h-8"
+//             stroke={color}
+//             strokeLinecap="round"
+//             strokeLinejoin="round"
+//             strokeWidth={stroke}
+//             strokeDasharray="28"
+//             animatedProps={animatedProps2}
+//             fill="none"
+//           />
+//         </AnimatedG>
 
-  return (
-    <View style={[tw`p-10`,{ width: size, height: size }]}>
-      <Svg width={size} height={size} viewBox="0 0 24 24">
-        <AnimatedG 
-          animatedProps={animatedGroupProps}
-          stroke="none"
-        >
-          <AnimatedPath
-            d="M12 3v2"
-            stroke={color}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={stroke}
-            strokeDasharray="4"
-            animatedProps={animatedProps1}
-            fill="none"
-          />
-
-          <AnimatedPath
-            d="M12 5c-3.31 0 -6 2.69 -6 6l0 6c-1 0 -2 1 -2 2h8M12 5c3.31 0 6 2.69 6 6l0 6c1 0 2 1 2 2h-8"
-            stroke={color}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={stroke}
-            strokeDasharray="28"
-            animatedProps={animatedProps2}
-            fill="none"
-          />
-        </AnimatedG>
-
-        <AnimatedPath
-          d="M10 20c0 1.1 0.9 2 2 2c1.1 0 2 -0.9 2 -2"
-          stroke={color}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={stroke}
-          strokeDasharray="8"
-          animatedProps={animatedProps3}
-          fill="none"
-        />
-      </Svg>
-    </View>
-  );
-}
-
- function SvgComponent(props) {
-  return (
-    <Svg height="50%" width="50%" viewBox="0 0 100 100" {...props}>
-      <Polygon points="50,15 90,50 10,50" fill="black" />
-      <Rect x="25" y="50" width="50" height="35" fill="#ffc107" stroke="#333" strokeWidth="2" />
-      <Rect x="45" y="65" width="10" height="20" fill="red" />
-      <Line x1="10" y1="50" x2="90" y2="50" stroke="#333" strokeWidth="2" />
-    </Svg>
-  );
-}
-
-
-function SvgComponent2(props) {
-  return (
-    <Svg height="50px" width="50px" viewBox="0 0 100 100" {...props}>
-      <Path
-        d="M10 50 L50 15 L90 50 V85 H65 V65 H35 V85 H10 Z"
-        fill="black"
-        stroke="#333"
-        strokeWidth="2"
-      />
-    </Svg>
-  );
-}
-
-
-
-
+//         <AnimatedPath
+//           d="M10 20c0 1.1 0.9 2 2 2c1.1 0 2 -0.9 2 -2"
+//           stroke={color}
+//           strokeLinecap="round"
+//           strokeLinejoin="round"
+//           strokeWidth={stroke}
+//           strokeDasharray="8"
+//           animatedProps={animatedProps3}
+//           fill="none"
+//         />
+//       </Svg>
+//     </View>
+//   );
+// }
+//  function SvgComponent(props) {
+//   return (
+//     <Svg height="50%" width="50%" viewBox="0 0 100 100" {...props}>
+//       <Polygon points="50,15 90,50 10,50" fill="black" />
+//       <Rect x="25" y="50" width="50" height="35" fill="#ffc107" stroke="#333" strokeWidth="2" />
+//       <Rect x="45" y="65" width="10" height="20" fill="red" />
+//       <Line x1="10" y1="50" x2="90" y2="50" stroke="#333" strokeWidth="2" />
+//     </Svg>
+//   );
+// }
+// function SvgComponent2(props) {
+//   return (
+//     <Svg height="50px" width="50px" viewBox="0 0 100 100" {...props}>
+//       <Path
+//         d="M10 50 L50 15 L90 50 V85 H65 V65 H35 V85 H10 Z"
+//         fill="black"
+//         stroke="#333"
+//         strokeWidth="2"
+//       />
+//     </Svg>
+//   );
+// }
 
 const ShopScreen = () => {
   const navigation = useNavigation();
@@ -218,7 +210,7 @@ const ShopScreen = () => {
   );
    function SvgComponent3(props) {
   return (
-    <Svg style={tw`p-5 m-2`} width={24} height={24} viewBox="0 0 24 24" {...props}>
+    <Svg style={tw`p-5 mx-4 mt-3`} width={24} height={24} viewBox="0 0 24 24" {...props}>
       <Path
         fill={theme.primary}
         d="m11.05 17l4.15-2.65q.45-.3.45-.85t-.45-.85L11.05 10q-.5-.325-1.025-.05t-.525.875v5.35q0 .6.525.875T11.05 17M4 21q-.825 0-1.412-.587T2 19V7q0-.425.288-.712T3 6h5V4q0-.825.588-1.412T10 2h4q.825 0 1.413.588T16 4v2h5q.425 0 .713.288T22 7v12q0 .825-.587 1.413T20 21zm6-15h4V4h-4z"
