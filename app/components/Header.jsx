@@ -15,7 +15,8 @@ const Header = ({ showBack = false, showCart = true, showSearch = true, showNoti
     <SafeAreaView style={{ backgroundColor: theme.white }}>
       <View
         style={[ tw`flex-row items-center justify-between px-4 py-3 border-b`,
-          { backgroundColor: theme.white, borderBottomColor: theme.lightGray, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0}]}>
+          // { backgroundColor: theme.white, borderBottomColor: theme.lightGray, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0}]}>
+          { backgroundColor: theme.white, borderBottomColor: theme.lightGray }]}>
         <View style={tw`flex-row items-center flex-1`}>
           {showBack && (
             <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-3 p-2`}>
