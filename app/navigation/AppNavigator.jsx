@@ -26,6 +26,7 @@ import Paypal from "../screens/Paypal.jsx";
 import About from "../screens/About.jsx";
 import Svg, { Path, G } from 'react-native-svg';
 import Readmore from "../screens/Readmore.jsx";
+import MyProfileScreen from "../screens/profile/MyProfileScreen.jsx";
 
 const Stack = createStackNavigator(), Tab = createBottomTabNavigator();
 const AboutIcon = ({ color, size }) => (
@@ -53,7 +54,7 @@ const TabNavigator = () => {
       tabBarActiveTintColor: theme.primary, tabBarInactiveTintColor: theme.darkGray,
       tabBarLabelStyle: { fontSize: 12, fontFamily: "Poppins-Medium" },
       tabBarIcon: ({ color, size }) => {
-        const icons = { Home: "home", Shop: "storefront", Cart: "cart", Profile: "person", About: "About" };
+        const icons = { Home: "home", Shop: "storefront", Cart: "cart", Profile: "person", About: "About", MyProfileScreen: "person", };
         return (
           <View style={{ position: "relative" }}>
              {route.name === "About" ? (
@@ -74,6 +75,7 @@ const TabNavigator = () => {
       <Tab.Screen name="Shop" component={ShopScreen} />
       <Tab.Screen name="Cart" component={CartScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="MyProfileScreen" component={MyProfileScreen} />
       <Tab.Screen name="About" component={About} />
     </Tab.Navigator>
   );
