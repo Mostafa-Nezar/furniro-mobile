@@ -24,7 +24,7 @@ export const ProfileProvider = ({ children }) => {
   const [activeTab, setActiveTab] = useState("favorites");
   const [isUploading, setIsUploading] = useState(false);
   const [isLocationLoading, setLocationLoading] = useState(false);
-
+   const [isActionsModalVisible, setIsActionsModalVisible] = useState(false);
   // Derived State
   const favoriteProducts = useMemo(() => products.filter((p) => favorites.includes(p.id)), [products, favorites]);
 
@@ -72,6 +72,7 @@ export const ProfileProvider = ({ children }) => {
       return "Could not fetch address";
     }
   };
+  const toggleActionsModal = () => setIsActionsModalVisible(prev => !prev);
 
   const getCurrentLocation = async () => {
     try {
@@ -138,6 +139,8 @@ export const ProfileProvider = ({ children }) => {
     handleLogout,
     getCurrentLocation,
     updatePhone,
+    isActionsModalVisible, // <--- الكود المضاف
+    toggleActionsModal,
   }), [
     // FIX: تحديث مصفوفة التبعيات
     theme, user, appContext.isDarkMode, appContext.toggleTheme, getImageUrl, favoriteProducts, orders, loadingCancel, notifications, formatDate, toggleFavorite, cancelOrder,

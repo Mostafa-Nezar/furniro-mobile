@@ -3,7 +3,7 @@ import { View, ScrollView } from "react-native";
 import Header from "../../components/Header";
 import Toast from "react-native-toast-message";
 import tw from "twrnc";
-
+import ProfileActionsModal from "./ProfileActionsModal";
 import { ProfileProvider, useProfile } from "./ProfileContext";
 import ProfileHeader from ".//ProfileHeader";
 import HorizontalTabBar from "./HorizontalTabBar";
@@ -45,6 +45,7 @@ const ProfileScreenContent = () => {
         </View>
       </ScrollView>
       <Toast />
+      <ProfileActionsModal />
     </View>
   );
 };

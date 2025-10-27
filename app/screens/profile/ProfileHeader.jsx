@@ -1,4 +1,4 @@
-import React from 'react';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { View, Text, TouchableOpacity, Image, Switch, ActivityIndicator } from 'react-native';
 import tw from "twrnc";
 import { useProfile } from './ProfileContext';
@@ -12,11 +12,18 @@ const ProfileHeader = () => {
     getImageUrl, 
     pickImage, 
     handleLogout, 
-    isUploading 
+    isUploading,
+    toggleActionsModal
   } = useProfile();
 
   return (
     <View style={tw`p-4 items-center`}>
+      <TouchableOpacity 
+        onPress={toggleActionsModal} // <--- الكود المضاف
+        style={tw`absolute top-0 right-0 p-4`}
+      >
+        <Icon name="menu" size={28} color={theme.black} />
+      </TouchableOpacity>
       <TouchableOpacity onPress={pickImage} disabled={isUploading}>
         <Image
           source={{ uri: getImageUrl(user?.image) || 'https://via.placeholder.com/150' }}
