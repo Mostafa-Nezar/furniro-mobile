@@ -47,12 +47,11 @@ useEffect(() => {
 
 
   return (<>
-  <SafeAreaView edges={['top']} style={{ backgroundColor: isDarkMode ? theme.red : theme.primary, flex: 1 }}>
-  <StatusBar style={isDarkMode ? "dark" : "light"} backgroundColor={isDarkMode ? theme.red : theme.primary} />
-  <AppNavigator />
-  <Toast config={toastConfig} />
-</SafeAreaView>
-
+    <SafeAreaView edges={['top']} style={{ backgroundColor: isDarkMode ? theme.red : theme.primary, flex: 1 }}>
+    <StatusBar style={isDarkMode ? "dark" : "light"} backgroundColor={isDarkMode ? theme.red : theme.primary} />
+    <AppNavigator />
+    <Toast config={toastConfig} />
+    </SafeAreaView>
         </>);
   };
 
