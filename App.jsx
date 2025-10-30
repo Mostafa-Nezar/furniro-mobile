@@ -13,7 +13,7 @@ import { CartProvider } from "./app/context/CartContext";
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { View } from "react-native";
 SplashScreen.preventAutoHideAsync();
-
+import { SafeAreaView } from "react-native-safe-area-context"
 
 const InnerApp = () => {
 
@@ -47,10 +47,12 @@ useEffect(() => {
 
 
   return (<>
-          <View style={[tw`p-3`, { backgroundColor: isDarkMode ? theme.red : theme.primary }]} />
-          <StatusBar style={isDarkMode ? "dark" : "light"} backgroundColor={ isDarkMode ? theme.red : theme.red } />
-          <AppNavigator />
-          <Toast config={toastConfig} />
+  <SafeAreaView edges={['top']} style={{ backgroundColor: isDarkMode ? theme.red : theme.primary, flex: 1 }}>
+  <StatusBar style={isDarkMode ? "dark" : "light"} backgroundColor={isDarkMode ? theme.red : theme.primary} />
+  <AppNavigator />
+  <Toast config={toastConfig} />
+</SafeAreaView>
+
         </>);
   };
 
