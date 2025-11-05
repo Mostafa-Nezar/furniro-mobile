@@ -50,6 +50,9 @@ const TabNavigator = () => {
   return (
     <Tab.Navigator screenOptions={({ route }) => ({
       headerShown: false,
+      tabBarPosition:"top",
+      tabBarPosition:"right",
+      tabBarPosition:"bottom",
       tabBarStyle: { backgroundColor: theme.white, borderTopColor: theme.lightGray, paddingBottom: 5, paddingTop: 5, height: 60 },
       tabBarActiveTintColor: theme.primary, tabBarInactiveTintColor: theme.darkGray,
       tabBarLabelStyle: { fontSize: 12, fontFamily: "Poppins-Medium" },
