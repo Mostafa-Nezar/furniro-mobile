@@ -20,7 +20,6 @@
         "foregroundImage": "./assets/images/myicon.png",
         "backgroundColor": "#ffffff"
       },
-      "useNextNotificationsApi": true,
       "edgeToEdgeEnabled": true,
       "package": "com.mostafanezar.furniromobile"
     },
