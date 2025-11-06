@@ -226,7 +226,7 @@ const { width } = Dimensions.get("window");
       <SidebarHeader title="Notifications" />
       <ScrollView>
         {notifications.length > 0 ? notifications.map(n => (
-          <View key={n.id} style={[tw`p-4 mb-3 rounded-lg flex-row justify-between`,{backgroundColor:n.read?theme.semiWhite:theme.lightBeige}]}>
+          <View key={n._id} style={[tw`p-4 mb-3 rounded-lg flex-row justify-between`,{backgroundColor:n.read?theme.semiWhite:theme.lightBeige}]}>
             <View style={tw`flex-1 pr-2`}>
               <Text style={[tw`text-base font-semibold`,{color:theme.black}]}>{n.message}</Text>
               <Text style={[tw`text-sm mt-1`,{color:theme.darkGray}]}>{formatDate(n.createdAt)}</Text>

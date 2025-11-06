@@ -16,7 +16,7 @@ const ProductCard = ({ product, onPress }) => {
   };
 
   return (
-    <TouchableOpacity onPress={onPress} style={[tw`m-2 rounded-lg overflow-hidden shadow-lg`, { backgroundColor: theme.white, elevation: 5 }]}>
+    <TouchableOpacity onPress={onPress} style={[tw`m-2 rounded-lg overflow-hidden shadow-lg`, { backgroundColor: theme.semiWhite }]}>
       <View style={tw`relative`}>
         <Image source={{ uri: imageUrl }} style={tw`w-full h-48`} resizeMode="cover" />
           {(product.date && ((new Date() - new Date(product.date)) / (1000 * 60 * 60 * 24) < 30)) || product.sale ? (
