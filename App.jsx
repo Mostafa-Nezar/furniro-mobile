@@ -39,11 +39,13 @@ useEffect(() => {
       console.log("⚠️ Notification permission not granted");
     }
   })();
-      const hideSplashScreen = async () => {
+}, [unreadCount]);
+  useEffect(()=>{
+    const hideSplashScreen = async () => {
       await SplashScreen.hideAsync();
     };
     setTimeout(hideSplashScreen, 1000);
-}, []);
+  },[])
 
 
   return (<>
