@@ -21,6 +21,7 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
+
   useEffect(() => {
     GoogleSignin.configure({webClientId: '866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh.apps.googleusercontent.com', offlineAccess: true});
     loadUser();
@@ -64,20 +65,25 @@ export const AuthProvider = ({ children }) => {
         method: "POST",
         body: JSON.stringify(userData),
       });
-      return await login(data.user.email, userData.password);
+      const newUser = data.user || userData;
+      await AsyncStorage.setItem("token", data.token);
+      await AsyncStorage.setItem("user", JSON.stringify(newUser));
+      dispatch({ type: "REGISTER_SUCCESS", payload: newUser });
+      return { success: true }; 
     } catch (error) {
       if (error.status === 409 || error.message?.includes("already exists")) {
         try {
-          return await login(userData.email, userData.password);
-        } catch {
-          return { success: false, message: "Login failed for existing user" };
+          const loginResult = await login(userData.email, userData.password);
+          if (loginResult.success) {
+            return { success: true };
+          } else {
+            return { success: false, message: loginResult.message };
+          }
+        } catch (loginError) {
+          return { success: false, message: loginError.message };
         }
       }
-      const newUser = { id: Date.now(), ...userData, avatar: null };
-      await AsyncStorage.setItem("token", "mock_token_123");
-      await AsyncStorage.setItem("user", JSON.stringify(newUser));
-      dispatch({ type: "REGISTER_SUCCESS", payload: newUser });
-      return { success: true, user: newUser };
+      return { success: false, message: error.message };
     }
   };
   const updateUser = async (updatedUserData) => {
@@ -108,16 +114,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        ...state,
-        login,
-        register,
-        GoogleSignup,
-        updateUser,
-        dispatch
-      }}
-    >
+    <AuthContext.Provider value={{ ...state, login, register, GoogleSignup, updateUser, dispatch }} >
       {children}
     </AuthContext.Provider>
   );

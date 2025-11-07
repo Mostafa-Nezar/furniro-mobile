@@ -382,7 +382,7 @@ import Toast from "react-native-toast-message";
 import { useAuth } from '../context/AuthContext';
 const RegisterScreen=()=>{ 
   const navigation=useNavigation();
-  const { theme, isDarkMode }=useAppContext(),{login,register,GoogleSignup} = useAuth()
+  const { theme }=useAppContext(),{login,register,GoogleSignup} = useAuth()
   const [showPassword,setShowPassword]=useState(false);
   const [showConfirmPassword,setShowConfirmPassword]=useState(false);
   const validationSchema=Yup.object({
@@ -391,13 +391,21 @@ const RegisterScreen=()=>{
     password:Yup.string().min(6).required('Password is required'),
     confirmPassword:Yup.string().oneOf([Yup.ref('password'),null],'Passwords must match').required('Please confirm your password'),
   });
-  const handleRegister=async(values,{setSubmitting})=>{
-    try{
-      const result=await register(values);
-        if(result.success){login(result.user);Toast.show({type: "success", text1: "Account Created Successfully", text2: "Welcome"});;navigation.replace('Main');}
-        else{Toast.show({type: 'error', text1: 'Registration Error', text2: result.message || 'Something went wrong',});}
-      }catch(error){Toast.show({type: 'error', text1: 'Registration Error', text2: result.message || 'Something went wrong',});}
-    finally{setSubmitting(false);}
+  const handleRegister = async (values, { setSubmitting }) => {
+    try {
+      const result = await register(values);
+      if (result.success) {
+        const successMessage = result.type === 'login' ? "Logged in Successfully" : "Account Created Successfully";
+        Toast.show({ type: "success", text1: successMessage, text2: "Welcome!" });
+        navigation.replace('Main');
+      } else {
+        Toast.show({ type: 'error', text1: 'Operation Failed', text2: result.message || 'Something went wrong, please try again.' });
+      }
+    } catch (error) {
+      Toast.show({ type: 'error', text1: 'An Unexpected Error Occurred', text2: 'Please check your connection and try again.' });
+    } finally {
+      setSubmitting(false);
+    }
   };
   const handleGoogleSignup = async () => {
     const result = await GoogleSignup();
@@ -420,7 +428,6 @@ const RegisterScreen=()=>{
       {touched&&error?<Text style={tw`text-red-500 text-sm mt-1`}>{error}</Text>:null}
     </View>
   );
-
   return(
     <KeyboardAvoidingView style={[tw`flex-1`,{backgroundColor:theme.white}]} behavior={Platform.OS==='ios'?'padding':'height'}>
       <ScrollView contentContainerStyle={tw`flex-grow justify-center px-6`}>

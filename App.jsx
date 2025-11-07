@@ -11,7 +11,7 @@ import tw from "twrnc";
 import { AuthProvider } from "./app/context/AuthContext";
 import { CartProvider } from "./app/context/CartContext";
 import { StripeProvider } from '@stripe/stripe-react-native';
-import { View } from "react-native";
+
 SplashScreen.preventAutoHideAsync();
 import { SafeAreaView } from "react-native-safe-area-context"
 
@@ -28,15 +28,7 @@ useEffect(() => {
     const { status } = await Notifications.requestPermissionsAsync();
 
     if (status === "granted") {
-      try {
         await Notifications.setBadgeCountAsync(unreadCount);
-        const current = await Notifications.getBadgeCountAsync();
-        console.log("✅ Badge set successfully. Current count:", current);
-      } catch (error) {
-        console.warn("⚠️ Error setting badge:", error);
-      }
-    } else {
-      console.log("⚠️ Notification permission not granted");
     }
   })();
 }, [unreadCount]);

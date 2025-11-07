@@ -27,9 +27,7 @@ const appReducer = (state, action) => {
 };
 
 export const AppProvider = ({ children }) => {
-  const systemColorScheme = useColorScheme();
-  console.log(systemColorScheme,"hellooooooooo");
-  
+  const systemColorScheme = useColorScheme();  
   const { user, isAuthenticated, updateUser, dispatch: authDispatch } = useAuth();
   const { clearCart, clearCartAndUpdateOrsers } = useCart();
   const [state, dispatch] = useReducer(appReducer, {...initialState,   isDarkMode: systemColorScheme === "dark", theme: systemColorScheme === "dark" ? darkColors : colors});

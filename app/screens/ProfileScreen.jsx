@@ -12,6 +12,8 @@ import * as Location from "expo-location";
 import { useSocket } from "../context/SocketContext";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import Constants from "expo-constants";
+const screenHeight = Dimensions.get("window").height;
 
 const ProfileScreen = () => {
 const { width } = Dimensions.get("window");
@@ -355,7 +357,7 @@ const { width } = Dimensions.get("window");
           <Text style={[tw`ml-2 text-base font-semibold`, { color: theme.white }]}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
-      <Modal visible={sidebarVisible} transparent animationType="none" onRequestClose={closeSidebar}>
+      <Modal statusBarTranslucent={true} visible={sidebarVisible} transparent animationType="none" onRequestClose={closeSidebar}>
         <View style={[tw`flex-1 flex-row`, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
           <TouchableOpacity style={tw`flex-1`} onPress={closeSidebar} activeOpacity={1} />
           <Animated.View style={[tw`w-4/5 h-full`, { backgroundColor: theme.white, transform: [{ translateX: slideAnim }], elevation: 20 }]}>
@@ -363,6 +365,43 @@ const { width } = Dimensions.get("window");
           </Animated.View>
         </View>
       </Modal>
+      {/* <Modal
+      statusBarTranslucent={true}
+      visible={sidebarVisible}
+      transparent
+      animationType="none"
+      onRequestClose={closeSidebar}
+    >
+      <View
+        style={[
+          tw`flex-1 flex-row`,
+          { backgroundColor: "rgba(0,0,0,0.5)" },
+        ]}
+      >
+        <TouchableOpacity
+          style={tw`flex-1`}
+          onPress={closeSidebar}
+          activeOpacity={1}
+        />
+
+        <Animated.View
+          style={[
+            tw`w-4/5 absolute right-0`,
+            {
+              top: Constants.statusBarHeight, // يبدأ من تحت الـ StatusBar
+              bottom: 0, // لحد آخر الشاشة
+              backgroundColor: theme.white,
+              transform: [{ translateX: slideAnim }],
+              borderTopLeftRadius: 15,
+              elevation: 20,
+            },
+          ]}
+        >
+          {renderSidebarContent()}
+        </Animated.View>
+      </View>
+      </Modal> */}
+
     </View>
   );
 };
