@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const loginResult = await login(userData.email, userData.password);
           if (loginResult.success) {
-            return { success: true };
+            return { success: true, message: "login" };
           } else {
             return { success: false, message: loginResult.message };
           }

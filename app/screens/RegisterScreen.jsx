@@ -395,7 +395,7 @@ const RegisterScreen=()=>{
     try {
       const result = await register(values);
       if (result.success) {
-        const successMessage = result.type === 'login' ? "Logged in Successfully" : "Account Created Successfully";
+        const successMessage = result.message?.toLowerCase().includes("login") ? "Logged in Successfully" : "Account Created Successfully";
         Toast.show({ type: "success", text1: successMessage, text2: "Welcome!" });
         navigation.replace('Main');
       } else {
