@@ -130,12 +130,12 @@ export const AppProvider = ({ children }) => {
     dispatch({ type: "SET_LOADING_CANCEL", payload: orderId });
     const data = await fetchInstance(`/orders/${orderId}/status`, {
       method: "PATCH",
-      body: JSON.stringify({ status: "canceled" })
+      body: JSON.stringify({ status: "cancelled" })
     });
     dispatch({
       type: "SET_ORDERS",
       payload: state.orders.map((o) =>
-        o._id === orderId ? { ...o, status: "canceled" } : o
+        o._id === orderId ? { ...o, status: "cancelled" } : o
       )
     });
     return data;

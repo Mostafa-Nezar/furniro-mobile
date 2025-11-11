@@ -255,7 +255,7 @@ const { width } = Dimensions.get("window");
             <Text style={[tw`text-base font-bold`, { color: theme.black }]}>Order ID: {o._id.slice(-6)}</Text>
             <Text style={[tw`text-sm`, { color: theme.darkGray }]}>Date: {new Date(o.date).toLocaleDateString()}</Text>
             <Text style={[tw`text-sm font-semibold mt-1`, { color: theme.primary }]}>Total: ${o.total}</Text>
-            <Text style={[tw`text-sm font-semibold mt-2`, { color: o.status==="pending"?theme.yellow:o.status==="delivered"?theme.green:(o.status==="canceled"||o.status==="refused")?theme.red:theme.darkGray }]}>
+            <Text style={[tw`text-sm font-semibold mt-2`, { color: o.status==="pending"?theme.yellow:o.status==="delivered"?theme.green:(o.status==="cancelled"||o.status==="refused")?theme.red:theme.darkGray }]}>
               {o.status[0].toUpperCase() + o.status.slice(1)}
             </Text>
           </View>
