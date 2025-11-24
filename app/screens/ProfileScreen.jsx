@@ -69,6 +69,7 @@ const { width } = Dimensions.get("window");
   const uploadImage = async (image) => {
     if (!image) return;
     setIsUploading(true);
+    const token = await AsyncStorage.getItem("token");
   
     const formData = new FormData();
     formData.append("avatar", {
@@ -83,7 +84,7 @@ const { width } = Dimensions.get("window");
         {
           method: "PATCH",
           headers: {
-            Authorization: `Bearer ${user?.token}`,
+            Authorization: `Bearer ${token}`,
           },
           body: formData,
         }
