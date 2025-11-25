@@ -41,7 +41,8 @@ export const CartProvider = ({ children }) => {
     dispatch({ type: "SET_CART", payload: cart });
     AsyncStorage.setItem("cart", JSON.stringify(cart));
   };
-  const addToCart = (product) => {
+  const addToCart = async (product) => {
+    try {
     const existingItem = state.cart.find((item) => item.id === product.id);
     const cartQuantity = existingItem ? existingItem.quantity : 0;
 
@@ -63,8 +64,25 @@ export const CartProvider = ({ children }) => {
           { id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1, size: "l", color: "#B88E2F" },
         ];
 
-    syncCart(updatedCart);
-    Toast.show({ type: "success", text1: "Added To Cart !", text2: product.name });
+        const response = await fetchInstance(`/auth/cart/${user.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ cart: updatedCart }),
+        });
+        syncCart(response.cart)
+        ;
+        Toast.show({ type: "success", text1: "Added To Cart !", text2: product.name });
+
+    
+      } catch (error) {
+        Toast.show({
+          type: "error",
+          text1: "Cart Update Failed",
+          text2: error.data?.msg || error.message,
+        });
+    
+        console.log("Cart update error:", error);
+        throw error;
+      }
   };
   const decreaseCartQuantity = (product) => {
     const existingItem = state.cart.find((item) => item.id === product.id);
