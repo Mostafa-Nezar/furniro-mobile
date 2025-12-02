@@ -10,7 +10,7 @@ import { useCart } from "../context/CartContext.jsx";
 export default function Ordersuccessscreen() {
   const navigation = useNavigation();
   const { theme, fetchOrders,getProducts } = useAppContext(),{ clearCart } =useCart();
- useEffect(()=>{clearCart(),fetchOrders(),getProducts()},[])
+  useEffect(() => { (async () => { await clearCart(); fetchOrders(); getProducts() })() }, []);
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title="Success" showBack={true}/>

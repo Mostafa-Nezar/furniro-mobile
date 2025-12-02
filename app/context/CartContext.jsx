@@ -15,12 +15,17 @@ const cartReducer = (state, action) => {
     case "ADD_ITEM":
       return { ...state, cart: [...state.cart, action.payload] };
     case "REMOVE_ITEM":
-      return { ...state, cart: state.cart.filter((item) => item.id !== action.payload) };
+      return {
+        ...state,
+        cart: state.cart.filter((item) => item.id !== action.payload),
+      };
     case "UPDATE_QUANTITY":
       return {
         ...state,
         cart: state.cart.map((item) =>
-          item.id === action.payload.id ? { ...item, quantity: action.payload.quantity } : item
+          item.id === action.payload.id
+            ? { ...item, quantity: action.payload.quantity }
+            : item
         ),
       };
     case "CLEAR_CART":
@@ -37,114 +42,160 @@ const cartReducer = (state, action) => {
 export const CartProvider = ({ children }) => {
   const { user } = useAuth();
   const [state, dispatch] = useReducer(cartReducer, initialState);
-  const syncCart = (cart) => {
+  const syncCart = async (cart) => {
     dispatch({ type: "SET_CART", payload: cart });
-    AsyncStorage.setItem("cart", JSON.stringify(cart));
+    await AsyncStorage.setItem("cart", JSON.stringify(cart));
+    await fetchInstance(`/auth/cart/${user.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ cart }),
+    });
   };
+
   const addToCart = async (product) => {
-    try {
     const existingItem = state.cart.find((item) => item.id === product.id);
     const cartQuantity = existingItem ? existingItem.quantity : 0;
 
     if (product.quantity <= 0)
-      return Toast.show({ type: "error", text1: product.name, text2: "Out of stock" });
+      return Toast.show({
+        type: "error",
+        text1: product.name,
+        text2: "Out of stock",
+      });
 
     if (cartQuantity >= product.quantity)
-      return Toast.show({ type: "error", text1: product.name, text2: `Only ${product.quantity} in stock` });
+      return Toast.show({
+        type: "error",
+        text1: product.name,
+        text2: `Only ${product.quantity} in stock`,
+      });
 
     if (cartQuantity >= 10)
-      return Toast.show({ type: "error", text1: product.name, text2: "You can only 10 items" });
+      return Toast.show({
+        type: "error",
+        text1: product.name,
+        text2: "You can only 10 items",
+      });
 
     const updatedCart = existingItem
       ? state.cart.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
         )
       : [
           ...state.cart,
-          { id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1, size: "l", color: "#B88E2F" },
+          {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            quantity: 1,
+            size: "l",
+            color: "#B88E2F",
+          },
         ];
-
-        const response = await fetchInstance(`/auth/cart/${user.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ cart: updatedCart }),
-        });
-        syncCart(response.cart)
-        ;
-        Toast.show({ type: "success", text1: "Added To Cart !", text2: product.name });
-
-    
-      } catch (error) {
-        Toast.show({
-          type: "error",
-          text1: "Cart Update Failed",
-          text2: error.data?.msg || error.message,
-        });
-    
-        console.log("Cart update error:", error);
-        throw error;
-      }
+    await syncCart(updatedCart);
+    Toast.show({
+      type: "success",
+      text1: "Added To Cart !",
+      text2: product.name,
+    });
   };
-  const decreaseCartQuantity = (product) => {
+
+  const decreaseCartQuantity = async (product) => {
     const existingItem = state.cart.find((item) => item.id === product.id);
     if (!existingItem)
-      return Toast.show({ type: "error", text1: product.name, text2: "Not In your Cart" });
-      const updatedCart = state.cart.map((item) =>item.id === product.id ? { ...item, quantity: item.quantity - 1 } : item).filter((item) => item.quantity > 0);
-      syncCart(updatedCart);
+      return Toast.show({
+        type: "error",
+        text1: product.name,
+        text2: "Not In your Cart",
+      });
+    const updatedCart = state.cart
+      .map((item) =>
+        item.id === product.id ? { ...item, quantity: item.quantity - 1 } : item
+      )
+      .filter((item) => item.quantity > 0);
+    await syncCart(updatedCart);
   };
-  const clearCartAndUpdateOrsers = async (paymentMethod = "cash on delivery") => {
-      if (!user?.id) return;
 
-      const total = state.cart.reduce((sum, p) => sum + (p.price * (p.quantity || 1)),0);
+  const clearCartAndUpdateOrsers = async (
+    paymentMethod = "cash on delivery"
+  ) => {
+    if (!user?.id) return;
 
-      const orderData = {
-        userId: user.id,
-        products: state.cart,
-        date: new Date().toISOString(),
-        total,
-        payment: { method: paymentMethod, status: "pending" },
-        customerInfo: {
-          fullName: user.name || "",
-          email: user.email || "",
-          address: user.location || "",
-          phoneNumber: user.phoneNumber || null
-        },
-        paymentdone:"cash on delivery" ,
-        status: "pending",
-        userlocation: user.location || "",
-      };
+    const total = state.cart.reduce(
+      (sum, p) => sum + p.price * (p.quantity || 1),
+      0
+    );
 
-      try {
-        await fetchInstance("/orders", {
-          method: "POST",
-          body: JSON.stringify(orderData),
-        });
+    const orderData = {
+      userId: user.id,
+      products: state.cart,
+      date: new Date().toISOString(),
+      total,
+      payment: { method: paymentMethod, status: "pending" },
+      customerInfo: {
+        fullName: user.name || "",
+        email: user.email || "",
+        address: user.location || "",
+        phoneNumber: user.phoneNumber || null,
+      },
+      paymentdone: "cash on delivery",
+      status: "pending",
+      userlocation: user.location || "",
+    };
 
-        await fetchInstance(`/auth/user/${user.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ cart: [] }),
-        });
+    try {
+      await fetchInstance("/orders", {
+        method: "POST",
+        body: JSON.stringify(orderData),
+      });
 
-        syncCart([]);
-      } catch (error) {
-        console.error("❌ Error while saving order or clearing cart:", error);
-      }
+      await fetchInstance(`/auth/cart/${user.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ cart: [] }),
+      });
+
+      await syncCart([]);
+    } catch (error) {
+      console.error("❌ Error while saving order or clearing cart:", error);
+    }
   };
+
   const clearCart = async () => {
-    syncCart([]);
+    await syncCart([]);
   };
+
   const removeFromCart = async (product) => {
     const updatedCart = state.cart.filter((item) => item.id !== product.id);
-    syncCart(updatedCart);
+    await syncCart(updatedCart);
   };
+
   useEffect(() => {
     const loadCart = async () => {
+      if (user?.id) {
+        const userData = await fetchInstance(`/auth/cart/${user.id}`);
+        if (
+          userData?.cart &&
+          Array.isArray(userData.cart) &&
+          userData.cart.length > 0
+        ) {
+          dispatch({ type: "SET_CART", payload: userData.cart });
+          await AsyncStorage.setItem("cart", JSON.stringify(userData.cart));
+          return;
+        }
+      }
+
       const savedCart = await AsyncStorage.getItem("cart");
       if (savedCart) {
-        dispatch({ type: "SET_CART", payload: JSON.parse(savedCart) });
+        const parsedCart = JSON.parse(savedCart);
+        if (Array.isArray(parsedCart) && parsedCart.length > 0) {
+          dispatch({ type: "SET_CART", payload: parsedCart });
+        }
       }
     };
     loadCart();
-  }, []);
+  }, [user?.id]);
 
   return (
     <CartContext.Provider
@@ -155,7 +206,7 @@ export const CartProvider = ({ children }) => {
         decreaseCartQuantity,
         clearCartAndUpdateOrsers,
         clearCart,
-        syncCart
+        syncCart,
       }}
     >
       {children}
