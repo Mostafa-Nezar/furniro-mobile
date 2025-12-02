@@ -43,39 +43,24 @@ export const CartProvider = ({ children }) => {
   const { user } = useAuth();
   const [state, dispatch] = useReducer(cartReducer, initialState);
   const syncCart = async (cart) => {
-    dispatch({ type: "SET_CART", payload: cart });
-    await AsyncStorage.setItem("cart", JSON.stringify(cart));
-    await fetchInstance(`/auth/cart/${user.id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ cart }),
-    });
-  };
 
+      const data = await fetchInstance(`/auth/cart/${user.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ cart }),
+      });
+  
+      dispatch({ type: "SET_CART", payload: data.cart });
+      await AsyncStorage.setItem("cart", JSON.stringify(data.cart));
+      Toast.show({ type: "success", text1: "Success", text2: data.msg });
+  
+      return data.cart;
+
+  };
+  
+  
   const addToCart = async (product) => {
     const existingItem = state.cart.find((item) => item.id === product.id);
-    const cartQuantity = existingItem ? existingItem.quantity : 0;
-
-    if (product.quantity <= 0)
-      return Toast.show({
-        type: "error",
-        text1: product.name,
-        text2: "Out of stock",
-      });
-
-    if (cartQuantity >= product.quantity)
-      return Toast.show({
-        type: "error",
-        text1: product.name,
-        text2: `Only ${product.quantity} in stock`,
-      });
-
-    if (cartQuantity >= 10)
-      return Toast.show({
-        type: "error",
-        text1: product.name,
-        text2: "You can only 10 items",
-      });
-
+  
     const updatedCart = existingItem
       ? state.cart.map((item) =>
           item.id === product.id
@@ -94,29 +79,21 @@ export const CartProvider = ({ children }) => {
             color: "#B88E2F",
           },
         ];
+  
     await syncCart(updatedCart);
-    Toast.show({
-      type: "success",
-      text1: "Added To Cart !",
-      text2: product.name,
-    });
   };
+  
 
   const decreaseCartQuantity = async (product) => {
-    const existingItem = state.cart.find((item) => item.id === product.id);
-    if (!existingItem)
-      return Toast.show({
-        type: "error",
-        text1: product.name,
-        text2: "Not In your Cart",
-      });
     const updatedCart = state.cart
       .map((item) =>
         item.id === product.id ? { ...item, quantity: item.quantity - 1 } : item
       )
       .filter((item) => item.quantity > 0);
+  
     await syncCart(updatedCart);
   };
+  
 
   const clearCartAndUpdateOrsers = async (
     paymentMethod = "cash on delivery"
