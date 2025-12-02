@@ -82,7 +82,6 @@ export const AppProvider = ({ children }) => {
     await AsyncStorage.removeItem("cart");
     authDispatch({ type: "LOGOUT" });
     dispatch({ type: "RESET" });
-    clearCart();
     return true;
   };
   const toggleTheme = () => { dispatch({ type: "TOGGLE_THEME" }) };
