@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, FlatList, TouchableOpacity, Image, Dimensions, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useAppContext } from "../context/AppContext.jsx";
-import Header from "../components/Header.jsx";
-import ProductCard from "../components/ProductCard.jsx";
+import { useAppContext } from "../../context/AppContext.jsx";
+import Header from "../../components/Header.jsx";
+import ProductCard from "../../components/ProductCard.jsx";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import NetInfo from "@react-native-community/netinfo";
 
 const { width } = Dimensions.get("window");
 const categories = [{ id: 1, name: "Living Room", icon: "chair", image: "Image-living room.png" }, { id: 2, name: "Bedroom", icon: "bed", image: "bedroom.png" }, { id: 3, name: "Kitchen", icon: "kitchen", image: "kit.png" }, { id: 4, name: "Lighting", icon: "lightbulb", image: "lamp.png" }, ];
-const getImage = (name) =>({"Image-living room.png": require("../../assets/images/Image-living room.png"), "kit.png": require("../../assets/images/kit.png"), "lamp.png": require("../../assets/images/lamp.png"), "bedroom.png": require("../../assets/images/bedroom.png"), }[name] || require("../../assets/images/bedroom.png"));
+const getImage = (name) =>({"Image-living room.png": require("../../../assets/images/Image-living room.png"), "kit.png": require("../../../assets/images/kit.png"), "lamp.png": require("../../../assets/images/lamp.png"), "bedroom.png": require("../../../assets/images/bedroom.png"), }[name] || require("../../../assets/images/bedroom.png"));
 const features = [{ icon: "local-shipping", title: "Free Shipping", desc: "For orders over $100" }, { icon: "support-agent", title: "24/7 Support", desc: "Excellent customer service" }, { icon: "verified", title: "Quality Guarantee", desc: "High quality products" }, { icon: "payment", title: "Secure Payment", desc: "Multiple payment methods" }, ];
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -69,7 +69,7 @@ const HomeScreen = () => {
       <Header />
       <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View style={tw`relative`}>
-          <Image source={require("../../assets/images/hero.png")} style={tw`w-full h-64`} resizeMode="cover" />
+          <Image source={require("../../../assets/images/hero.png")} style={tw`w-full h-64`} resizeMode="cover" />
           <View style={[tw`absolute inset-0 justify-center items-center`, { backgroundColor: "rgba(0,0,0,0.4)" }]}>
             <View style={[tw`p-6 rounded-lg mx-4`, { backgroundColor: theme.lightBeige }]}>
               <Text style={[tw`text-2xl font-bold text-center mb-2`, { color: theme.primary, fontFamily: "Poppins-Bold" }]}>

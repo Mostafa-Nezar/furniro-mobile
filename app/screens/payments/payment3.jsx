@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator,TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useAppContext } from "../context/AppContext.jsx";
-import Header from "../components/Header.jsx";
+import { useAppContext } from "../../context/AppContext.jsx";
+import Header from "../../components/Header.jsx";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import Toast from "react-native-toast-message";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 import { useStripe, CardField } from '@stripe/stripe-react-native';
-import { useCart } from "../context/CartContext.jsx";
+import { useCart } from "../../context/CartContext.jsx";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 

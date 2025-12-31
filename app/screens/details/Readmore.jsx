@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Text, Image, ScrollView, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import tw from "twrnc";
-import Header from "../components/Header";
-import { useAppContext } from "../context/AppContext";
+import Header from "../../components/Header";
+import { useAppContext } from "../../context/AppContext";
 
 export default function Readmore({ route }) {
   const { id } = route.params;

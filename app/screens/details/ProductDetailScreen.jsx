@@ -1,14 +1,14 @@
 import { useState,useEffect } from "react";
 import { View, Text, ScrollView, Image, TouchableOpacity, Dimensions, TextInput } from "react-native";
 import { useRoute } from "@react-navigation/native";
-import { useAppContext } from "../context/AppContext";
-import Header from "../components/Header";
+import { useAppContext } from "../../context/AppContext";
+import Header from "../../components/Header";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
-import { useCart } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext";
+import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
 
 const { width } = Dimensions.get("window");
 const SpecificationRow = ({ label, value, theme }) => (

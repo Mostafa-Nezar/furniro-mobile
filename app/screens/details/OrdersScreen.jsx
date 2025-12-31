@@ -1,8 +1,8 @@
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import tw from "twrnc";
-import { useAppContext } from "../context/AppContext";
-import Header from "../components/Header";
+import { useAppContext } from "../../context/AppContext";
+import Header from "../../components/Header";
 import { useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 

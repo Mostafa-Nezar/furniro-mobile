@@ -1,11 +1,11 @@
 import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useAppContext } from "../context/AppContext.jsx";
-import Header from "../components/Header.jsx";
+import { useAppContext } from "../../context/AppContext.jsx";
+import Header from "../../components/Header.jsx";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Toast from "react-native-toast-message";
-import { useCart } from "../context/CartContext.jsx";
+import { useCart } from "../../context/CartContext.jsx";
 import { useState } from "react";
 
 const CartScreen = () => {

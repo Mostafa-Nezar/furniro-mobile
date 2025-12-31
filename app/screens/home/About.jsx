@@ -1,9 +1,9 @@
-import Header from "../components/Header"
+import Header from "../../components/Header"
 import { useEffect, useState } from "react";
 import { View, Text, Image, TextInput, FlatList, TouchableOpacity, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import tw from "twrnc";
-import { useAppContext } from "../context/AppContext";
+import { useAppContext } from "../../context/AppContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const postsPerPage = 4; 
 const About = () => {

@@ -1,7 +1,7 @@
 import { View, Text, ScrollView } from "react-native";
 import tw from "twrnc";
-import { useAppContext } from "../context/AppContext";
-import Header from "../components/Header";
+import { useAppContext } from "../../context/AppContext";
+import Header from "../../components/Header";
 
 const OrderDetailsScreen = ({ route }) => {
   const { orderId } = route.params;

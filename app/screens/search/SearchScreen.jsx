@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, FlatList, TouchableOpacity, ScrollView, } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useAppContext } from "../context/AppContext";
-import Header from "../components/Header";
-import ProductCard from "../components/ProductCard";
+import { useAppContext } from "../../context/AppContext";
+import Header from "../../components/Header";
+import ProductCard from "../../components/ProductCard";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 

@@ -373,13 +373,13 @@
 import {useState} from 'react';
 import {View,Text,TextInput,TouchableOpacity,ScrollView,Image,KeyboardAvoidingView,Platform} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {useAppContext} from '../context/AppContext';
+import {useAppContext} from '../../context/AppContext';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Toast from "react-native-toast-message";
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 const RegisterScreen=()=>{ 
   const navigation=useNavigation();
   const { theme }=useAppContext(),{login,register,GoogleSignup} = useAuth()
@@ -432,7 +432,7 @@ const RegisterScreen=()=>{
     <KeyboardAvoidingView style={[tw`flex-1`,{backgroundColor:theme.white}]} behavior={Platform.OS==='ios'?'padding':'height'}>
       <ScrollView contentContainerStyle={tw`flex-grow justify-center px-6`}>
         <View style={tw`items-center flex-row justify-center mb-8`}>
-          <Image source={require('../../assets/images/Meubel House_Logos-05.png')} style={tw`w-12 h-12 mr-3`} resizeMode="contain"/>
+          <Image source={require('../../../assets/images/Meubel House_Logos-05.png')} style={tw`w-12 h-12 mr-3`} resizeMode="contain"/>
           <Text style={[tw`text-3xl font-bold`,{color:theme.black}]}>Furniro</Text>
         </View>
         <Text style={[tw`text-lg text-center mb-6`,{color:theme.darkGray}]}>Create New Account</Text>
@@ -455,7 +455,7 @@ const RegisterScreen=()=>{
           <View style={[tw`flex-1 h-px`,{backgroundColor:theme.lightGray}]}/>
         </View>
         <TouchableOpacity onPress={handleGoogleSignup} style={[tw`flex-row items-center justify-center py-3 rounded-lg mb-3 border`,{borderColor:theme.lightGray,backgroundColor:theme.white}]}>
-          <Image source={require("../../assets/g.png")} style={{ width: 20, height: 20 }} resizeMode="contain"/>
+          <Image source={require("../../../assets/g.png")} style={{ width: 20, height: 20 }} resizeMode="contain"/>
           <Text style={[tw`ml-3 text-base font-medium`,{color:theme.black}]}>Sign up with Google</Text>
         </TouchableOpacity>
         <View style={tw`flex-row justify-center mt-2`}>

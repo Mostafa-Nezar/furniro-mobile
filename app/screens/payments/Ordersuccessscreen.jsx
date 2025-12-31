@@ -2,10 +2,10 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import tw from "twrnc";
-import Header from "../components/Header.jsx";
-import { useAppContext } from "../context/AppContext.jsx";
+import Header from "../../components/Header.jsx";
+import { useAppContext } from "../../context/AppContext.jsx";
 import { useEffect } from "react";
-import { useCart } from "../context/CartContext.jsx";
+import { useCart } from "../../context/CartContext.jsx";
 
 export default function Ordersuccessscreen() {
   const navigation = useNavigation();

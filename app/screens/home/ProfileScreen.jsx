@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, ScrollView, Image, Switch, Animated, Dimensions, Modal, PermissionsAndroid, Platform, ActivityIndicator, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useAppContext } from "../context/AppContext";
-import Header from "../components/Header";
+import { useAppContext } from "../../context/AppContext";
+import Header from "../../components/Header";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as ImagePicker from "expo-image-picker";
@@ -9,9 +9,9 @@ import { useState, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 import * as Location from "expo-location";
-import { useSocket } from "../context/SocketContext";
-import { useAuth } from "../context/AuthContext";
-import { useCart } from "../context/CartContext";
+import { useSocket } from "../../context/SocketContext";
+import { useAuth } from "../../context/AuthContext";
+import { useCart } from "../../context/CartContext";
 import Constants from "expo-constants";
 const screenHeight = Dimensions.get("window").height;
 

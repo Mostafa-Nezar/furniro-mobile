@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useAppContext } from '../context/AppContext';
-import Header from '../components/Header';
-import ProductCard from '../components/ProductCard';
+import { useAppContext } from '../../context/AppContext';
+import Header from '../../components/Header';
+import ProductCard from '../../components/ProductCard';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Svg, { Path } from 'react-native-svg';
