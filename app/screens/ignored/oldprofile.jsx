@@ -12,7 +12,8 @@ import * as Location from "expo-location";
 import { useSocket } from "../../context/SocketContext";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
-
+import Constants from "expo-constants";
+const screenHeight = Dimensions.get("window").height;
 
 const ProfileScreen = () => {
 const { width } = Dimensions.get("window");
@@ -28,6 +29,28 @@ const { width } = Dimensions.get("window");
   const slideAnim = useRef(new Animated.Value(width)).current;
   const favoriteProducts = products.filter((p) => favorites.includes(p.id));
 
+  // const pickImage = async () => {
+  //   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  //   if (!perm.granted) return Toast.show({ type: "info", text1: "Permission required" });
+  //   const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [1, 1], quality: 0.8 });
+  //   if (!result.canceled) await uploadImage(result.assets[0]);
+  // };
+  // const uploadImage = async (image) => {
+  //   if (!image) return;
+  //   setIsUploading(true);
+  //   const formData = new FormData();
+  //   formData.append("avatar", { uri: image.uri, name: image.fileName || `avatar.jpg`, type: "image/jpeg" });
+  //   try {
+  //     const res = await fetch(`https://furniro-back-production.up.railway.app/api/upload/${user?.id}/update-image`, { method: "PATCH", headers: { Authorization: `Bearer ${user?.token}` }, body: formData } );
+  //     const data = await res.json();
+  //     if (data.success) {
+  //       const updated = { ...user, image: data.imageUrl };
+  //       updateUser(updated)
+  //       Toast.show({ type: "success", text1: "Image Updated" });
+  //     } else Toast.show({ type: "error", text1: data.message || "Upload Failed" });
+  //   } catch (err) { Toast.show({ type: "error", text1: "Check Your Connection" }); } 
+  //   finally { setIsUploading(false); }
+  // };
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted)
@@ -139,11 +162,9 @@ const { width } = Dimensions.get("window");
     }
   };
   const updatePhone = async (userId, newPhone) => {
-    const token = await AsyncStorage.getItem("token");
-    const res = await fetch(`https://furniro-back-production.up.railway.app/api/auth/users/${userId}/phone`, { method: "PATCH", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ phoneNumber: newPhone }) });
+    const res = await fetch(`https://furniro-back-production.up.railway.app/api/auth/users/${userId}/phone`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phoneNumber: newPhone }) });
     const data = await res.json();
     if (res.ok) {
-      Toast.show({type: "success", text1: user?.phoneNumber ? "Phone updated" : "Phone added", text2: newPhone });
       const updatedUser = { ...user, phoneNumber: data.phoneNumber };
       updateUser(updatedUser);
     } else { Toast.show({ type: "error", text1: data?.msg || "Failed to update phone" }) }
@@ -288,6 +309,7 @@ const { width } = Dimensions.get("window");
     setLoading(true);
     try {
       await updatePhone(user.id, phone);
+      Toast.show({type: "success", text1: user?.phoneNumber ? "Phone updated" : "Phone added", text2: phone });
       closeSidebar();
     } finally {
       setLoading(false);
@@ -391,6 +413,14 @@ const { width } = Dimensions.get("window");
           <Text style={[tw`ml-2 text-base font-semibold`, { color: theme.white }]}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
+      {/* <Modal statusBarTranslucent={false} visible={sidebarVisible} transparent animationType="none" onRequestClose={closeSidebar}>
+        <View style={[tw`flex-1 flex-row`, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
+          <TouchableOpacity style={tw`flex-1`} onPress={closeSidebar} activeOpacity={1} />
+          <Animated.View style={[tw`w-4/5 h-full`, { backgroundColor: theme.white, transform: [{ translateX: slideAnim }], elevation: 20 }]}>
+            {renderSidebarContent()}
+          </Animated.View>
+        </View>
+      </Modal> */}
       <Modal
   statusBarTranslucent={true} // 👈 عشان ما يغطيش الـ Status Bar
   visible={sidebarVisible}
@@ -420,7 +450,7 @@ const { width } = Dimensions.get("window");
           borderTopRightRadius: 25,
           transform: [{ translateY: slideAnim }],
           elevation: 20,
-          marginTop: 80, 
+          marginTop: 80, // 👈 يسيب جزء من فوق
           position: "absolute",
           bottom: 0,
         },
@@ -430,6 +460,44 @@ const { width } = Dimensions.get("window");
     </Animated.View>
   </View>
 </Modal>
+{/* 
+      <Modal
+      statusBarTranslucent={true}
+      visible={sidebarVisible}
+      transparent
+      animationType="none"
+      onRequestClose={closeSidebar}
+    >
+      <View
+        style={[
+          tw`flex-1 flex-row`,
+          { backgroundColor: "rgba(0,0,0,0.5)" },
+        ]}
+      >
+        <TouchableOpacity
+          style={tw`flex-1`}
+          onPress={closeSidebar}
+          activeOpacity={1}
+        />
+
+        <Animated.View
+          style={[
+            tw`w-4/5 absolute right-0`,
+            {
+              top: Constants.statusBarHeight, // يبدأ من تحت الـ StatusBar
+              bottom: 0, // لحد آخر الشاشة
+              backgroundColor: theme.white,
+              transform: [{ translateX: slideAnim }],
+              // borderTopLeftRadius: 15,
+              elevation: 20,
+            },
+          ]}
+        >
+          {renderSidebarContent()}
+        </Animated.View>
+      </View>
+      </Modal> */}
+
     </View>
   );
 };
