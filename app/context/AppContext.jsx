@@ -4,6 +4,7 @@ import { colors, darkColors } from "../constants/theme.jsx";
 import { fetchInstance } from "./api";
 import { useAuth } from "./AuthContext"; 
 import { useCart } from "./CartContext"; 
+import { useSocket } from "./SocketContext.jsx"; 
 import io from "socket.io-client";
 import { useRef } from "react";
 import { useColorScheme } from "react-native";
@@ -27,9 +28,10 @@ const appReducer = (state, action) => {
 };
 
 export const AppProvider = ({ children }) => {
-  const systemColorScheme = useColorScheme();  
+  const systemColorScheme = useColorScheme(); 
+  const { clearNotifications } = useSocket(); 
   const { user, isAuthenticated, updateUser, dispatch: authDispatch } = useAuth();
-  const { clearCart, clearCartAndUpdateOrsers } = useCart();
+  const { clearCartAndUpdateOrsers } = useCart();
   const [state, dispatch] = useReducer(appReducer, {...initialState,   isDarkMode: systemColorScheme === "dark", theme: systemColorScheme === "dark" ? darkColors : colors});
   useEffect(() => { loadStoredData();  }, []);
   useEffect(() => { saveDataToStorage(); }, [state.isDarkMode, state.favorites, user, isAuthenticated]);
@@ -77,6 +79,7 @@ export const AppProvider = ({ children }) => {
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("user");
     await AsyncStorage.removeItem("cart");
+    clearNotifications(); 
     authDispatch({ type: "LOGOUT" });
     dispatch({ type: "RESET" });
     return true;

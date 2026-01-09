@@ -54,11 +54,11 @@ export default function App() {
   <StripeProvider publishableKey="pk_test_51RfzAo4hpzh6swtTe5XoqvV6DcUlufkptuTb7Q4DKfuVgnDDH76ICrTlrw8pXwKGpHscUSZCr9vwniO6e0zc0VT900tEcvmgjR">
     <AuthProvider>
       <CartProvider>
-    <AppProvider>
       <SocketProvider>
+    <AppProvider>
         <InnerApp />
-      </SocketProvider>
     </AppProvider>
+      </SocketProvider>
       </CartProvider>
     </AuthProvider>
   </StripeProvider>
