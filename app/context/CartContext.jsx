@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect } from "react";
+import { createContext, useContext, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "./AuthContext";
 import { fetchInstance } from "./api";
@@ -6,53 +6,30 @@ import Toast from "react-native-toast-message";
 
 const CartContext = createContext();
 
-const initialState = { cart: [], loading: false, error: null };
-
-const cartReducer = (state, action) => {
-  switch (action.type) {
-    case "SET_CART":
-      return { ...state, cart: action.payload };
-    case "ADD_ITEM":
-      return { ...state, cart: [...state.cart, action.payload] };
-    case "REMOVE_ITEM":
-      return {
-        ...state,
-        cart: state.cart.filter((item) => item.id !== action.payload),
-      };
-    case "UPDATE_QUANTITY":
-      return {
-        ...state,
-        cart: state.cart.map((item) =>
-          item.id === action.payload.id
-            ? { ...item, quantity: action.payload.quantity }
-            : item
-        ),
-      };
-    case "CLEAR_CART":
-      return { ...state, cart: [] };
-    case "SET_LOADING":
-      return { ...state, loading: action.payload };
-    case "SET_ERROR":
-      return { ...state, error: action.payload };
-    default:
-      return state;
-  }
-};
-
 export const CartProvider = ({ children }) => {
-  const { user } = useAuth();
-  const [state, dispatch] = useReducer(cartReducer, initialState);
+  const { user, updateUser } = useAuth();
+
+  const cart = user?.cart && Array.isArray(user.cart) ? user.cart : [];
+
   const syncCart = async (cart) => {
-    dispatch({ type: "SET_CART", payload: cart });
     await AsyncStorage.setItem("cart", JSON.stringify(cart));
-    await fetchInstance(`/auth/cart/${user.id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ cart }),
-    });
+    if (user?.id) {
+      await updateUser({ cart });
+      try {
+        await fetchInstance(`/auth/cart/${user.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ cart }),
+        });
+        console.log("hello cart");
+        
+      } catch (error) {
+        console.error("❌ Error syncing cart to backend:", error);
+      }
+    }
   };
 
   const addToCart = async (product) => {
-    const existingItem = state.cart.find((item) => item.id === product.id);
+    const existingItem = cart.find((item) => item.id === product.id);
     const cartQuantity = existingItem ? existingItem.quantity : 0;
 
     if (product.quantity <= 0)
@@ -77,13 +54,13 @@ export const CartProvider = ({ children }) => {
       });
 
     const updatedCart = existingItem
-      ? state.cart.map((item) =>
+      ? cart.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         )
       : [
-          ...state.cart,
+          ...cart,
           {
             id: product.id,
             name: product.name,
@@ -103,14 +80,14 @@ export const CartProvider = ({ children }) => {
   };
 
   const decreaseCartQuantity = async (product) => {
-    const existingItem = state.cart.find((item) => item.id === product.id);
+    const existingItem = cart.find((item) => item.id === product.id);
     if (!existingItem)
       return Toast.show({
         type: "error",
         text1: product.name,
         text2: "Not In your Cart",
       });
-    const updatedCart = state.cart
+    const updatedCart = cart
       .map((item) =>
         item.id === product.id ? { ...item, quantity: item.quantity - 1 } : item
       )
@@ -123,14 +100,11 @@ export const CartProvider = ({ children }) => {
   ) => {
     if (!user?.id) return;
 
-    const total = state.cart.reduce(
-      (sum, p) => sum + p.price * (p.quantity || 1),
-      0
-    );
+    const total = cart.reduce((sum, p) => sum + p.price * (p.quantity || 1), 0);
 
     const orderData = {
       userId: user.id,
-      products: state.cart,
+      products: cart,
       date: new Date().toISOString(),
       total,
       payment: { method: paymentMethod, status: "pending" },
@@ -167,40 +141,28 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = async (product) => {
-    const updatedCart = state.cart.filter((item) => item.id !== product.id);
+    const updatedCart = cart.filter((item) => item.id !== product.id);
     await syncCart(updatedCart);
   };
 
   useEffect(() => {
-    const loadCart = async () => {
-      if (user?.id) {
-        const userData = await fetchInstance(`/auth/cart/${user.id}`);
-        if (
-          userData?.cart &&
-          Array.isArray(userData.cart) &&
-          userData.cart.length > 0
-        ) {
-          dispatch({ type: "SET_CART", payload: userData.cart });
-          await AsyncStorage.setItem("cart", JSON.stringify(userData.cart));
-          return;
+    if (user?.cart && Array.isArray(user.cart)) {
+      AsyncStorage.setItem("cart", JSON.stringify(user.cart));
+    } else if (!user) {
+      AsyncStorage.getItem("cart").then((savedCart) => {
+        if (savedCart) {
+          const parsedCart = JSON.parse(savedCart);
+          if (Array.isArray(parsedCart) && parsedCart.length > 0) {
+          }
         }
-      }
-
-      const savedCart = await AsyncStorage.getItem("cart");
-      if (savedCart) {
-        const parsedCart = JSON.parse(savedCart);
-        if (Array.isArray(parsedCart) && parsedCart.length > 0) {
-          dispatch({ type: "SET_CART", payload: parsedCart });
-        }
-      }
-    };
-    loadCart();
-  }, [user?.id]);
+      });
+    }
+  }, [user?.cart, user]);
 
   return (
     <CartContext.Provider
       value={{
-        ...state,
+        cart,
         addToCart,
         removeFromCart,
         decreaseCartQuantity,

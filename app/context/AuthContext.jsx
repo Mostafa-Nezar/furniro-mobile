@@ -12,8 +12,6 @@ const authReducer = (state, action) => {
     case "REGISTER_SUCCESS": return { ...state, user: action.payload, isAuthenticated: true, isLoading: false };
     case "LOGOUT": return { ...state, user: null, isAuthenticated: false, isLoading: false };
     case "UPDATE_USER": return { ...state, user: action.payload };
-    case "SET_LOADING": return { ...state, isLoading: action.payload };
-    case "RESTORE_USER": return { ...state, user: action.payload, isAuthenticated: !!action.payload, isLoading: false };
     default: return state;
   }
 };
@@ -21,24 +19,18 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-
   useEffect(() => {
     GoogleSignin.configure({webClientId: '866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh.apps.googleusercontent.com', offlineAccess: true});
     loadUser();
   }, []);
 
   const loadUser = async () => {
-      try {
         const storedUser = await AsyncStorage.getItem("user");
         if (storedUser) {
-          dispatch({ type: "RESTORE_USER", payload: JSON.parse(storedUser) });
+          dispatch({ type: "LOGIN_SUCCESS", payload: JSON.parse(storedUser) });
         } else {
-          dispatch({ type: "RESTORE_USER", payload: null });
+          dispatch({ type: "LOGIN_SUCCESS", payload: null });
         }
-      } catch (err) {
-        console.error("❌ Error restoring user:", err);
-        dispatch({ type: "RESTORE_USER", payload: null });
-      }
   };
   const GoogleSignup = async () => {
     try {
@@ -92,7 +84,6 @@ export const AuthProvider = ({ children }) => {
     await AsyncStorage.setItem("user", JSON.stringify(newUser));
   };
   const login = async (email, password) => {
-    try {
       const data = await fetchInstance("/auth/signin", {
         method: "POST",
         body: JSON.stringify({ email, password }),
@@ -101,20 +92,22 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem("user", JSON.stringify(data.user));
       dispatch({ type: "LOGIN_SUCCESS", payload: data.user });
       return { success: true, user: data.user };
-    } catch (error) {
-      if (email === "admin@furniro.com" && password === "admin123") {
-        const admin = { id: 1, email, name: "Admin User", avatar: null };
-        await AsyncStorage.setItem("token", "mock_token_123");
-        await AsyncStorage.setItem("user", JSON.stringify(admin));
-        dispatch({ type: "LOGIN_SUCCESS", payload: admin });
-        return { success: true, user: admin };
-      }
-      return { success: false, message: error.message };
-    }
   };
-
+  const checkTokenAndAutoLogin = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return false;
+      const res = await fetch("https://furniro-back-production.up.railway.app/api/auth/check-token", { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if(res.ok){              
+        await AsyncStorage.setItem("user", JSON.stringify(data.user));
+        dispatch({ type: "LOGIN_SUCCESS", payload: data.user });
+        return true
+      }
+      return false     
+  };
+  
   return (
-    <AuthContext.Provider value={{ ...state, login, register, GoogleSignup, updateUser, dispatch }} >
+    <AuthContext.Provider value={{ ...state, login, register, GoogleSignup, updateUser, checkTokenAndAutoLogin, dispatch }} >
       {children}
     </AuthContext.Provider>
   );

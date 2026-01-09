@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { View, Text, Image, Animated, ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
@@ -9,8 +8,7 @@ import tw from 'twrnc';
 const SplashScreen = () => {
   const navigation = useNavigation();
   const { theme } = useAppContext();
-  const { login } = useAuth();
-
+  const { checkTokenAndAutoLogin } = useAuth();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
@@ -19,18 +17,9 @@ const SplashScreen = () => {
       Animated.timing(fadeAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
       Animated.spring(scaleAnim, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
     ]).start();
-
     const checkAuth = async () => {
-      try {
-        const user = JSON.parse(await AsyncStorage.getItem('user'));
-        if (user && user.id) login(user);
-        setTimeout(() => {
-          navigation.replace(user && user.id ? 'Main' : 'GetStarted');
-        }, 2000);
-      } catch (e) {
-        console.log(e);
-        navigation.replace('GetStarted');
-      }
+        const result = await checkTokenAndAutoLogin();
+        navigation.replace(result ? 'Main' : 'GetStarted');
     };
 
     checkAuth();

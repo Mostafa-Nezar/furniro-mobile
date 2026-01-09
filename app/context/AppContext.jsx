@@ -37,10 +37,7 @@ export const AppProvider = ({ children }) => {
   const socketRef = useRef(null);
     useEffect(() => {
       socketRef.current = io("https://furniro-back-production.up.railway.app");
-      socketRef.current.on("connect", () => { console.log("✅ Socket products connected:", socketRef.current.id)});
       socketRef.current.on("productsChanged", () => { console.log("Reload products📦"); getProducts()});
-      socketRef.current.on("disconnect", () => { console.log("❌ Socket disconnected") });
-
       return () => {socketRef.current.disconnect()};
     }, []);
 
