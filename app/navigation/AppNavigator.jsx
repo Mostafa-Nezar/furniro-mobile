@@ -10,7 +10,7 @@ import CartScreen from "../screens/home/CartScreen.jsx";
 import LoginScreen from "../screens/auth/LoginScreen.jsx";
 import RegisterScreen from "../screens/auth/RegisterScreen.jsx";
 import ProductDetailScreen from "../screens/details/ProductDetailScreen.jsx";
-import ProfileScreen from "../screens/home/ProfileScreen.jsx";
+import ProfileScreen from "../screens/home/ProfileScreen/ProfileScreen.jsx";
 import SearchScreen from "../screens/search/SearchScreen.jsx";
 import SplashScreen from "../screens/auth/SplashScreen.jsx";
 import NotificationsList from "../components/NotificationsList.jsx";

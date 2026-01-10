@@ -11,7 +11,7 @@ const NotificationBell = ({ navigation }) => {
     <TouchableOpacity onPress={()=>navigation.navigate('NotificationsList')} style={tw`relative mr-2`}>
       <Ionicons name="notifications-outline" size={24} color={theme.black} />
       {unreadCount > 0 && (
-        <View style={[ tw`absolute items-center justify-center -top-1 -right-1 rounded-full min-w-[20px] h-[20px] px-1`,{ backgroundColor: theme.red }]}>
+        <View style={[ tw`absolute items-center justify-center -top-1 -right-1 rounded-full min-w-5 h-5`,{ backgroundColor: theme.red }]}>
           <Text style={[ tw`text-xs font-bold`, { color: theme.white }]}> {unreadCount > 99 ? '99+' : unreadCount} </Text>
         </View>
       )}
