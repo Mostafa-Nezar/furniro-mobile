@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user: data.user };
   };
   const checkTokenAndAutoLogin = async () => {
-      const token = await AsyncStorage.getItem("token");
+    try{  const token = await AsyncStorage.getItem("token");
       if (!token) return false;
       const res = await fetch("https://furniro-back-production.up.railway.app/api/auth/check-token", { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
@@ -102,8 +102,8 @@ export const AuthProvider = ({ children }) => {
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
         dispatch({ type: "LOGIN_SUCCESS", payload: data.user });
         return true
-      }
-      return false     
+      }}catch{
+      return false}     
   };
   
   return (

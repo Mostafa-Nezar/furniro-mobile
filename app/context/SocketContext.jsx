@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from "./AuthContext";
 
 const SocketContext = createContext();
 
@@ -16,7 +15,6 @@ export const useSocket = ( ) => {
 };
 
 export const SocketProvider = ({ children }) => {
-  const { user } = useAuth();
   const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -78,6 +76,7 @@ export const SocketProvider = ({ children }) => {
     if (diff < 1440) return `${Math.floor(diff / 60)}h ago`;
     return date.toLocaleDateString();
   };
+
   const clearNotifications = () => {
     setNotifications([]);
     setUnreadCount(0);
@@ -98,7 +97,6 @@ export const SocketProvider = ({ children }) => {
           await fetchNotifications();
 
           const userData = JSON.parse(userString);
-          if (socket) socket.disconnect();
           const newSocket = io('https://furniro-back-production.up.railway.app', {
             auth: { token: token }
           } );
@@ -124,7 +122,6 @@ export const SocketProvider = ({ children }) => {
 
           setSocket(newSocket);
         } else {
-          clearNotifications();
           setLoading(false);
         }
       } catch (error) {
@@ -141,7 +138,7 @@ export const SocketProvider = ({ children }) => {
         socket.disconnect();
       }
     };
-  }, [user]);
+  }, []);
 
   const value = {
     socket,
