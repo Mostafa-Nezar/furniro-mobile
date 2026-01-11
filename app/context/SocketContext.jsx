@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from './AuthContext';
 
 const SocketContext = createContext();
 
@@ -22,13 +23,14 @@ export const SocketProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const getToken = () => AsyncStorage.getItem("token");
+  const { user } = useAuth();
   const fetchNotifications = async () => {
     try {
       const token = await getToken();
-      const userString = await AsyncStorage.getItem("user");
-      if (!token || !userString) return;
+      
+      if (!token || !user) return;
 
-      const user = JSON.parse(userString);
+      
       const res = await fetch(API, {headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }});
 
       if (res.ok) {
@@ -91,12 +93,11 @@ export const SocketProvider = ({ children }) => {
     const initSocket = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const userString = await AsyncStorage.getItem('user');
-
-        if (token && userString) {
+        
+        if (token && user) {
           await fetchNotifications();
 
-          const userData = JSON.parse(userString);
+          
           const newSocket = io('https://furniro-back-production.up.railway.app', {
             auth: { token: token }
           } );
@@ -104,8 +105,8 @@ export const SocketProvider = ({ children }) => {
           newSocket.on('connect', () => {
             console.log('✅ Connected to socket server');
             setConnected(true);
-            if (userData?.id) {
-              newSocket.emit('join', userData.id);
+            if (user?.id) {
+              newSocket.emit('join', user.id);
             }
           });
 
@@ -138,7 +139,7 @@ export const SocketProvider = ({ children }) => {
         socket.disconnect();
       }
     };
-  }, []);
+  }, [user]);
 
   const value = {
     socket,
