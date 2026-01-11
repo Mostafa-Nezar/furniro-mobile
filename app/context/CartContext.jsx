@@ -8,21 +8,22 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const { user, updateUser } = useAuth();
-  const token = AsyncStorage.getItem("token");
   const cart = user?.cart && Array.isArray(user.cart) ? user.cart : [];
 
   const syncCart = async (cart) => {
-    await AsyncStorage.setItem("cart", JSON.stringify(cart));
+    const token = await AsyncStorage.getItem("token");
+
     if (user?.id) {
       await updateUser({ cart });
       try {
-        await fetchInstance(`/auth/cart/${user.id}`, {
+      const res =  await fetchInstance(`/auth/cart/${user.id}`, {
           method: "PATCH",
           body: JSON.stringify({ cart }),
-          headers: { Authorization: `Bearer ${token}` } 
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } 
         });
-        console.log("hello cart");
-        
+      await AsyncStorage.setItem("cart", JSON.stringify(res.cart));
+      console.log(res.cart);
+      
       } catch (error) {
         console.error("❌ Error syncing cart to backend:", error);
       }
@@ -94,6 +95,11 @@ export const CartProvider = ({ children }) => {
       )
       .filter((item) => item.quantity > 0);
     await syncCart(updatedCart);
+        Toast.show({
+      type: "success",
+      text1: "Cart Updated !",
+      text2: product.name,
+    });
   };
 
   const clearCartAndUpdateOrsers = async (
@@ -137,13 +143,14 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const clearCart = async () => {
-    await syncCart([]);
-  };
-
   const removeFromCart = async (product) => {
     const updatedCart = cart.filter((item) => item.id !== product.id);
     await syncCart(updatedCart);
+        Toast.show({
+      type: "success",
+      text1: "Removed From Cart !",
+      text2: product.name,
+    });
   };
 
   useEffect(() => {
@@ -168,7 +175,6 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         decreaseCartQuantity,
         clearCartAndUpdateOrsers,
-        clearCart,
         syncCart,
       }}
     >
