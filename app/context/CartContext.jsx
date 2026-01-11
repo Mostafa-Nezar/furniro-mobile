@@ -12,7 +12,6 @@ export const CartProvider = ({ children }) => {
 
   const syncCart = async (cart) => {
     const token = await AsyncStorage.getItem("token");
-
     if (user?.id) {
       await updateUser({ cart });
       try {
@@ -22,8 +21,6 @@ export const CartProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } 
         });
       await AsyncStorage.setItem("cart", JSON.stringify(res.cart));
-      console.log(res.cart);
-      
       } catch (error) {
         console.error("❌ Error syncing cart to backend:", error);
       }
@@ -154,30 +151,11 @@ export const CartProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    if (user?.cart && Array.isArray(user.cart)) {
-      AsyncStorage.setItem("cart", JSON.stringify(user.cart));
-    } else if (!user) {
-      AsyncStorage.getItem("cart").then((savedCart) => {
-        if (savedCart) {
-          const parsedCart = JSON.parse(savedCart);
-          if (Array.isArray(parsedCart) && parsedCart.length > 0) {
-          }
-        }
-      });
-    }
+      AsyncStorage.setItem("cart", JSON.stringify(user.cart));   
   }, [user?.cart, user]);
 
   return (
-    <CartContext.Provider
-      value={{
-        cart,
-        addToCart,
-        removeFromCart,
-        decreaseCartQuantity,
-        clearCartAndUpdateOrsers,
-        syncCart,
-      }}
-    >
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, decreaseCartQuantity, clearCartAndUpdateOrsers, syncCart }} >
       {children}
     </CartContext.Provider>
   );
