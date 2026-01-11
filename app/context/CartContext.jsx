@@ -8,7 +8,7 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const { user, updateUser } = useAuth();
-
+  const token = AsyncStorage.getItem("token");
   const cart = user?.cart && Array.isArray(user.cart) ? user.cart : [];
 
   const syncCart = async (cart) => {
@@ -19,6 +19,7 @@ export const CartProvider = ({ children }) => {
         await fetchInstance(`/auth/cart/${user.id}`, {
           method: "PATCH",
           body: JSON.stringify({ cart }),
+          headers: { Authorization: `Bearer ${token}` } 
         });
         console.log("hello cart");
         
