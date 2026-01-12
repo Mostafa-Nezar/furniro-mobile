@@ -4,6 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../../context/AppContext";
 import tw from "twrnc";
 import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutLeft } from "react-native-reanimated";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GetStarted = () => {
   const navigation = useNavigation();
@@ -16,7 +17,7 @@ const GetStarted = () => {
     { title: "Let’s get Start", image: require("../../../assets/bro4.png"), des: "Connecting you with skilled professionals"}
   ];
 
-  const handleGetStartedPress = () => { clickCount < 2 ? setClickCount(clickCount + 1) : navigation.navigate("Login") }
+  const handleGetStartedPress = async () => { clickCount < 2 ? setClickCount(clickCount + 1) : navigation.navigate("Login");await AsyncStorage.setItem("notfirsttime4", "true"); }
 
   return (
     <View style={[tw`flex-1 justify-center items-center p-6`, { backgroundColor: theme.white }]}>

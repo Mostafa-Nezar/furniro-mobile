@@ -151,7 +151,17 @@ export const CartProvider = ({ children }) => {
   };
 
   useEffect(() => {
-      AsyncStorage.setItem("cart", JSON.stringify(user.cart));   
+       if (user?.cart && Array.isArray(user.cart)) {
+      AsyncStorage.setItem("cart", JSON.stringify(user.cart));
+    } else if (!user) {
+      AsyncStorage.getItem("cart").then((savedCart) => {
+        if (savedCart) {
+          const parsedCart = JSON.parse(savedCart);
+          if (Array.isArray(parsedCart) && parsedCart.length > 0) {
+          }
+        }
+      });
+    }  
   }, [user?.cart, user]);
 
   return (

@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import tw from 'twrnc';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SplashScreen = () => {
   const navigation = useNavigation();
@@ -18,8 +19,9 @@ const SplashScreen = () => {
       Animated.spring(scaleAnim, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
     ]).start();
     const checkAuth = async () => {
+        const notFirstTime = await AsyncStorage.getItem("notfirsttime4") || false;
         const result = await checkTokenAndAutoLogin();
-        navigation.replace(result ? 'Main' : 'GetStarted');
+        navigation.replace(!notFirstTime ? "GetStarted" : result ? "Main" : "Login");
     };
 
     checkAuth();
