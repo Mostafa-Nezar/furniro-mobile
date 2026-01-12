@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Switch, Animated, Modal, Platform } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Switch, Animated, Modal, Platform, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../../../context/AppContext";
 import Header from "../../../components/Header";
@@ -33,6 +33,12 @@ const ProfileScreen = () => {
   const [sidebarContentKey, setSidebarContentKey] = useState(null);
   const [isLocationLoading, setLocationLoading] = useState(false);
   
+  // New states for editing profile
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editField, setEditField] = useState(""); // "name" or "email"
+  const [editValue, setEditValue] = useState("");
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
   const slideAnim = useRef(new Animated.Value(500)).current;
 
   const favoriteProducts = products.filter((p) => favorites.includes(p.id));
@@ -82,7 +88,6 @@ const ProfileScreen = () => {
         
         const formData = new FormData();
         
-        // Fix for image URI on Android and ensuring correct structure
         const uri = Platform.OS === "android" ? image.uri : image.uri.replace("file://", "");
         const fileName = image.uri.split("/").pop();
         const match = /\.(\w+)$/.exec(fileName);
@@ -94,7 +99,6 @@ const ProfileScreen = () => {
           type: type || "image/jpeg",
         });
 
-        // Using the specific update-image endpoint
         const data = await fetchInstance(`/auth/${user.id}/update-image`, {
           method: "PATCH",
           headers: { "Content-Type": "multipart/form-data" },
@@ -110,6 +114,38 @@ const ProfileScreen = () => {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  // New function to handle profile updates (name/email)
+  const handleUpdateProfile = async () => {
+    if (!editValue.trim()) {
+      return Toast.show({ type: "error", text1: "Field cannot be empty" });
+    }
+
+    try {
+      setIsUpdatingProfile(true);
+      const updateData = { [editField]: editValue };
+      
+      const data = await fetchInstance(`/auth/users/${user.id}/edit`, {
+        method: "PATCH",
+        body: JSON.stringify(updateData),
+      });
+
+      updateUser({ ...user, ...updateData });
+      Toast.show({ type: "success", text1: data.msg || "Profile updated successfully" });
+      setIsEditModalVisible(false);
+    } catch (err) {
+      console.error("Update Profile Error:", err);
+      Toast.show({ type: "error", text1: "Update failed", text2: err.message });
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
+
+  const openEditModal = (field, currentValue) => {
+    setEditField(field);
+    setEditValue(currentValue || "");
+    setIsEditModalVisible(true);
   };
 
   const updateLocation = async () => {
@@ -206,6 +242,7 @@ const ProfileScreen = () => {
           favorites={favorites} 
           isUploading={isUploading} 
           onPickImage={pickImage} 
+          onEditField={openEditModal}
         />
         
         <View style={[tw`flex-row justify-between p-4 py-6 mx-4 mt-4 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
@@ -234,6 +271,36 @@ const ProfileScreen = () => {
           <Text style={[tw`ml-2 text-base font-semibold`, { color: theme.white }]}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Edit Profile Modal */}
+      <Modal visible={isEditModalVisible} transparent animationType="fade" onRequestClose={() => setIsEditModalVisible(false)}>
+        <View style={[tw`flex-1 justify-center items-center px-6`, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
+          <View style={[tw`w-full p-6 rounded-2xl`, { backgroundColor: theme.white }]}>
+            <Text style={[tw`text-xl font-bold mb-4`, { color: theme.black }]}>Edit {editField === "name" ? "Username" : "Email"}</Text>
+            <TextInput
+              style={[tw`w-full p-4 border rounded-lg mb-6`, { borderColor: theme.lightGray, color: theme.black }]}
+              value={editValue}
+              onChangeText={setEditValue}
+              placeholder={`Enter new ${editField}`}
+              autoFocus
+            />
+            <View style={tw`flex-row justify-end`}>
+              <TouchableOpacity onPress={() => setIsEditModalVisible(false)} style={tw`mr-4`}>
+                <Text style={[tw`text-base font-semibold`, { color: theme.darkGray }]}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={handleUpdateProfile} 
+                disabled={isUpdatingProfile}
+                style={[tw`px-6 py-2 rounded-lg`, { backgroundColor: theme.primary }]}
+              >
+                <Text style={[tw`text-base font-semibold`, { color: theme.white }]}>
+                  {isUpdatingProfile ? "Saving..." : "Save"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <Modal visible={sidebarVisible} transparent animationType="none" onRequestClose={closeSidebar} statusBarTranslucent={true}>
         <View style={[tw`flex-1`, { justifyContent: "flex-end" }]}>
