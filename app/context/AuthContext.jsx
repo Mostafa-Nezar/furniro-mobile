@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
         if (storedUser) {
           dispatch({ type: "LOGIN_SUCCESS", payload: JSON.parse(storedUser) });
         } else {
-          dispatch({ type: "LOGIN_SUCCESS", payload: null });
+          dispatch({ type: "LOGOUT" });
         }
   };
   const GoogleSignup = async () => {

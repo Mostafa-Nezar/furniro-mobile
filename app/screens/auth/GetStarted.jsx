@@ -17,7 +17,7 @@ const GetStarted = () => {
     { title: "Let’s get Start", image: require("../../../assets/bro4.png"), des: "Connecting you with skilled professionals"}
   ];
 
-  const handleGetStartedPress = async () => { clickCount < 2 ? setClickCount(clickCount + 1) : navigation.navigate("Login");await AsyncStorage.setItem("notfirsttime4", "true"); }
+  const handleGetStartedPress = async () => { clickCount < 2 ? setClickCount(clickCount + 1) : (await AsyncStorage.setItem("notfirsttime9", "true"), navigation.replace("Login")); }
 
   return (
     <View style={[tw`flex-1 justify-center items-center p-6`, { backgroundColor: theme.white }]}>

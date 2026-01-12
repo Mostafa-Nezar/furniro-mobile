@@ -51,15 +51,9 @@ export const AppProvider = ({ children }) => {
   const loadStoredData = async () => {
     try {
       const appDataRaw = await AsyncStorage.getItem("appData");
-      const userRaw = await AsyncStorage.getItem("user");
       const appData = appDataRaw ? JSON.parse(appDataRaw) : {};
-      const storedUser = userRaw ? JSON.parse(userRaw) : null;
-
       dispatch({ type: "SET_DARK_MODE", payload: appData.isDarkMode || false });
       dispatch({ type: "SET_FAVORITES", payload: appData.favorites || [] });
-
-      authDispatch({ type: "SET_USER", payload: storedUser });
-      authDispatch({ type: "SET_AUTH", payload: !!storedUser });
     } catch (error) {
       console.error("Error loading stored data:", error);
     }

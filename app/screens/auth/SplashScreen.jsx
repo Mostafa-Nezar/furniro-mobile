@@ -19,7 +19,7 @@ const SplashScreen = () => {
       Animated.spring(scaleAnim, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
     ]).start();
     const checkAuth = async () => {
-        const notFirstTime = await AsyncStorage.getItem("notfirsttime4") || false;
+        const notFirstTime = await AsyncStorage.getItem("notfirsttime9") || false;
         const result = await checkTokenAndAutoLogin();
         navigation.replace(!notFirstTime ? "GetStarted" : result ? "Main" : "Login");
     };

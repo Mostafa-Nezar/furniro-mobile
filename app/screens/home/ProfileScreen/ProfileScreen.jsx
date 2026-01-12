@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Switch, Animated, Dimensions, Modal, ActivityIndicator, Platform } from "react-native";
+import { useState, useRef } from "react";
+import { View, Text, TouchableOpacity, ScrollView, Switch, Animated, Modal, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../../../context/AppContext";
 import Header from "../../../components/Header";
