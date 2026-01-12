@@ -252,7 +252,6 @@ const ProfileScreen = () => {
           </View>
           <Switch value={isDarkMode} onValueChange={toggleTheme} trackColor={{ false: theme.lightGray, true: theme.primary }} thumbColor={theme.white} />
         </View>
-
         <View style={tw`px-4 mt-2`}>
           {menuItems.map((item) => (
             <TouchableOpacity key={item.key} onPress={() => openSidebar(item.key)} style={[tw`flex-row items-center p-4 mb-2 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
@@ -265,7 +264,6 @@ const ProfileScreen = () => {
             </TouchableOpacity>
           ))}
         </View>
-
         <TouchableOpacity onPress={handleLogout} style={[tw`flex-row items-center justify-center p-4 mx-4 mt-4 mb-8 rounded-lg`, { backgroundColor: theme.red }]}>
           <Icon name="logout" size={20} color={theme.white} />
           <Text style={[tw`ml-2 text-base font-semibold`, { color: theme.white }]}>Log Out</Text>
