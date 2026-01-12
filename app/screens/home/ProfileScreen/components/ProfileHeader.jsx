@@ -18,24 +18,24 @@ const ProfileHeader = ({ user, theme, cart, favorites, isUploading, onPickImage,
     <View style={tw`w-full items-center mb-4`}>
       <View style={tw`flex-row items-center justify-center mb-1`}>
         <Text style={tw`text-2xl font-bold text-[${theme.black}] text-center`}>{user?.name}</Text>
-        <TouchableOpacity onPress={() => onEditField("name", user?.name)} style={tw`ml-2 p-1.5 rounded-full bg-[${theme.primary}15]`}>
+        <TouchableOpacity onPress={() => onEditField("name", user?.name)} style={tw`ml-2 p-1.5 rounded-2xl bg-[${theme.primary}15]`}>
           <Icon name="mode-edit" size={18} color={theme.primary} />
         </TouchableOpacity>
       </View>
       <View style={tw`flex-row items-center justify-center`}>
         <Text style={tw`text-base text-[${theme.darkGray}] text-center`}>{user?.email}</Text>
-        <TouchableOpacity onPress={() => onEditField("email", user?.email)} style={tw`ml-2 p-1 rounded-full bg-[${theme.primary}10]`}>
+        <TouchableOpacity onPress={() => onEditField("email", user?.email)} style={tw`ml-2 p-1 rounded-2xl bg-[${theme.primary}10]`}>
           <Icon name="edit" size={14} color={theme.primary} />
         </TouchableOpacity>
       </View>
     </View>
     
     <View style={tw`w-full flex-row justify-center px-4`}>
-      <View style={tw`flex-row items-center px-6 py-2 rounded-2xl mx-2 bg-white`}>
+      <View style={[tw`flex-row items-center px-6 py-2 rounded-2xl mx-2`,{backgroundColor:theme.white}]}>
         <Icon name="shopping-cart" size={24} color={theme.primary} />
         <Text style={tw`ml-3 text-lg font-bold text-[${theme.black}]`}>{cart.length}</Text>
       </View>
-      <View style={tw`flex-row items-center px-6 py-2 rounded-2xl mx-2 bg-white`}>
+      <View style={[tw`flex-row items-center px-6 py-2 rounded-2xl mx-2`,{backgroundColor:theme.white}]}>
         <Icon name="favorite" size={24} color={theme.primary} />
         <Text style={tw`ml-3 text-lg font-bold text-[${theme.black}]`}>{favorites.length}</Text>
       </View>
