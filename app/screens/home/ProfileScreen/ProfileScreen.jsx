@@ -116,7 +116,6 @@ const ProfileScreen = () => {
     }
   };
 
-  // New function to handle profile updates (name/email)
   const handleUpdateProfile = async () => {
     if (!editValue.trim()) {
       return Toast.show({ type: "error", text1: "Field cannot be empty" });
