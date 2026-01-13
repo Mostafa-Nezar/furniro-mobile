@@ -16,15 +16,15 @@ const ProfileHeader = ({ user, theme, cart, favorites, isUploading, onPickImage,
       </View>
     </TouchableOpacity>
     <View style={tw`w-full items-center mb-4`}>
-      <View style={tw`flex-row items-center justify-center mb-1`}>
+      <View style={tw`flex-row items-center justify-center mb-1 relative`}>
         <Text style={tw`text-2xl font-bold text-[${theme.black}] text-center`}>{user?.name}</Text>
-        <TouchableOpacity onPress={() => onEditField("name", user?.name)} style={tw`ml-2 p-1.5 rounded-2xl bg-[${theme.primary}15]`}>
+        <TouchableOpacity onPress={() => onEditField("name", user?.name)} style={tw`absolute ml-2 p-1.5 right-[-4rem] rounded-2xl bg-[${theme.primary}15]`}>
           <Icon name="mode-edit" size={18} color={theme.primary} />
         </TouchableOpacity>
       </View>
-      <View style={tw`flex-row items-center justify-center`}>
+      <View style={tw`flex-row items-center justify-center relative`}>
         <Text style={tw`text-base text-[${theme.darkGray}] text-center`}>{user?.email}</Text>
-        <TouchableOpacity onPress={() => onEditField("email", user?.email)} style={tw`ml-2 p-1 rounded-2xl bg-[${theme.primary}10]`}>
+        <TouchableOpacity onPress={() => onEditField("email", user?.email)} style={tw`absolute ml-2 p-1 right-[-5rem] rounded-2xl bg-[${theme.primary}10]`}>
           <Icon name="edit" size={14} color={theme.primary} />
         </TouchableOpacity>
       </View>
