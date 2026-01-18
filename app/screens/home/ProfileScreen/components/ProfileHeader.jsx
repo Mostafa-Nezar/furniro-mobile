@@ -24,7 +24,7 @@ const ProfileHeader = ({ user, theme, cart, favorites, isUploading, onPickImage,
       </View>
       <View style={tw`flex-row items-center justify-center relative`}>
         <Text style={tw`text-base text-[${theme.darkGray}] text-center`}>{user?.email}</Text>
-        <TouchableOpacity onPress={() => onEditField("email", user?.email)} style={tw`absolute ml-2 p-1 right-[-3rem] rounded-2xl bg-[${theme.primary}10]`}>
+        <TouchableOpacity onPress={() => onEditField("email", user?.email)} style={tw`absolute ml-2 p-1 right-[-2rem] rounded-2xl bg-[${theme.primary}10]`}>
           <Icon name="edit" size={14} color={theme.primary} />
         </TouchableOpacity>
       </View>

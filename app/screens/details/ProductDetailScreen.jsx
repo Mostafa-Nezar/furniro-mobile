@@ -1,4 +1,4 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, ScrollView, Image, TouchableOpacity, Dimensions, TextInput } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useAppContext } from "../../context/AppContext";
@@ -20,7 +20,7 @@ const SpecificationRow = ({ label, value, theme }) => (
 );
 
 const ProductDetailScreen = () => {
-  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), {cart, updateItemAttribute, addToCart, decreaseCartQuantity, syncCart }=useCart(),{ user }=useAuth();
+  const { theme, toggleFavorite, favorites, getImageUrl, getProducts } = useAppContext(), {cart, updateItemAttribute, addToCart, decreaseCartQuantity }=useCart(),{ user }=useAuth();
     const { product: initialProduct } = useRoute().params;
   const [product, setProduct] = useState(initialProduct);
   const [selectedImage, setSelectedImage] = useState(product.image);
@@ -87,6 +87,8 @@ const ProductDetailScreen = () => {
     setSelectedColor(cart.find((item) => item.id === product.id)?.color || null);
     gettop();
   }, [cart, product]);
+  useEffect(()=>{getProducts();})
+
   return (
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title={product.name} showBack showSearch={false} showNotification={false} />

@@ -33,9 +33,8 @@ const ProfileScreen = () => {
   const [sidebarContentKey, setSidebarContentKey] = useState(null);
   const [isLocationLoading, setLocationLoading] = useState(false);
   
-  // New states for editing profile
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [editField, setEditField] = useState(""); // "name" or "email"
+  const [editField, setEditField] = useState("");
   const [editValue, setEditValue] = useState("");
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
@@ -234,16 +233,7 @@ const ProfileScreen = () => {
     <View style={[tw`flex-1`, { backgroundColor: theme.white }]}>
       <Header title="Profile" />
       <ScrollView>
-        <ProfileHeader 
-          user={user} 
-          theme={theme} 
-          cart={cart} 
-          favorites={favorites} 
-          isUploading={isUploading} 
-          onPickImage={pickImage} 
-          onEditField={openEditModal}
-        />
-        
+        <ProfileHeader user={user} theme={theme} cart={cart} favorites={favorites} isUploading={isUploading} onPickImage={pickImage} onEditField={openEditModal}/>
         <View style={[tw`flex-row justify-between p-4 py-6 mx-4 mt-4 rounded-lg`, { backgroundColor: theme.semiWhite }]}>
           <View style={tw`flex-row items-center`}>
             <Icon name={isDarkMode ? "dark-mode" : "light-mode"} size={24} color={theme.primary} />
