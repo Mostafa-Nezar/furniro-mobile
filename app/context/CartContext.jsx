@@ -1,5 +1,4 @@
-import { createContext, useContext, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createContext, useContext } from "react";
 import { useAuth } from "./AuthContext";
 import { fetchInstance } from "./api";
 import Toast from "react-native-toast-message";
@@ -10,20 +9,25 @@ export const CartProvider = ({ children }) => {
   const { user, updateUser } = useAuth();
   const cart = user?.cart && Array.isArray(user.cart) ? user.cart : [];
 
-  const syncCart = async (cart) => {
-    const token = await AsyncStorage.getItem("token");
-    if (user?.id) {
-      await updateUser({ cart });
-      try {
-      const res =  await fetchInstance(`/auth/cart/${user.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ cart }),
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } 
-        });
-      await AsyncStorage.setItem("cart", JSON.stringify(res.cart));
-      } catch (error) {
-        console.error("❌ Error syncing cart to backend:", error);
-      }
+  const updateCartOnServer = async (newCart) => {
+    if (!user?.id) 
+    return  Toast.show({ type: "error", text1: "Authentication Error", text2: "You must be logged in to modify the cart." });
+    try {
+      const response = await fetchInstance(`/auth/cart/${user.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ cart: newCart }),
+      });
+      updateUser({ cart: response.cart });
+      return true; 
+
+    } catch (error) {
+      console.error("❌ Error updating cart on backend:", error.data?.msg || error.message);
+      Toast.show({
+        type: "error",
+        text1: "Update Failed",
+        text2: error.data?.msg || "Could not update your cart.",
+      });
+      return false; // Indicate failure
     }
   };
 
@@ -31,75 +35,51 @@ export const CartProvider = ({ children }) => {
     const existingItem = cart.find((item) => item.id === product.id);
     const cartQuantity = existingItem ? existingItem.quantity : 0;
 
-    if (product.quantity <= 0)
-      return Toast.show({
-        type: "error",
-        text1: product.name,
-        text2: "Out of stock",
-      });
-
-    if (cartQuantity >= product.quantity)
-      return Toast.show({
-        type: "error",
-        text1: product.name,
-        text2: `Only ${product.quantity} in stock`,
-      });
-
-    if (cartQuantity >= 10)
-      return Toast.show({
-        type: "error",
-        text1: product.name,
-        text2: "You can only 10 items",
-      });
+    if (product.quantity <= 0) {
+      return Toast.show({ type: "error", text1: product.name, text2: "Out of stock" });
+    }
+    if (cartQuantity >= product.quantity) {
+      return Toast.show({ type: "error", text1: product.name, text2: `Only ${product.quantity} in stock` });
+    }
+    if (cartQuantity >= 10) {
+      return Toast.show({ type: "error", text1: product.name, text2: "You can only add 10 items" });
+    }
 
     const updatedCart = existingItem
-      ? cart.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      : [
-          ...cart,
-          {
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            image: product.image,
-            quantity: 1,
-            size: "l",
-            color: "#B88E2F",
-          },
-        ];
-    await syncCart(updatedCart);
-    Toast.show({
-      type: "success",
-      text1: "Added To Cart !",
-      text2: product.name,
-    });
+      ? cart.map((item) => (item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item))
+      : [...cart, { id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1, size: "l", color: "#B88E2F" }];
+
+    const success = await updateCartOnServer(updatedCart);
+
+    if (success) {
+      Toast.show({ type: "success", text1: "Added To Cart!", text2: product.name });
+    }
   };
 
   const decreaseCartQuantity = async (product) => {
     const existingItem = cart.find((item) => item.id === product.id);
-    if (!existingItem)
-      return Toast.show({
-        type: "error",
-        text1: product.name,
-        text2: "Not In your Cart",
-      });
+    if (!existingItem) {
+      return Toast.show({ type: "error", text1: product.name, text2: "Not in your cart" });
+    }
+
     const updatedCart = cart
-      .map((item) =>
-        item.id === product.id ? { ...item, quantity: item.quantity - 1 } : item
-      )
+      .map((item) => (item.id === product.id ? { ...item, quantity: item.quantity - 1 } : item))
       .filter((item) => item.quantity > 0);
-    await syncCart(updatedCart);
-        Toast.show({
-      type: "success",
-      text1: "Cart Updated !",
-      text2: product.name,
-    });
+
+    const success = await updateCartOnServer(updatedCart);
+    if (success) {
+      Toast.show({ type: "success", text1: "Cart Updated!", text2: product.name });
+    }
   };
 
-  const clearCartAndUpdateOrsers = async (
+  const removeFromCart = async (product) => {
+    const updatedCart = cart.filter((item) => item.id !== product.id);
+    const success = await updateCartOnServer(updatedCart);
+    if (success) {
+      Toast.show({ type: "success", text1: "Removed From Cart!", text2: product.name });
+    }
+  };
+    const clearCartAndUpdateOrsers = async (
     paymentMethod = "cash on delivery"
   ) => {
     if (!user?.id) return;
@@ -139,33 +119,10 @@ export const CartProvider = ({ children }) => {
       console.error("❌ Error while saving order or clearing cart:", error);
     }
   };
-
-  const removeFromCart = async (product) => {
-    const updatedCart = cart.filter((item) => item.id !== product.id);
-    await syncCart(updatedCart);
-        Toast.show({
-      type: "success",
-      text1: "Removed From Cart !",
-      text2: product.name,
-    });
-  };
-
-  useEffect(() => {
-       if (user?.cart && Array.isArray(user.cart)) {
-      AsyncStorage.setItem("cart", JSON.stringify(user.cart));
-    } else if (!user) {
-      AsyncStorage.getItem("cart").then((savedCart) => {
-        if (savedCart) {
-          const parsedCart = JSON.parse(savedCart);
-          if (Array.isArray(parsedCart) && parsedCart.length > 0) {
-          }
-        }
-      });
-    }  
-  }, [user?.cart, user]);
+  
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, decreaseCartQuantity, clearCartAndUpdateOrsers, syncCart }} >
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, decreaseCartQuantity, clearCartAndUpdateOrsers }}>
       {children}
     </CartContext.Provider>
   );

@@ -182,7 +182,7 @@ const ProfileScreen = () => {
       });
       
       updateUser({ ...user, phoneNumber: data.phoneNumber || newPhone });
-      Toast.show({ type: "success", text1: "Phone updated" });
+      Toast.show({ type: "success", text1: "Phone updated",text2:data.phoneNumber });
       closeSidebar();
     } catch (err) {
       Toast.show({ type: "error", text1: err.message });
