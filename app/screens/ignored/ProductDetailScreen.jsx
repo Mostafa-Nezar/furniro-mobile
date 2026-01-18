@@ -9,7 +9,6 @@ import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
-import { fetchInstance } from "../../context/api";
 
 const { width } = Dimensions.get("window");
 const SpecificationRow = ({ label, value, theme }) => (
@@ -20,9 +19,8 @@ const SpecificationRow = ({ label, value, theme }) => (
 );
 
 const ProductDetailScreen = () => {
-  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), {cart, updateItemAttribute, addToCart, decreaseCartQuantity, syncCart }=useCart(),{ user }=useAuth();
-    const { product: initialProduct } = useRoute().params;
-  const [product, setProduct] = useState(initialProduct);
+  const { theme, toggleFavorite, favorites, getImageUrl } = useAppContext(), {cart, addToCart, decreaseCartQuantity, syncCart }=useCart(),{ user }=useAuth();
+  const { product } = useRoute().params;
   const [selectedImage, setSelectedImage] = useState(product.image);
   const [rating, setRating] = useState(0);
   const [toprates, settoprates] = useState([]);
@@ -34,22 +32,43 @@ const ProductDetailScreen = () => {
   const [selectedColor, setSelectedColor] = useState(null);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
+  function SelectOrColor(productId, key, value) {
+    const existingItem = cart.find((item) => item.id === productId);
+    if (!existingItem) { Toast.show({type: "error",text1: "Not In Cart" });
+      return;
+    }
+    const updatedCart = cart.map((item) =>
+      item.id === productId ? { ...item, [key]: value } : item
+    );
+    syncCart(updatedCart);
+    Toast.show({ type: "success", text1: `Updated ${key}` });
+  };
   const handleRatingSubmit = async (selectedRate) => {
-  if (!user?.id) return Toast.show({ type: "error", text1: "Please log in to rate." });
-  setRating(selectedRate); 
-  const rateId = `${user.id}-${product.id}`;
-  const requestBody = { userid: user.id, productid: product.id, rateid: rateId, rate: selectedRate };
-  try {
-    const data = await fetchInstance("/ratings/test", { method: "POST", body: JSON.stringify(requestBody) });
-    const updatedProduct = { ...product, averagerate: data.averagerate, ratecount: data.ratecount };
-    setProduct(updatedProduct);
-    Toast.show({ type: "success", text1: "Thanks!", text2: `You rated this product ${selectedRate} stars.` });
-  } catch (error) {
-    Toast.show({ type: "error", text1: "Rating Failed",  text2: error.data?.msg || "An unexpected error occurred." });
-  }
-};
-
-
+    if (!user?.id) return;
+    try {
+      const rateId = `${user.id}-${product.id}`;
+      await fetch("https://furniro-back-production.up.railway.app/api/ratings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userid: user.id, productid: product.id, rateid: rateId, rate: selectedRate }),
+      });
+      const res = await fetch("https://furniro-back-production.up.railway.app/api/ratings");
+      const allRatings = await res.json();
+      const productRatings = allRatings.filter((r) => r.productid === product.id);
+      const avg = productRatings.reduce((acc, cur) => acc + cur.rate, 0) / productRatings.length;
+      await fetch(`https://furniro-back-production.up.railway.app/api/products/db/${product.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ averagerate: +avg.toFixed(1), ratecount: productRatings.length }),
+      });
+      Toast.show({ type: "success", text1: "Thanks!", text2: `You rated this product ${selectedRate} stars.` });
+      setRating(selectedRate);
+      product.averagerate = +avg.toFixed(1);
+      product.ratecount = productRatings.length;
+    } catch {
+      Toast.show({ type: "error", text1: "Fail to Rate" });
+    }
+  };
   const gettop = async () => {
     settoprates(await (await fetch(`https://furniro-back-production.up.railway.app/api/ratings/top-ratings/${product.id}`)).json());
   };
@@ -156,7 +175,7 @@ const ProductDetailScreen = () => {
                 const bgColor = selectedSize === size ? "#B88E2F" : "#FDF5E6"; 
                 const textColor = selectedSize === size ? "#fff" : "#000";
                 return (
-                  <TouchableOpacity key={size} onPress={() => { setSelectedSize(size); updateItemAttribute(product.id, "size", size) }} style={tw.style(`px-3 py-2 mr-2 rounded`, { backgroundColor: bgColor })}>
+                  <TouchableOpacity key={size} onPress={() => { setSelectedSize(size); SelectOrColor(product.id, "size", size) }} style={tw.style(`px-3 py-2 mr-2 rounded`, { backgroundColor: bgColor })}>
                     <Text style={tw.style({ color: textColor })}> {size.toUpperCase()}</Text>
                   </TouchableOpacity>
                 )
@@ -166,7 +185,7 @@ const ProductDetailScreen = () => {
           <View style={tw`my-2`}>
             <Text style={tw`font-bold mb-1`}>Color</Text>
             <View style={tw`flex-row`}>
-            {["mediumslateblue", "black", "#B88E2F"].map((color) => ( <TouchableOpacity key={color} onPress={() => { setSelectedColor(color); updateItemAttribute(product.id, "color", color) }} style={tw.style(`w-8 h-8 mr-2 rounded-full`, { backgroundColor: color, borderWidth: selectedColor === color ? 2 : 0, borderColor: "#000" })}/>))}
+            {["mediumslateblue", "black", "#B88E2F"].map((color) => ( <TouchableOpacity key={color} onPress={() => { setSelectedColor(color); SelectOrColor(product.id, "color", color) }} style={tw.style(`w-8 h-8 mr-2 rounded-full`, { backgroundColor: color, borderWidth: selectedColor === color ? 2 : 0, borderColor: "#000" })}/>))}
             </View>
           </View>
           {[{ title: "General Info", data: product.general }, { title: "Product Details", data: product.myproduct }, { title: "Dimensions", data: product.dimensions } ]
@@ -190,7 +209,9 @@ const ProductDetailScreen = () => {
                       <Image source={{ uri: r.user.image }} style={[tw`rounded-full w-12 h-12 mb-2`, { borderWidth: 2, borderColor: theme.primary }]} />
                       <Text style={[tw`font-semibold text-sm`, { color: theme.black }]}>{r.user.name}</Text>
                       <View style={tw`flex-row mt-1`}>
-                        {[1, 2, 3, 4, 5].map(s => (<FontAwesome key={s} name="star" size={14} color={s <= r.rate ? theme.yellow : theme.darkGray} />))}
+                        {[1, 2, 3, 4, 5].map(s => (
+                          <FontAwesome key={s} name="star" size={14} color={s <= r.rate ? theme.yellow : theme.darkGray} />
+                        ))}
                       </View>
                     </View>
                     <Text numberOfLines={3} style={[tw`italic mt-3 text-xs text-center`, { borderLeftWidth: 3, borderColor: theme.primary, paddingLeft: 6, color: theme.gray }]}>
@@ -216,13 +237,44 @@ const ProductDetailScreen = () => {
         </View>
         <View style={tw`px-4 my-8`}>
           <View style={[ tw`p-5 rounded-3xl shadow-sm`, { backgroundColor: theme.white, borderColor: theme.lightGray, borderWidth: 1, borderTopLeftRadius: 0 } ]} >
-            <Text style={[ tw`text-base font-semibold mb-3`, { color: theme.black, fontFamily: "Poppins-SemiBold" } ]}>
+            <Text
+              style={[ tw`text-base font-semibold mb-3`, { color: theme.black, fontFamily: "Poppins-SemiBold" } ]}>
               Leave a Comment 💬
             </Text>
-            <TextInput style={[ tw`p-3 rounded-xl border mb-4 bg-[${theme.semiWhite}]`, { borderColor: theme.lightGray, color: theme.black, textAlignVertical: "top", minHeight: 90 } ]}
-              placeholder="Share your thoughts..." placeholderTextColor={theme.gray} value={comment} onChangeText={setComment} multiline />
-            <TouchableOpacity onPress={sendcomment} disabled={loading} style={[ tw`self-end rounded-full px-5 py-2`, { backgroundColor: theme.primary, opacity: loading ? 0.7 : 1 } ]}>
-              <Text style={[ tw`text-sm font-semibold`, { color: theme.white, fontFamily: "Poppins-SemiBold" } ]}>
+            <TextInput
+              style={[ tw`p-3 rounded-xl border mb-4`,
+                {
+                  backgroundColor: theme.semiWhite,
+                  borderColor: theme.lightGray,
+                  color: theme.black,
+                  textAlignVertical: "top",
+                  minHeight: 90,
+                },
+              ]}
+              placeholder="Share your thoughts..."
+              placeholderTextColor={theme.gray}
+              value={comment}
+              onChangeText={setComment}
+              multiline
+            />
+
+            <TouchableOpacity
+              onPress={sendcomment}
+              disabled={loading}
+              style={[
+                tw`self-end rounded-full px-5 py-2`,
+                {
+                  backgroundColor: theme.primary,
+                  opacity: loading ? 0.7 : 1,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  tw`text-sm font-semibold`,
+                  { color: theme.white, fontFamily: "Poppins-SemiBold" },
+                ]}
+              >
                 {loading ? "Sending..." : "Send"}
               </Text>
             </TouchableOpacity>

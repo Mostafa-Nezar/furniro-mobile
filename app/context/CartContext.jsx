@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 import { fetchInstance } from "./api";
 import Toast from "react-native-toast-message";
@@ -27,8 +27,17 @@ export const CartProvider = ({ children }) => {
         text1: "Update Failed",
         text2: error.data?.msg || "Could not update your cart.",
       });
-      return false; // Indicate failure
     }
+  };
+
+  const updateItemAttribute = async (productId, attributeKey, attributeValue) => {
+    const existingItem = cart.find((item) => item.id === productId);
+    if (!existingItem) return Toast.show({ type: "error", text1: "Not In Cart", text2: "Add the item to the cart first." });
+       
+    const updatedCart = cart.map((item) => item.id === productId ? { ...item, [attributeKey]: attributeValue } : item);
+    const success = await updateCartOnServer(updatedCart);
+    if (success) Toast.show({ type: "success", text1: `Updated successfully`, text2:attributeKey });
+    
   };
 
   const addToCart = async (product) => {
@@ -79,7 +88,8 @@ export const CartProvider = ({ children }) => {
       Toast.show({ type: "success", text1: "Removed From Cart!", text2: product.name });
     }
   };
-    const clearCartAndUpdateOrsers = async (
+
+  const clearCartAndUpdateOrsers = async (
     paymentMethod = "cash on delivery"
   ) => {
     if (!user?.id) return;
@@ -114,15 +124,18 @@ export const CartProvider = ({ children }) => {
         body: JSON.stringify({ cart: [] }),
       });
 
-      await syncCart([]);
     } catch (error) {
       console.error("❌ Error while saving order or clearing cart:", error);
     }
   };
-  
 
+  const clearCart = async () =>{
+    if (cart.length === 0) return; 
+    await updateCartOnServer([]);
+  };
+  
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, decreaseCartQuantity, clearCartAndUpdateOrsers }}>
+    <CartContext.Provider value={{ cart,updateItemAttribute, addToCart, removeFromCart, decreaseCartQuantity, clearCartAndUpdateOrsers, clearCart }}>
       {children}
     </CartContext.Provider>
   );
