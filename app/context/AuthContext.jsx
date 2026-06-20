@@ -20,33 +20,38 @@ export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   useEffect(() => {
-    GoogleSignin.configure({webClientId: '866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh.apps.googleusercontent.com', offlineAccess: true});
+    GoogleSignin.configure({ webClientId: '866938789864-hfj30l2ktsbdb4t78r3cl1lj3p4vehmh.apps.googleusercontent.com', offlineAccess: true });
     loadUser();
   }, []);
 
   const loadUser = async () => {
-        const storedUser = await AsyncStorage.getItem("user");
-        if (storedUser) {
-          dispatch({ type: "LOGIN_SUCCESS", payload: JSON.parse(storedUser) });
-        } else {
-          dispatch({ type: "LOGOUT" });
-        }
+    await AsyncStorage.removeItem("token");
+    const storedUser = await AsyncStorage.getItem("user");
+    if (storedUser) {
+      dispatch({ type: "LOGIN_SUCCESS", payload: JSON.parse(storedUser) });
+    }
+    const loggedIn = await checkTokenAndAutoLogin();
+    if (!loggedIn) {
+      await AsyncStorage.removeItem("user");
+      dispatch({ type: "LOGOUT" });
+    }
   };
+
   const GoogleSignup = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       const token = userInfo.idToken;
-      const res = await fetch('https://furniro-back-production.up.railway.app/api/auth/google', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) });
-      const data = await res.json();
-      if (data.user && data.token) {
-        await AsyncStorage.setItem('token', data.token);
-        await AsyncStorage.setItem('user', JSON.stringify(data.user));
+      const data = await fetchInstance("/auth/google", {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      });
+      if (data.user) {
+        await AsyncStorage.setItem("user", JSON.stringify(data.user));
         dispatch({ type: "LOGIN_SUCCESS", payload: data.user });
         return { success: true, user: data.user };
-      } else {
-        return { success: false, message: data.msg || 'Google sign-up error' };
       }
+      return { success: false, message: data.msg || "Google sign-up error" };
     } catch (error) {
       return { success: false, message: error.message };
     }
@@ -58,10 +63,9 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify(userData),
       });
       const newUser = data.user || userData;
-      await AsyncStorage.setItem("token", data.token);
       await AsyncStorage.setItem("user", JSON.stringify(newUser));
       dispatch({ type: "REGISTER_SUCCESS", payload: newUser });
-      return { success: true }; 
+      return { success: true };
     } catch (error) {
       if (error.status === 409 || error.message?.includes("already exists")) {
         try {
@@ -84,28 +88,28 @@ export const AuthProvider = ({ children }) => {
     await AsyncStorage.setItem("user", JSON.stringify(newUser));
   };
   const login = async (email, password) => {
-      const data = await fetchInstance("/auth/signin", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      });
-      if (data.token) await AsyncStorage.setItem("token", data.token);
-      await AsyncStorage.setItem("user", JSON.stringify(data.user));
-      dispatch({ type: "LOGIN_SUCCESS", payload: data.user });
-      return { success: true, user: data.user };
+    const data = await fetchInstance("/auth/signin", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+    await AsyncStorage.setItem("user", JSON.stringify(data.user));
+    dispatch({ type: "LOGIN_SUCCESS", payload: data.user });
+    return { success: true, user: data.user };
   };
   const checkTokenAndAutoLogin = async () => {
-    try{  const token = await AsyncStorage.getItem("token");
-      if (!token) return false;
-      const res = await fetch("https://furniro-back-production.up.railway.app/api/auth/check-token", { headers: { Authorization: `Bearer ${token}` } });
-      const data = await res.json();
-      if(res.ok){              
+    try {
+      const data = await fetchInstance("/auth/check-token", { method: "GET" });
+      if (data.user) {
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
         dispatch({ type: "LOGIN_SUCCESS", payload: data.user });
-        return true
-      }}catch{
-      return false}     
+        return true;
+      }
+    } catch (error) {
+      return false;
+    }
+    return false;
   };
-  
+
   return (
     <AuthContext.Provider value={{ ...state, login, register, GoogleSignup, updateUser, checkTokenAndAutoLogin, dispatch }} >
       {children}

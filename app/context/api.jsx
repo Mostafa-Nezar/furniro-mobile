@@ -1,16 +1,16 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 const API_BASE_URL = "https://furniro-back-production.up.railway.app/api";
 
-export const fetchInstance = async (endpoint, options = {} ) => {
-  const token = await AsyncStorage.getItem("token");
-
-  const defaultHeaders = {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
+export const fetchInstance = async (endpoint, options = {}) => {
+  const isFormData = options.body instanceof FormData;
+  const defaultHeaders = isFormData
+    ? {}
+    : {
+      "Content-Type": "application/json",
+    };
 
   const finalOptions = {
     ...options,
+    credentials: "include",
     headers: {
       ...defaultHeaders,
       ...(options.headers || {}),
