@@ -23,8 +23,8 @@ import SidebarGenericContent from "./components/SidebarGenericContent";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
-  const { theme, logout, isDarkMode, toggleTheme, favorites, products, getImageUrl, toggleFavorite, orders, cancelOrder, loadingCancel, updateUser } = useAppContext();
-  const { user, isAuthenticated } = useAuth();
+  const { theme, isDarkMode, toggleTheme, favorites, products, getImageUrl, toggleFavorite, orders, cancelOrder, loadingCancel, updateUser } = useAppContext();
+  const { user, isAuthenticated, logout } = useAuth();
   const { cart } = useCart();
   const { notifications, formatDate } = useSocket();
 
@@ -44,8 +44,7 @@ const ProfileScreen = () => {
   const favoriteProducts = products.filter((p) => favorites.includes(p.id));
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("user");
-    logout();
+    await logout();
     navigation.reset({ index: 0, routes: [{ name: "Login" }] });
   };
 

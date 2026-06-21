@@ -69,15 +69,7 @@ export const AppProvider = ({ children }) => {
       await AsyncStorage.setItem("user", JSON.stringify(user));
     }
   };
-  const logout = async () => {
-    await AsyncStorage.removeItem("token");
-    await AsyncStorage.removeItem("user");
-    await AsyncStorage.removeItem("cart");
-    clearNotifications(); 
-    authDispatch({ type: "LOGOUT" });
-    dispatch({ type: "RESET" });
-    return true;
-  };
+
   const toggleTheme = () => { dispatch({ type: "TOGGLE_THEME" }) };
   const toggleFavorite = (id) => { dispatch({ type: "TOGGLE_FAVORITE", payload: id })};
   const getProducts = async () => {
@@ -138,7 +130,7 @@ export const AppProvider = ({ children }) => {
   };
 
   return (
-    <AppContext.Provider value={{ ...state, toggleTheme, toggleFavorite, getProducts, searchProducts, getImageUrl, cancelOrder, logout, user, isAuthenticated, updateUser, clearCartAndUpdateOrsers, fetchOrders }} >
+    <AppContext.Provider value={{ ...state, toggleTheme, toggleFavorite, getProducts, searchProducts, getImageUrl, cancelOrder, user, isAuthenticated, updateUser, clearCartAndUpdateOrsers, fetchOrders }} >
       {children}
     </AppContext.Provider>
   );

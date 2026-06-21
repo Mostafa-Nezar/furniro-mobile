@@ -25,7 +25,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const loadUser = async () => {
-    await AsyncStorage.removeItem("token");
     const storedUser = await AsyncStorage.getItem("user");
     if (storedUser) {
       dispatch({ type: "LOGIN_SUCCESS", payload: JSON.parse(storedUser) });
@@ -96,6 +95,16 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: "LOGIN_SUCCESS", payload: data.user });
     return { success: true, user: data.user };
   };
+  const logout = async () => {
+    try {
+      await fetchInstance("/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.warn("Logout error:", error);
+    }
+    await AsyncStorage.removeItem("user");
+    dispatch({ type: "LOGOUT" });
+    return true;
+  };
   const checkTokenAndAutoLogin = async () => {
     try {
       const data = await fetchInstance("/auth/check-token", { method: "GET" });
@@ -111,7 +120,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ ...state, login, register, GoogleSignup, updateUser, checkTokenAndAutoLogin, dispatch }} >
+    <AuthContext.Provider value={{ ...state, login, register, GoogleSignup, updateUser, checkTokenAndAutoLogin, logout, dispatch }} >
       {children}
     </AuthContext.Provider>
   );
